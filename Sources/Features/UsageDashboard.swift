@@ -5,10 +5,16 @@ import SwiftUI
 final class UsageDashboardController: NSWindowController, NSWindowDelegate {
     private var screensObserver: NSObjectProtocol?
     private var isRestoring = false
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
     private var lastScreenID: String?
 
     var liveModel: NotchViewModel?
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        super.init(window: nil)
+    }
+    required init?(coder: NSCoder) { nil }
 
     static func visibleFrame(_ proposed: NSRect, on screen: NSRect) -> NSRect {
         let width = min(proposed.width, screen.width), height = min(proposed.height, screen.height)
@@ -25,7 +31,15 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
     }
     func windowDidMove(_ notification: Notification) { savePlacement() }
     func windowDidResize(_ notification: Notification) { savePlacement() }
-    func windowWillClose(_ notification: Notification) { savePlacement() }
+    func windowWillClose(_ notification: Notification) {
+        savePlacement()
+        // Closing the dashboard must release its hosting tree, observations,
+        // popovers and animation state. Placement is restored on next open.
+        if let screensObserver { NotificationCenter.default.removeObserver(screensObserver) }
+        screensObserver = nil
+        window?.contentView = nil
+        window = nil
+    }
     private func move(to screen: NSScreen) {
         guard let window else { return }
         savePlacement()
@@ -73,7 +87,7 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
         panel.setFrameAutosaveName("usageDashboardFrame")
         panel.contentView = NSHostingView(rootView: UsageDashboard(store: store, preferences: preferences, liveModel: liveModel,
             moveTo: { [weak self] screen in self?.move(to: screen)
-            }, stayOnTop: { panel.level = $0 ? .floating : .normal }))
+            }, stayOnTop: { [weak panel] in panel?.level = $0 ? .floating : .normal }))
         window = panel
         panel.delegate = self
         if !panel.setFrameUsingName("usageDashboardFrame") { panel.center() }

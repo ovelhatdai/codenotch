@@ -1,8 +1,30 @@
+import AppKit
 import XCTest
 @testable import Codenotch
 
 @MainActor
 final class PersonalDashboardTests: XCTestCase {
+    func testClosingDashboardReleasesViewTreeAndWindow() {
+        let suite = "dashboard-lifetime-" + UUID().uuidString
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = UsageDashboardController(defaults: defaults)
+        weak var releasedView: NSView?
+        autoreleasepool {
+            let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+                                 styleMask: [.titled], backing: .buffered, defer: false)
+            panel.isReleasedWhenClosed = false
+            let view = NSView()
+            releasedView = view
+            panel.contentView = view
+            controller.window = panel
+            controller.windowWillClose(Notification(name: NSWindow.willCloseNotification, object: panel))
+            XCTAssertNil(panel.contentView)
+            XCTAssertNil(controller.window)
+        }
+        XCTAssertNil(releasedView, "A closed dashboard must not retain its UI tree")
+    }
+
     func testGridNeverLeavesAThreePlusOneRowForFourAccounts() {
         XCTAssertEqual(UsageDashboard.columnCount(width: 380), 1)
         XCTAssertEqual(UsageDashboard.columnCount(width: 900), 2)
