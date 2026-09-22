@@ -25,6 +25,12 @@ final class CodexUsageArchiveTests: XCTestCase {
         return UsageArchive(defaults: defaults).load()[snapshot.id]?.snapshot
     }
 
+    func testArchivePreservesIdentityAlongWithBalance() {
+        var value = snapshot(windows: [LimitWindow(id: "primary", label: "5h", usedFraction: 0.2)])
+        value.accountEmail = "juridico@example.invalid"
+        XCTAssertEqual(roundTrip(value)?.accountEmail, value.accountEmail)
+    }
+
     /// Spark is a live quota, not leftover rollout data. Reloading it after
     /// a relaunch is the archive's job.
     func testAnArchivedSparkWindowSurvivesRelaunch() {

@@ -25,6 +25,7 @@ struct ThresholdAlert: Equatable {
 @MainActor
 final class ThresholdNotifier {
     private var crossed: [String: Int] = [:]
+    private var identities: [String: String] = [:]
     private let isMuted: (String) -> Bool
     private let deliver: (ThresholdAlert) -> Void
 
@@ -45,6 +46,13 @@ final class ThresholdNotifier {
         let percent = fraction * 100
         let level = percent >= 100 ? 100 : percent >= 80 ? 80 : 0
 
+        let identity = snapshot.accountEmail?.lowercased() ?? ""
+        let changedAccount = identities[snapshot.id].map { $0 != identity } ?? false
+        identities[snapshot.id] = identity
+        if changedAccount {
+            crossed[snapshot.id] = level
+            return // A different account is a new baseline, not consumption.
+        }
         defer { crossed[snapshot.id] = level }
         let previous = crossed[snapshot.id] ?? 0
         guard level > previous, !isMuted(snapshot.id) else { return }

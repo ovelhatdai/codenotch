@@ -88,7 +88,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Before Preferences reads anything, or the first launch flag and
         // every choice would be read from an empty domain.
-        Preferences.migrateFromPreviousName()
+        if PersonalEdition.isEnabled {
+            PersonalEdition.importAppearance(from: UserDefaults.standard.persistentDomain(forName: "com.vinz.codenotch") ?? [:], into: .standard)
+        } else {
+            Preferences.migrateFromPreviousName()
+        }
         let preferences = Preferences()
         self.preferences = preferences
 
@@ -99,6 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // notch would already have flashed on the default edge.
         let fleet = NotchFleet(scope: preferences.notchScope, edge: preferences.notchEdge)
         self.notchFleet = fleet
+        UsageDashboardController.shared.liveModel = fleet.menuModel
 
         // `CODENOTCH_DEMO=1` puts the design frame's three providers on screen
         // with its numbers, for screenshots and for eyeballing the layout.
@@ -165,6 +170,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             preferences.reconcile(discoveredIDs: allProviders.map(\.id))
             let store = UsageStore(
                 providers: allProviders,
+                consumptionHistory: ConsumptionHistory(url: ConsumptionHistory.storageURL),
                 disconnected: preferences.disconnectedIDs(among: allProviders.map(\.id)),
                 // Passed at construction, not left to the sink below, for the
                 // same reason `disconnected` is: the sink delivers a run loop
@@ -349,6 +355,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 // leave the notch where it is until the next edge change, and
                 // moving only the panel would put it back on relaunch.
                 resetPosition: { [weak fleet, weak preferences] in
+                    preferences?.clearScreenOffsets(edge: preferences?.notchEdge ?? .right)
                     preferences?.setOffset(0, for: preferences?.notchEdge ?? .right)
                     fleet?.apply(alongOffset: 0)
                 },
@@ -533,6 +540,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .sink { [weak fleet] in fleet?.apply(displayPreference: $0) }
                 .store(in: &cancellables)
 
+            fleet.screenOffset = { [weak preferences] id, edge in preferences?.screenOffset(id: id, edge: edge) }
+            fleet.onScreenReposition = { [weak preferences] id, edge, offset in preferences?.setScreenOffset(offset, id: id, edge: edge) }
             fleet.onReposition = { [weak preferences] offset in
                 preferences?.setOffset(offset, for: preferences?.notchEdge ?? .right)
             }
@@ -563,6 +572,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .sink { [weak fleet] watch, critical in
                     fleet?.apply(watchLimit: watch, criticalLimit: critical)
                 }
+                .store(in: &cancellables)
+
+            preferences.$notchPresentation
+                .receive(on: RunLoop.main)
+                .sink { [weak fleet] in fleet?.apply(presentation: $0) }
+                .store(in: &cancellables)
+            store.$readingHealth
+                .receive(on: RunLoop.main)
+                .sink { [weak fleet] in fleet?.apply(readingHealth: $0) }
+                .store(in: &cancellables)
+
+            preferences.$notchQuota
+                .receive(on: RunLoop.main)
+                .sink { [weak fleet] in fleet?.apply(notchQuota: $0) }
+                .store(in: &cancellables)
+
+            preferences.$usageDisplayMode
+                .receive(on: RunLoop.main)
+                .sink { [weak fleet] in fleet?.apply(usageDisplayMode: $0) }
                 .store(in: &cancellables)
 
             preferences.$weeklyRingDashed
@@ -663,10 +691,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // what the vendor said. Paired with the preference so flipping the
             // toggle redraws at once, without a fetch.
             store.$notchSnapshots
-                .combineLatest(preferences.$claudeDailyPaceRing)
+                .combineLatest(preferences.$claudeDailyPaceRing, preferences.$notchGrouping, preferences.$notchQuota)
                 .receive(on: RunLoop.main)
-                .sink { [weak fleet] snapshots, paced in
-                    fleet?.setSnapshots(DailyPace.apply(to: snapshots, enabled: paced))
+                .sink { [weak fleet] snapshots, paced, grouping, quota in
+                    let readings = DailyPace.apply(to: snapshots, enabled: paced)
+                    fleet?.setSnapshots(grouping.apply(to: readings, quota: quota,
+                        names: UserDefaults.standard.data(forKey: AccountNames.key) ?? Data()))
                 }
                 .store(in: &cancellables)
 
@@ -684,6 +714,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             store.start()
             fleet.onRefresh = { [weak store] in store?.refreshNow() }
             fleet.onRefreshProvider = { [weak store] id in
+                if id.hasPrefix(NotchGrouping.prefix), let store {
+                    UserDefaults.standard.set(String(id.dropFirst(NotchGrouping.prefix.count)), forKey: "dashboardFilter")
+                    UsageDashboardController.shared.show(store: store, preferences: preferences)
+                    return
+                }
                 await store?.refresh(providerID: id)?.value
             }
             store.$refreshing
@@ -827,6 +862,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         fleet.apply(resetTimeFormat: preferences.resetTimeFormat)
         fleet.apply(accentColor: preferences.accentColor)
         fleet.apply(watchLimit: preferences.watchLimit, criticalLimit: preferences.criticalLimit)
+        fleet.apply(presentation: preferences.notchPresentation)
+        fleet.apply(notchQuota: preferences.notchQuota)
+        fleet.apply(usageDisplayMode: preferences.usageDisplayMode)
         fleet.apply(weeklyRing: preferences.weeklyRing)
         fleet.apply(weeklyRingDashed: preferences.weeklyRingDashed)
         fleet.apply(showsMoveHandle: preferences.showsMoveHandle)

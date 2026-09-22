@@ -313,6 +313,11 @@ final class NotchWindowController {
             let hosting = NotchHostingView(rootView: NotchRootView(model: model))
             panel.contextMenuProvider = { [weak self] in self?.contextMenu() }
             panel.onClick = { [weak self] point in self?.handleClick(at: point) }
+            panel.canStartPlainDrag = { [weak self, weak panel] point in
+                guard let self, let panel else { return false }
+                let local = CGPoint(x: point.x, y: panel.frame.height - point.y)
+                return self.notchRect.contains(local) && !self.isOverHandle(local) && !self.isOverMoveHandle(local)
+            }
             panel.onDragStart = { [weak self] in self?.beginOptionDrag() }
             panel.onDrag = { [weak self] dx, dy in self?.dragged(dx: dx, dy: dy) }
             panel.onDragEnd = { [weak self] in
@@ -841,6 +846,12 @@ final class NotchWindowController {
         guard model.showsMoveHandle != showsMoveHandle else { return }
         model.showsMoveHandle = showsMoveHandle
         updateInteractiveRects()
+    }
+
+    func apply(presentation: NotchPresentation) {
+        model.presentation = presentation
+        model.hoveredIndex = nil
+        relocate()
     }
 
     func apply(alongOffset: CGFloat) {

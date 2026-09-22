@@ -22379,6 +22379,12 @@
             "state": "translated",
             "value": "tugallandi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "concluído"
+          }
         }
       }
     },
@@ -22697,6 +22703,12 @@
             "state": "translated",
             "value": "Avtomatik"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automático"
+          }
         }
       }
     },
@@ -22749,6 +22761,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 soatlik limit"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite de 5 horas"
           }
         }
       }
@@ -22803,6 +22821,12 @@
             "state": "translated",
             "value": "Haftalik limit"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite semanal"
+          }
         }
       }
     },
@@ -22852,6 +22876,12 @@
           }
         },
         "uz": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Liquid Glass"
@@ -22909,6 +22939,12 @@
             "state": "translated",
             "value": "Toʻliq qora"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preto sólido"
+          }
         }
       }
     },
@@ -22961,6 +22997,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toʻq Glass"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidro escuro"
           }
         }
       }
@@ -23015,6 +23057,12 @@
             "state": "translated",
             "value": "Tizim Liquid Glass. Shu Macʼning Koʻrinish sozlamalariga ergashadi — Clear yoki Tinted shisha va yorugʻ yoki qorongʻi rejim bilan birga."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidro do sistema. Acompanha a aparência clara ou escura e as opções de transparência do Mac."
+          }
         }
       }
     },
@@ -23067,6 +23115,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Asl shaffof boʻlmagan qora notch. Mac koʻrinishi qanday boʻlishidan qatʼi nazar, doimo qorongʻi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fundo preto opaco. Permanece escuro independentemente da aparência do Mac."
           }
         }
       }
@@ -23121,6 +23175,12 @@
             "state": "translated",
             "value": "Qora tusli Liquid Glass. Mac koʻrinishi qanday boʻlishidan qatʼi nazar, doimo qorongʻi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidro com tonalidade preta. Permanece escuro independentemente da aparência do Mac."
+          }
         }
       }
     },
@@ -23167,6 +23227,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "주간 사용량을 위한 두 번째 링, Liquid Glass, 프랑스어, Claude Desktop 자체 캐시에서 사용량 읽기를 추가합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indicador semanal, Liquid Glass, francês e leitura do Claude Desktop pelo cache local."
           }
         }
       }
@@ -23215,6 +23281,12 @@
             "state": "translated",
             "value": "주간 사용량 전용 링 추가"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A semana ganha seu próprio indicador"
+          }
         }
       }
     },
@@ -23261,6 +23333,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "세션 한도와 주간 한도를 함께 제공하는 경우, 기본 링 안쪽이나 바깥쪽에 두 번째 호를 표시합니다. 기본값은 꺼짐이며 ‘모양’에서 켤 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um segundo arco, interno ou externo ao principal, para serviços com limites de sessão e semana. Desativado por padrão; pode ser ligado em Aparência."
           }
         }
       }
@@ -23309,6 +23387,12 @@
             "state": "translated",
             "value": "열린 노치, 툴팁, 설정 구체에 시스템의 유리 효과를 적용해 배경을 굴절시켜 보여 줍니다. ‘투명도 줄이기’를 켜면 불투명하게 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A barra aberta, seus detalhes e o botão de configurações usam o vidro do sistema para refratar o fundo. A opção Reduzir Transparência deixa a superfície sólida."
+          }
         }
       }
     },
@@ -23355,6 +23439,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Français"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Francês"
           }
         }
       }
@@ -23403,6 +23493,12 @@
             "state": "translated",
             "value": "‘모양’에서 English, 简体中文에 이어 세 번째 언어를 선택할 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um terceiro idioma em Aparência, junto de inglês e chinês simplificado."
+          }
         }
       }
     },
@@ -23449,6 +23545,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude Desktop 자체 캐시에서 사용량 읽기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso do Claude Desktop pelo cache local"
           }
         }
       }
@@ -23497,6 +23599,12 @@
             "state": "translated",
             "value": "CLI와 토큰으로 조회할 수 없을 때 Claude 계정 정보를 읽는 세 번째 방법입니다. 이 Mac의 캐시를 압축 해제하기만 하며 외부로 전송하지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma terceira forma de ler uma conta Claude quando a linha de comando e o token não respondem. O cache é apenas descompactado neste Mac; nenhum dado é enviado."
+          }
         }
       }
     },
@@ -23543,6 +23651,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "npm 설치 경로의 Claude Code 감지"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code encontrado nas instalações npm"
           }
         }
       }
@@ -23591,6 +23705,12 @@
             "state": "translated",
             "value": "nvm, Volta, pnpm으로 설치한 경우도 감지하며, 해당 환경에서 백그라운드 로그인 갱신도 다시 작동합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalações por nvm, Volta ou pnpm passam a ser descobertas normalmente. Isso também restaura a renovação do login em segundo plano nesses ambientes."
+          }
         }
       }
     },
@@ -23637,6 +23757,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "대화 기록 폴더가 남지 않도록 수정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem pastas de transcrição acumuladas"
           }
         }
       }
@@ -23685,6 +23811,12 @@
             "state": "translated",
             "value": "Claude 사용량을 조회할 때마다 새 디렉터리를 사용해 Claude Code가 대화 기록 폴더를 계속 만들었습니다. 이제 같은 위치에서 print 모드로 실행하며 세션을 기록하지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada consulta de uso criava uma pasta temporária e uma pasta de transcrição no Claude Code. Agora as consultas usam um único local, em modo de saída direta, sem gravar sessões."
+          }
         }
       }
     },
@@ -23731,6 +23863,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac의 시간 형식을 따르는 재설정 시간"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horários de renovação seguem o relógio do Mac"
           }
         }
       }
@@ -23779,6 +23917,12 @@
             "state": "translated",
             "value": "Mac이 24시간 형식이면 재설정 시간도 오전·오후 대신 24시간 형식으로 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se o Mac usa o formato de 24 horas, as renovações também aparecem nesse formato, sem AM e PM."
+          }
         }
       }
     },
@@ -23825,6 +23969,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "종료된 세션을 완료로 표시"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessões concluídas são identificadas"
           }
         }
       }
@@ -23873,6 +24023,12 @@
             "state": "translated",
             "value": "에이전트 세션에 성공 상태를 추가해 완료된 작업과 진행 중인 작업을 구분합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As sessões dos agentes passam a indicar sucesso, distinguindo uma execução concluída de outra ainda em andamento."
+          }
         }
       }
     },
@@ -23919,6 +24075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Antigravity의 주요 한도 선택"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity: escolha o limite principal"
           }
         }
       }
@@ -23967,6 +24129,12 @@
             "state": "translated",
             "value": "기본 링에 가장 여유가 없는 한도 대신 지정한 한도를 표시할 수 있습니다. CLI에서만 로그인한 계정도 정상 계정으로 인식합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O indicador principal pode acompanhar um limite escolhido, em vez do mais restrito. Uma instalação apenas pela linha de comando também é reconhecida como conta."
+          }
         }
       }
     },
@@ -24014,6 +24182,12 @@
             "state": "translated",
             "value": "하드웨어 노치에 포인터를 올릴 때만 연결된 노치 열기"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apenas o recorte da câmera abre a barra acoplada"
+          }
         }
       }
     },
@@ -24060,6 +24234,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "카메라 영역과 합쳐진 노치가 위쪽 가장자리 어디에나 포인터를 올리면 열리던 문제를 수정했습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma barra unida ao recorte da câmera não se abre mais ao passar o mouse em qualquer ponto da borda superior."
           }
         }
       }
@@ -24114,6 +24294,12 @@
             "state": "translated",
             "value": "Haftalik halqa"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anel semanal"
+          }
         }
       }
     },
@@ -24166,6 +24352,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sirt"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fundo da barra"
           }
         }
       }
@@ -24220,6 +24412,12 @@
             "state": "translated",
             "value": "Notch nimalarni oʻqiydi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leituras da barra"
+          }
         }
       }
     },
@@ -24272,6 +24470,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Antigravity uchun asosiy notchʼda qaysi limit koʻrinishini tanlang."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha qual limite do Antigravity aparece no indicador principal."
           }
         }
       }
@@ -24326,6 +24530,12 @@
             "state": "translated",
             "value": "Oʻchirilgan"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desligado"
+          }
         }
       }
     },
@@ -24378,6 +24588,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ichkarida"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por dentro"
           }
         }
       }
@@ -24432,6 +24648,12 @@
             "state": "translated",
             "value": "Tashqarida"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por fora"
+          }
         }
       }
     },
@@ -24484,6 +24706,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Har bir provayder uchun bitta halqa — asosiy limitni koʻrsatadi. Haftalik ruxsat maslahat kartasida qoladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra apenas o anel principal. O limite semanal continua disponível nos detalhes ao passar o mouse."
           }
         }
       }
@@ -24538,6 +24766,12 @@
             "state": "translated",
             "value": "Haftalik limit uchun ingichkaroq halqa — asosiysining ichida chiziladi. U boʻshliqni ish holati indikatori bilan boʻlishadi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desenha um anel fino dentro do principal. Durante uma atividade, o indicador de trabalho ocupa esse espaço. Se a semana já estiver no anel principal, ela não se repete."
+          }
         }
       }
     },
@@ -24590,6 +24824,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalik limit uchun ingichkaroq halqa — asosiysining atrofida, halqa bilan notch chekkasi orasidagi boʻshliqda chiziladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desenha um anel fino por fora do principal. Se a semana já estiver no anel principal, ela não se repete."
           }
         }
       }
@@ -24909,6 +25149,12 @@
             "state": "translated",
             "value": "Gemini modellari"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos Gemini"
+          }
         }
       }
     },
@@ -25014,6 +25260,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude va GPT modellari"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos Claude e GPT"
           }
         }
       }
@@ -25333,6 +25585,12 @@
             "state": "translated",
             "value": "Ulanish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexão"
+          }
         }
       }
     },
@@ -25385,6 +25643,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shablon"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predefinido"
           }
         }
       }
@@ -25439,6 +25703,12 @@
             "state": "translated",
             "value": "Maxsus"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizado"
+          }
         }
       }
     },
@@ -25491,6 +25761,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tayyor oʻlcham"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho predefinido"
           }
         }
       }
@@ -25545,6 +25821,12 @@
             "state": "translated",
             "value": "Butun sirtni — halqalar, matn va maslahat oynasini birgalikda — masshtablaydi, shunda nisbatlar chizilganicha qoladi. 100% — notch moʻljallangan oʻlcham."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusta juntos os anéis, os textos e os detalhes. 100% corresponde ao tamanho original."
+          }
         }
       }
     },
@@ -25597,6 +25879,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ollama API kaliti"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave de API do Ollama"
           }
         }
       }
@@ -25651,6 +25939,12 @@
             "state": "translated",
             "value": "Kalitingizni joylashtiring"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cole sua chave"
+          }
         }
       }
     },
@@ -25704,6 +25998,12 @@
             "state": "translated",
             "value": "Saqlash"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
+          }
         }
       }
     },
@@ -25756,6 +26056,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saqlandi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvo"
           }
         }
       }
@@ -26022,6 +26328,12 @@
             "state": "translated",
             "value": "Oʻylamoqda"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pensando"
+          }
         }
       }
     },
@@ -26181,6 +26493,12 @@
             "state": "translated",
             "value": "Ishlatilmagan yangilanishlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovações extras disponíveis"
+          }
         }
       }
     },
@@ -26233,6 +26551,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishlatilmagan yangilanishlar yoʻq"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma renovação extra disponível"
           }
         }
       }
@@ -26287,6 +26611,12 @@
             "state": "translated",
             "value": "1 ishlatilmagan yangilanish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 renovação extra disponível"
+          }
         }
       }
     },
@@ -26339,6 +26669,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld ishlatilmagan yangilanish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld renovações extras disponíveis"
           }
         }
       }
@@ -26393,6 +26729,12 @@
             "state": "translated",
             "value": "%@ da muddati tugaydi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vence %@"
+          }
         }
       }
     },
@@ -26446,6 +26788,12 @@
             "state": "translated",
             "value": "Keyingisining muddati %@ da tugaydi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo vencimento: %@"
+          }
         }
       }
     },
@@ -26493,6 +26841,12 @@
             "state": "translated",
             "value": "Provayderning asosiy limiti 80% dan oshgan zahoti tizim bildirishnomasi, 100% da esa yana bir marta — har oʻtishda bir martadan, keyingisi faqat oyna yangilangandan soʻng. Birini oʻchirish uchun Hisoblar boʻlimidagi qatori yonidagi qoʻngʻiroqni bosing."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifica quando o limite principal ultrapassa 80% e novamente em 100%, uma vez por faixa a cada ciclo. Para silenciar uma conta, use o sino ao lado dela em Contas."
+          }
         }
       }
     },
@@ -26539,6 +26893,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Codenotch agent ishdan toʻxtagan yoki sizdan nimadir soʻramoqchi boʻlgan lahzani darhol biladi. Notch ochiq turganda uni bosish oʻsha sessiyaning ilovasini oldinga chiqaradi — ilovani, varaqni emas: faqat baʼzi terminallar tashqaridan varaq tanlashga ruxsat beradi, shuning uchun maslahat oynasi sessiya nomini koʻrsatadi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Codenotch detecta quando um agente termina de trabalhar ou precisa de uma resposta. Ao clicar na barra aberta, ele traz o aplicativo da sessão para a frente. A seleção da aba depende do terminal; o cartão identifica a sessão."
           }
         }
       }
@@ -26681,6 +27041,12 @@
             "state": "translated",
             "value": "Umumiy tokenlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens acumulados"
+          }
         }
       }
     },
@@ -26727,6 +27093,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yuqori yuklama tokenlari"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maior consumo de tokens"
           }
         }
       }
@@ -26775,6 +27147,12 @@
             "state": "translated",
             "value": "Eng uzun suhbat"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversa mais longa"
+          }
         }
       }
     },
@@ -26821,6 +27199,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hozirgi seriya"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dias consecutivos atuais"
           }
         }
       }
@@ -26869,6 +27253,12 @@
             "state": "translated",
             "value": "Eng uzun seriya"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maior sequência de dias"
+          }
         }
       }
     },
@@ -26915,6 +27305,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bugun"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoje"
           }
         }
       }
@@ -26963,6 +27359,12 @@
             "state": "translated",
             "value": "30 kunlik tokenlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens em 30 dias"
+          }
         }
       }
     },
@@ -27009,6 +27411,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kutilmoqda"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendente"
           }
         }
       }
@@ -27057,6 +27465,12 @@
             "state": "translated",
             "value": "Sarflangan"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gasto"
+          }
         }
       }
     },
@@ -27104,6 +27518,12 @@
             "state": "translated",
             "value": "Qolgan"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restante"
+          }
         }
       }
     },
@@ -27150,6 +27570,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toʻldirilgan"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créditos adicionados"
           }
         }
       }
@@ -27621,6 +28047,12 @@
             "state": "translated",
             "value": "Kuzatuv oʻchirilgan."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitoramento desligado."
+          }
         }
       }
     },
@@ -27667,6 +28099,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "LM Studioʻni ochish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir LM Studio"
           }
         }
       }
@@ -27715,6 +28153,12 @@
             "state": "translated",
             "value": "Ollamaʼni ochish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ollama"
+          }
         }
       }
     },
@@ -27761,6 +28205,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Server manzili"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endereço do servidor"
           }
         }
       }
@@ -27809,6 +28259,12 @@
             "state": "translated",
             "value": "Ulanishni tekshirish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar conexão"
+          }
         }
       }
     },
@@ -27855,6 +28311,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Qoʻllash"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar"
           }
         }
       }
@@ -27903,6 +28365,12 @@
             "state": "translated",
             "value": "API tokeni"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token de API"
+          }
         }
       }
     },
@@ -27949,6 +28417,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oʻchirish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover"
           }
         }
       }
@@ -27997,6 +28471,12 @@
             "state": "translated",
             "value": "LM Studio tekshirilmoqda…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando LM Studio…"
+          }
         }
       }
     },
@@ -28043,6 +28523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "LM Studioʻga ulanmoqda…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectando ao LM Studio…"
           }
         }
       }
@@ -28091,6 +28577,12 @@
             "state": "translated",
             "value": "Ollama tekshirilmoqda…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando Ollama…"
+          }
         }
       }
     },
@@ -28137,6 +28629,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ollamaʼga ulanmoqda…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectando ao Ollama…"
           }
         }
       }
@@ -28185,6 +28683,12 @@
             "state": "translated",
             "value": "Yuklangan modellar Hisoblar → Ulangan boʻlimida koʻrinadi va har soniyada tekshiriladi. Embedding modellari koʻrsatilmaydi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos carregados aparecem em Contas → Conectado e são verificados a cada segundo. Modelos de embeddings não são exibidos."
+          }
         }
       }
     },
@@ -28231,6 +28735,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Token saqlanadi va har bir soʻrov bilan yuboriladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O token é armazenado e enviado em cada consulta."
           }
         }
       }
@@ -28279,6 +28789,12 @@
             "state": "translated",
             "value": "Faqat LM Studio serveri token talab qilganda kerak (Developer → Server Settings). Tokensiz soʻrovlar Authorization sarlavhasisiz yuboriladi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Necessário apenas quando o servidor do LM Studio exige um token. Sem ele, as consultas são enviadas sem o cabeçalho de autorização."
+          }
         }
       }
     },
@@ -28325,6 +28841,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Topilgan modellar Hisoblar → Ulangan boʻlimida koʻrinadi. Model yuklanishi va oʻchirilishi har soniyada tekshiriladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os modelos detectados aparecem em Contas → Conectado. A lista de modelos carregados é verificada a cada segundo."
           }
         }
       }
@@ -28373,6 +28895,12 @@
             "state": "translated",
             "value": "Tezlik va fikrlashni oʻlchash"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medir velocidade e raciocínio"
+          }
         }
       }
     },
@@ -28420,6 +28948,12 @@
             "state": "translated",
             "value": "Javoblarni oʻlchash uchun chat mijozingizni http://127.0.0.1:11435 ga yoʻnaltiring va Codenotchʼni ochiq qoldiring."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para medir respostas, configure seu cliente de chat para http://127.0.0.1:11435 e mantenha o Codenotch aberto."
+          }
         }
       }
     },
@@ -28460,6 +28994,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shu tarmoqdagi telefonlarga ruxsat berish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir celulares nesta rede"
           }
         }
       }
@@ -28502,6 +29042,12 @@
             "state": "translated",
             "value": "Telefoningiz foydalanishni shu Macʼdan Wi-Fi orqali oʻqiydi. Hech narsa tarmogʻingizdan tashqariga chiqmaydi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu celular consulta o consumo deste Mac pelo Wi-Fi. Os dados permanecem na sua rede."
+          }
         }
       }
     },
@@ -28542,6 +29088,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishga tushmoqda…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando…"
           }
         }
       }
@@ -28625,6 +29177,12 @@
             "state": "translated",
             "value": "Bu Mac lokal tarmoqda emas"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este Mac não está em uma rede local"
+          }
         }
       }
     },
@@ -28665,6 +29223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Telefon ulash…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar um celular…"
           }
         }
       }
@@ -28707,6 +29271,12 @@
             "state": "translated",
             "value": "Ulangan telefonlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celulares vinculados"
+          }
         }
       }
     },
@@ -28748,6 +29318,12 @@
             "state": "translated",
             "value": "Hali telefonlar yoʻq."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum celular conectado."
+          }
         }
       }
     },
@@ -28788,6 +29364,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hozir faol"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ativo agora"
           }
         }
       }
@@ -28911,6 +29493,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Qayta ulanish uchun u yangi kodni skanerlashi kerak boʻladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Será necessário escanear um novo código para reconectar."
           }
         }
       }
@@ -29650,6 +30238,12 @@
             "state": "translated",
             "value": "Yuqori/past yuklama narxi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preços de pico e fora de pico"
+          }
         }
       }
     },
@@ -29690,6 +30284,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "DeepSeek narxlarini koʻrsatish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar preços do DeepSeek"
           }
         }
       }
@@ -29732,6 +30332,12 @@
             "state": "translated",
             "value": "DeepSeek foydalanish kartasida hozirgi hisob-kitob bosqichi va keyingi yuqori/past yuklama oʻzgarishini koʻrsatadi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra a faixa de cobrança atual e a próxima mudança de preço nos detalhes do DeepSeek."
+          }
         }
       }
     },
@@ -29772,6 +30378,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yuqori yuklama qoidasi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regra de pico"
           }
         }
       }
@@ -29814,6 +30426,12 @@
             "state": "translated",
             "value": "Jadval lokal saqlanadi, chunki uni rasmiy APIʼdan ishonchli oʻqib boʻlmaydi. Quyidagi vaqtlar UTCʼda; karta keyingi oʻzgarishni sizning mahalliy vaqtingizga oʻgiradi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tabela é mantida localmente porque não pode ser lida de forma confiável pela API oficial. Os horários abaixo são UTC; o cartão converte a próxima mudança para seu horário local."
+          }
         }
       }
     },
@@ -29854,6 +30472,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yuqori yuklama kunlari"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dias de pico"
           }
         }
       }
@@ -29896,6 +30520,12 @@
             "state": "translated",
             "value": "Yak"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dom"
+          }
         }
       }
     },
@@ -29936,6 +30566,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dush"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seg"
           }
         }
       }
@@ -29978,6 +30614,12 @@
             "state": "translated",
             "value": "Sesh"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ter"
+          }
         }
       }
     },
@@ -30018,6 +30660,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chor"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qua"
           }
         }
       }
@@ -30060,6 +30708,12 @@
             "state": "translated",
             "value": "Pay"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qui"
+          }
         }
       }
     },
@@ -30101,6 +30755,12 @@
             "state": "translated",
             "value": "Jum"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sex"
+          }
         }
       }
     },
@@ -30141,6 +30801,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shan"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáb"
           }
         }
       }
@@ -30265,6 +30931,12 @@
             "state": "translated",
             "value": "%lld-oyna"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Janela %lld"
+          }
         }
       }
     },
@@ -30305,6 +30977,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yuqori yuklama oynasini qoʻshish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar período de pico"
           }
         }
       }
@@ -30347,6 +31025,12 @@
             "state": "translated",
             "value": "Yuqori yuklama oynasini oʻchirish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover período de pico"
+          }
         }
       }
     },
@@ -30387,6 +31071,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Boshlanish vaqti"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Início"
           }
         }
       }
@@ -30429,6 +31119,12 @@
             "state": "translated",
             "value": "Tugash vaqti"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fim"
+          }
         }
       }
     },
@@ -30469,6 +31165,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "—"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "até"
           }
         }
       }
@@ -30511,6 +31213,12 @@
             "state": "translated",
             "value": "Hozirgi standart qoidani tiklash"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar regra padrão atual"
+          }
         }
       }
     },
@@ -30551,6 +31259,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limitga yetilganda"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando um limite for atingido"
           }
         }
       }
@@ -30593,6 +31307,12 @@
             "state": "translated",
             "value": "Sessiya limiti uchun bildirishnoma koʻrsatilsin"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificar limite da sessão"
+          }
         }
       }
     },
@@ -30633,6 +31353,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalik limit uchun bildirishnoma koʻrsatilsin"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificar limite semanal"
           }
         }
       }
@@ -30675,6 +31401,12 @@
             "state": "translated",
             "value": "Ogohlantirish tovushi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Som de alerta"
+          }
         }
       }
     },
@@ -30715,6 +31447,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessiya limiti ogohlantirishini koʻrish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar alerta de limite da sessão"
           }
         }
       }
@@ -30757,6 +31495,12 @@
             "state": "translated",
             "value": "Haftalik limit ogohlantirishini koʻrish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar alerta de limite semanal"
+          }
         }
       }
     },
@@ -30797,6 +31541,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Provayderning sessiya yoki haftalik foydalanish limitiga yetilganda notch yonidan bildirishnoma kartasini koʻrsatadi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra um aviso ao lado da barra quando uma conta atinge o limite da sessão ou da semana."
           }
         }
       }
@@ -30839,6 +31589,12 @@
             "state": "translated",
             "value": "Limit yangilanganda"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando um limite renovar"
+          }
         }
       }
     },
@@ -30879,6 +31635,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bildirishnoma notchʼdan koʻrsatilsin"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar notificação junto da barra"
           }
         }
       }
@@ -30921,6 +31683,12 @@
             "state": "translated",
             "value": "Yangilanish tovushi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Som de renovação"
+          }
         }
       }
     },
@@ -30962,6 +31730,12 @@
             "state": "translated",
             "value": "Bildirishnomani koʻrish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar notificação"
+          }
         }
       }
     },
@@ -31002,6 +31776,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Provayderning foydalanish limiti yangilanganda notch yonidan bildirishnoma kartasini koʻrsatadi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra um aviso ao lado da barra quando o limite de uma conta é renovado."
           }
         }
       }
@@ -32633,6 +33413,12 @@
             "state": "translated",
             "value": "Xalqaro"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internacional"
+          }
         }
       }
     },
@@ -32797,6 +33583,12 @@
             "state": "translated",
             "value": "Toʻliq ekranli ilovalarda yigʻilsin"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolher em tela cheia"
+          }
         }
       }
     },
@@ -32837,6 +33629,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Materik Xitoy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "China continental"
           }
         }
       }
@@ -32879,6 +33677,12 @@
             "state": "translated",
             "value": "Codenotch foydalanishni shu Macʼda allaqachon tizimga kirgan vositalardan oʻqiydi — u hech qachon parolingizni soʻramaydi. Quyidagilardan birortasini oʻrnatib, unga kiring: Claude Code (terminal vositasi, Claude ilovasi emas), Cursor (muharrir yoki cursor-agent), Codex, Antigravity, GLM, Grok, OpenCode, Command Code, GitHub Copilot, Kimi Code, Kiro yoki Gemini API kaliti (Gemini CLI, OpenCode yoki Hermes orqali) — va uning halqasi notchʼda paydo boʻladi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Codenotch lê o consumo de ferramentas conectadas neste Mac. Entre no Claude Code, Cursor, Codex, Antigravity, GLM, Grok, OpenCode, Command Code, GitHub Copilot, Kimi Code ou Kiro; para Gemini, use uma chave de API pelo Gemini CLI, OpenCode ou Hermes. A versão pessoal também permite vincular sessões independentes em Contas."
+          }
         }
       }
     },
@@ -32920,6 +33724,12 @@
             "state": "translated",
             "value": "Cookie sarlavhasi (ixtiyoriy)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalho Cookie (opcional)"
+          }
         }
       }
     },
@@ -32957,6 +33767,12 @@
           }
         },
         "uz": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cookie: …"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Cookie: …"
@@ -33002,6 +33818,12 @@
             "state": "translated",
             "value": "MiniMax Coding Plan kaliti"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave do plano de programação MiniMax"
+          }
         }
       }
     },
@@ -33042,6 +33864,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Model maʼlumotlari"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dados do modelo"
           }
         }
       }
@@ -33084,6 +33912,12 @@
             "state": "translated",
             "value": "Koʻrsatkichlarning aksariyati hisobni allaqachon saqlab turgan vositadan olinadi. DeepSeek va MiniMax bundan mustasno: Kirish tugmasini bosish oʻsha hisob uchun Codenotch oynasini ochadi, bu yerda chiqish esa faqat oʻsha sessiya va uning saqlangan koʻrsatkichini tozalaydi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A maioria das leituras usa uma sessão já conectada em outra ferramenta. DeepSeek e MiniMax abrem uma janela de login própria; sair por aqui remove apenas essa sessão e sua leitura salva."
+          }
         }
       }
     },
@@ -33124,6 +33958,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Telefon"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celular"
           }
         }
       }
@@ -33166,6 +34006,12 @@
             "state": "translated",
             "value": "Yangilangandan soʻng telefoningizni qayta ulang"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vincule o celular novamente após atualizar"
+          }
         }
       }
     },
@@ -33206,6 +34052,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hudud"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Região"
           }
         }
       }
@@ -33248,6 +34100,12 @@
             "state": "translated",
             "value": "Spark va kod koʻrigini koʻrsatish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar Spark e revisão de código"
+          }
         }
       }
     },
@@ -33288,6 +34146,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Koʻchirish dastagini koʻrsatish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar alça para mover"
           }
         }
       }
@@ -33330,6 +34194,12 @@
             "state": "translated",
             "value": "Codenotchʼda MiniMaxʼga kiring yoki Coding Plan kalitini joylashtiring. Cookie sarlavhasi ixtiyoriy. Codenotch hech qachon brauzer cookieʼlarini oʻqimaydi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entre no MiniMax pelo Codenotch ou cole uma chave do plano de programação. O cabeçalho Cookie é opcional. O Codenotch não lê cookies do navegador."
+          }
         }
       }
     },
@@ -33370,6 +34240,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Notch ustidagi yoy. Notchʼni boshqa chekkaga olib oʻtish uchun uni bosib turing — yuqoridagi Chekka ham xuddi shuni qiladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure a alça para levar a barra a outra borda da tela. Você também pode escolher a borda nesta tela."
           }
         }
       }
@@ -33412,6 +34288,12 @@
             "state": "translated",
             "value": "Toʻliq ekranli ilova oldinda turganda notch yigʻiladi va siz undan chiqqaningizda qaytadi. Oʻchirilgan holatda u toʻliq ekranli ilovalar ustida joyida qoladi."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolhe a barra quando um aplicativo está em tela cheia e a restaura ao sair. Desligado mantém a barra visível sobre o aplicativo."
+          }
         }
       }
     },
@@ -33452,6 +34334,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Halqa baribir asosiy Codex oynasiga ergashadi. Spark va kod koʻrigi maslahat kartasida qoladi."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spark e revisão de código aparecem nos detalhes ao passar o mouse. O indicador principal continua mostrando o limite escolhido para o Codex."
           }
         }
       }
@@ -33494,6 +34382,12 @@
             "state": "translated",
             "value": "Foydalanish limitlari"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites de consumo"
+          }
         }
       }
     },
@@ -33534,6 +34428,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kuzatiladigan limit"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atenção a partir de"
           }
         }
       }
@@ -33576,6 +34476,12 @@
             "state": "translated",
             "value": "Kritik limit"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crítico a partir de"
+          }
         }
       }
     },
@@ -33617,6 +34523,12 @@
             "state": "translated",
             "value": "Standart holatga qaytarish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar padrão"
+          }
         }
       }
     },
@@ -33657,6 +34569,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uzuq-uzuq haftalik halqa"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anel semanal tracejado"
           }
         }
       }
@@ -34962,7 +35880,15 @@
       }
     },
     "Adds a compact weekly-usage ring around each chosen provider that publishes it.": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acrescenta um anel compacto de uso semanal para cada serviço selecionado que informa esse limite."
+          }
+        }
+      }
     },
     "Show limit information in menu bar": {
       "extractionState": "manual",
@@ -35030,7 +35956,15 @@
       }
     },
     "Show weekly limit in menu bar": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar limite semanal na barra de menus"
+          }
+        }
+      }
     },
     "Swaps the icon for each chosen provider's five-hour limit — how much is used and how long until it resets.": {
       "extractionState": "manual",
@@ -35371,6 +36305,12 @@
             "state": "translated",
             "value": "중국어로 설정된 Mac의 충돌을 수정하고 키체인 권한 요청에서 ‘거부’를 선택하면 접근을 중단하도록 변경했습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correção de falha em Macs configurados em chinês e respeito à recusa de acesso às Chaves do macOS."
+          }
         }
       }
     },
@@ -35387,6 +36327,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "중국어 간체에서 발생하던 충돌 수정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem encerramento inesperado em chinês simplificado"
           }
         }
       }
@@ -35405,6 +36351,12 @@
             "state": "translated",
             "value": "앱 언어가 简体中文일 때 사용량이 80%를 넘은 제공자가 있으면 실행 몇 초 후 Codenotch가 충돌했습니다. 이제 모든 번역에서 이 문제를 검사합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Com o aplicativo em chinês simplificado, um serviço acima de 80% fazia o Codenotch encerrar poucos segundos após iniciar. Agora todas as traduções são verificadas para evitar essa falha."
+          }
         }
       }
     },
@@ -35421,6 +36373,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "‘거부’ 선택 시 접근 중단"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A recusa de acesso é respeitada"
           }
         }
       }
@@ -35439,6 +36397,12 @@
             "state": "translated",
             "value": "macOS가 저장된 로그인 정보의 접근 권한을 물을 때 ‘거부’를 선택하면, ‘접근 허용…’을 다시 선택할 때까지 어떤 경로로도 해당 계정을 읽지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ao negar acesso a um login salvo no macOS, o Codenotch deixa de ler essa conta por qualquer fonte até você escolher permitir o acesso novamente."
+          }
         }
       }
     },
@@ -35455,6 +36419,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "파일 접근 권한 요청 감소"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menos pedidos de acesso a arquivos"
           }
         }
       }
@@ -35473,6 +36443,12 @@
             "state": "translated",
             "value": "Claude 로그인 갱신 시 MCP 서버와 후크를 실행하지 않으며, 폴더 내부를 확인하지 않고 Kimi 세션을 식별합니다. 따라서 macOS가 Codenotch의 문서, 데스크탑 또는 네트워크 볼륨 접근 권한을 더 이상 요청하지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovar o login Claude não inicia mais os servidores MCP e hooks. As sessões Kimi são identificadas sem examinar suas pastas, evitando pedidos de acesso a Documentos, Mesa ou volumes de rede em nome do Codenotch."
+          }
         }
       }
     },
@@ -35489,6 +36465,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "기타 수정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outras correções"
           }
         }
       }
@@ -35507,6 +36489,12 @@
             "state": "translated",
             "value": "최신 kiro-cli 버전에서도 Kiro 사용량을 읽고, GLM Start Plan은 사용량이 없는 이유를 표시합니다. 공개된 한도가 없는 Claude 계정은 대기하는 대신 그 사실을 알리며, Windows 노치는 하루가 지나면 멈춘 응답 대기 카드를 정리합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Kiro lê o uso de versões mais recentes do kiro-cli. O GLM Start Plan explica a ausência de dados, contas Claude sem limites publicados informam essa condição e a barra no Windows limpa cartões presos em espera após um dia."
+          }
         }
       }
     },
@@ -35523,6 +36511,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "배터리 사용량을 크게 줄이고 Windows에 Grok과 가장자리 배치를 추가했으며 설정 창이 다시 열리도록 수정했습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menor consumo de bateria, Grok e bordas de tela no Windows, além da correção da janela de configurações do Windows."
           }
         }
       }
@@ -35541,6 +36535,12 @@
             "state": "translated",
             "value": "배터리 사용량 감소"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menor consumo de bateria"
+          }
         }
       }
     },
@@ -35557,6 +36557,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "유휴 상태의 CPU 사용량이 크게 줄고 포인터 이동 시 부하도 절반 미만으로 감소했습니다. 작업 중 회전 표시는 매 프레임마다 노치를 다시 그리는 대신 시스템이 그리며, 전체 화면 앱은 포인터가 움직일 때마다가 아닌 2초마다 확인합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em repouso, o Codenotch usa uma fração da CPU anterior, e mover o ponteiro consome menos da metade dos recursos. O sistema desenha a animação de atividade, e os aplicativos em tela cheia são verificados a cada dois segundos."
           }
         }
       }
@@ -35575,6 +36581,12 @@
             "state": "translated",
             "value": "Windows 설정 창 열기 수정"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurações do Windows voltam a abrir"
+          }
         }
       }
     },
@@ -35591,6 +36603,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "1.12.0에서 Windows 설정 창이 빈 화면으로 열리던 문제를 수정했습니다. 같은 종류의 오류가 배포되지 않도록 검사도 추가했습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na versão 1.12.0, a janela de configurações no Windows abria vazia. A falha foi corrigida, e uma verificação evita que esse problema volte a ser distribuído."
           }
         }
       }
@@ -35609,6 +36627,12 @@
             "state": "translated",
             "value": "Windows에 Grok, 모든 가장자리 배치, 트레이 사용량 표시 추가"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grok, todas as bordas e leituras na bandeja do Windows"
+          }
         }
       }
     },
@@ -35625,6 +36649,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows 노치에 Grok을 추가하고, 모든 모니터의 원하는 가장자리에 노치를 배치할 수 있도록 했습니다. 트레이 메뉴에는 제공자별 측정값을 표시합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Grok passa a aparecer na barra, que pode ficar em qualquer borda de qualquer monitor. O menu da bandeja mostra as leituras de cada serviço."
           }
         }
       }
@@ -35643,6 +36673,12 @@
             "state": "translated",
             "value": "Ghostty 탭"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abas do Ghostty"
+          }
         }
       }
     },
@@ -35659,6 +36695,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ghostty에서 실행 중인 세션을 클릭하면 앱을 앞으로 가져오는 동시에 해당 탭을 선택합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clicar em uma sessão do Ghostty seleciona a aba correspondente, em vez de apenas trazer o aplicativo para a frente."
           }
         }
       }
@@ -35677,6 +36719,12 @@
             "state": "translated",
             "value": "Codex 세션을 파일 전체 대신 끝부분에서 읽고, Codex 카드에서 비어 있는 재설정 크레딧 영역을 숨깁니다. Windows에서 Claude 토큰 갱신이 실패해도 카드가 멈추지 않고 재시도합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As sessões Codex são lidas a partir do fim do arquivo. O cartão esconde a seção de créditos de renovação quando ela está vazia. No Windows, uma falha ao renovar o token Claude gera uma nova tentativa, sem congelar o cartão."
+          }
         }
       }
     },
@@ -35693,6 +36741,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows 설치 프로그램, 우크라이나어, 어두운 유리, 직접 정하는 사용량 표시 기준을 추가합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalador para Windows, ucraniano, vidro escuro e limites de alerta personalizados."
           }
         }
       }
@@ -35711,6 +36765,12 @@
             "state": "translated",
             "value": "설치 가능한 Windows용 Codenotch"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalador do Codenotch para Windows"
+          }
         }
       }
     },
@@ -35727,6 +36787,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "모든 릴리스에 Codenotch-Setup.exe를 포함합니다. 관리자 권한 없이 현재 사용자용으로 설치하며, 아직 서명되지 않아 Windows가 한 번 확인을 요청합니다. Windows 버전에도 Mac과 같은 설정 창, 작게·중간·크게 크기, 주간 한도 링, 중국어·일본어·한국어·우크라이나어를 추가합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada versão inclui o Codenotch-Setup.exe, que instala para o usuário atual sem exigir administrador. O instalador ainda não é assinado, por isso o Windows mostra um aviso. Também chegam as configurações do Mac, três tamanhos, indicador semanal e chinês, japonês, coreano e ucraniano."
           }
         }
       }
@@ -35745,6 +36811,12 @@
             "state": "translated",
             "value": "Українська"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ucraniano"
+          }
         }
       }
     },
@@ -35761,6 +36833,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac과 Windows에서 일곱 번째 언어를 지원합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um sétimo idioma, no Mac e no Windows."
           }
         }
       }
@@ -35779,6 +36857,12 @@
             "state": "translated",
             "value": "Mac의 모양 설정과 관계없이 어둡게 표시하는 노치의 세 번째 표면 스타일입니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma terceira aparência para a barra, que permanece escura independentemente da aparência escolhida no Mac."
+          }
         }
       }
     },
@@ -35795,6 +36879,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "주의·위험 표시 기준 직접 설정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites de atenção e críticos personalizados"
           }
         }
       }
@@ -35813,6 +36903,12 @@
             "state": "translated",
             "value": "링이 주황색과 빨간색으로 바뀌는 기준을 직접 정하고, 주간 링을 점선으로 표시할 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você escolhe a partir de quais percentuais o indicador fica amarelo ou vermelho. O indicador semanal também pode ser tracejado."
+          }
         }
       }
     },
@@ -35829,6 +36925,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "백그라운드 작업 감소"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menos atividade em segundo plano"
           }
         }
       }
@@ -35847,6 +36949,12 @@
             "state": "translated",
             "value": "꺼 둔 제공자는 더 이상 감시하지 않고, 세션은 파일 전체 대신 끝부분에서 읽습니다. 전체 화면 앱 사용 시 접기를 꺼 두면 마우스를 올려도 노치가 접히지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serviços desativados deixam de ser monitorados. As sessões são lidas pelo final do arquivo, e a barra não se recolhe ao passar o mouse quando o recolhimento para tela cheia está desativado."
+          }
         }
       }
     },
@@ -35863,6 +36971,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows에서 Claude 측정값 유지"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leitura Claude preservada no Windows"
           }
         }
       }
@@ -35881,6 +36995,12 @@
             "state": "translated",
             "value": "만료된 토큰을 요청 제한으로 오인하지 않고 갱신하며, 노치가 포커스를 빼앗지 않습니다. Windows 애니메이션 효과를 끄면 노치도 움직이지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens expirados são renovados, sem serem confundidos com limites de uso. A barra não captura mais o foco e permanece estática quando as animações do Windows estão desativadas."
+          }
         }
       }
     },
@@ -35897,6 +37017,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "일본어 번역 완성"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Japonês completo"
           }
         }
       }
@@ -35915,6 +37041,12 @@
             "state": "translated",
             "value": "앱의 모든 문자열을 일본어로 번역했으며, 최신 기능에서 누락된 문자열 55개도 번역했습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos os textos do aplicativo agora têm tradução em japonês, incluindo 55 textos de recursos mais recentes que ainda não haviam sido traduzidos."
+          }
         }
       }
     },
@@ -35931,6 +37063,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kiro와 MiniMax, 독일어, Claude 일일 사용 속도 링, 전체 화면 앱 사용 시 접기 설정을 추가합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiro e MiniMax, alemão, indicador de ritmo diário do Claude e controle de recolhimento em tela cheia."
           }
         }
       }
@@ -35949,6 +37087,12 @@
             "state": "translated",
             "value": "Kiro와 MiniMax"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiro e MiniMax"
+          }
         }
       }
     },
@@ -35965,6 +37109,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kiro는 이 Mac에 저장된 kiro-cli 로그인 정보를 읽습니다. MiniMax는 Codenotch에서 로그인하며 국제 또는 중국 지역을 선택할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Kiro usa o login do kiro-cli existente neste Mac. O MiniMax permite entrar pelo Codenotch, com escolha entre região internacional e China."
           }
         }
       }
@@ -35983,6 +37133,12 @@
             "state": "translated",
             "value": "Deutsch"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alemão"
+          }
         }
       }
     },
@@ -35999,6 +37155,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "독일어를 추가하고 한도 도달 및 재설정 알림도 중국어 간체로 제공합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O alemão passa a integrar os idiomas do aplicativo. As notificações de limite e renovação também estão em chinês simplificado."
           }
         }
       }
@@ -36017,6 +37179,12 @@
             "state": "translated",
             "value": "Claude 일일 사용 속도 링"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indicador de ritmo diário do Claude"
+          }
         }
       }
     },
@@ -36033,6 +37201,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude의 기본 링에 주간 한도의 오늘 몫을 하루 7분의 1씩 표시하도록 선택할 수 있습니다. 세션은 얇은 링으로 옮겨 표시합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcionalmente, o indicador principal do Claude mostra a parcela diária do limite semanal, equivalente a um sétimo por dia. A sessão passa para o indicador fino."
           }
         }
       }
@@ -36051,6 +37225,12 @@
             "state": "translated",
             "value": "Codex의 추가 한도"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites adicionais do Codex"
+          }
         }
       }
     },
@@ -36067,6 +37247,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "계정에서 Spark와 코드 리뷰를 지원하면 호버 카드에 표시하며, ‘모양’에서 숨길 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O cartão de detalhes mostra os limites de Spark e revisão de código quando disponíveis na conta. Você pode ocultá-los em Aparência."
           }
         }
       }
@@ -36085,6 +37271,12 @@
             "state": "translated",
             "value": "최대화된 창 때문에 노치가 계속 접히는 경우를 위해 전체 화면 앱 사용 시 자동 접기를 끌 수 있도록 했습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O recolhimento automático em tela cheia agora pode ser desativado, evitando que janelas maximizadas recolham a barra sem necessidade."
+          }
         }
       }
     },
@@ -36101,6 +37293,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "DeepSeek 요금 시간대"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Horários de preço do DeepSeek"
           }
         }
       }
@@ -36119,6 +37317,12 @@
             "state": "translated",
             "value": "피크와 오프피크 시간대를 자유롭게 설정할 수 있으며, DeepSeek 로그인 정보를 더 안정적으로 감지합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os horários de pico e fora de pico são configuráveis, e o login do DeepSeek é reconhecido com mais confiabilidade."
+          }
         }
       }
     },
@@ -36135,6 +37339,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "제때 도착하는 알림"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alertas no momento certo"
           }
         }
       }
@@ -36153,6 +37363,12 @@
             "state": "translated",
             "value": "한도 집계 기간이 바뀌는 순간 사용량을 새로 고쳐, 화면에 노치가 없어도 재설정과 한도 도달 알림을 제때 보냅니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O uso é atualizado assim que um limite se renova. Os avisos de renovação e de limite chegam no momento do evento, mesmo sem uma barra visível na tela."
+          }
         }
       }
     },
@@ -36169,6 +37385,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "새 제공자는 직접 켤 때까지 꺼진 상태를 유지합니다. 가운데로 되돌리기 버튼의 피드백을 개선하고 Option 키를 누른 채 드래그하는 동안 마우스 올림을 무시합니다. Codex 완료 소리 설정을 유지하며 Windows의 링과 호버 카드를 Mac에 맞췄습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novos serviços ficam desativados até você ligá-los. O botão de centralizar dá uma resposta mais clara; passar o mouse é ignorado durante o arraste com Option; o som de conclusão do Codex mantém sua configuração; e os indicadores e detalhes do Windows acompanham o Mac."
           }
         }
       }
@@ -36187,6 +37409,12 @@
             "state": "translated",
             "value": "한도 재설정과 소진 시점을 알리고, 러시아어와 Kimi를 지원합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos de renovação e esgotamento, idioma russo e leitura do Kimi."
+          }
         }
       }
     },
@@ -36203,6 +37431,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "한도 재설정 및 소진 시 카드 표시"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um cartão quando o limite renova ou se esgota"
           }
         }
       }
@@ -36221,6 +37455,12 @@
             "state": "translated",
             "value": "제공자의 한도 집계 기간이 바뀌는 순간과 세션 또는 주간 한도가 100%에 도달할 때 노치에서 카드를 펼칩니다. 설정의 ‘알림’에서 원하는 알림을 선택하고 알림음도 켤 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A barra mostra um cartão quando um limite se renova e quando o uso da sessão ou da semana chega a 100%. Em Notificações, você escolhe os avisos desejados e pode ativar um som."
+          }
         }
       }
     },
@@ -36234,6 +37474,12 @@
           }
         },
         "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kimi"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Kimi"
@@ -36255,6 +37501,12 @@
             "state": "translated",
             "value": "주간 및 5시간 한도와 실행 중인 세션을 표시합니다. 세션을 클릭하면 앱뿐 아니라 해당 세션이 열린 터미널 탭을 앞으로 가져옵니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites semanais e de cinco horas, além das sessões em execução. Clicar em uma sessão abre a aba exata do terminal em que ela está."
+          }
         }
       }
     },
@@ -36271,6 +37523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Русский"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Russo"
           }
         }
       }
@@ -36289,6 +37547,12 @@
             "state": "translated",
             "value": "Mac과 Windows에서 다섯 번째 언어를 지원합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um quinto idioma, no Mac e no Windows."
+          }
         }
       }
     },
@@ -36305,6 +37569,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정에서 종료"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrar pelas configurações"
           }
         }
       }
@@ -36323,6 +37593,12 @@
             "state": "translated",
             "value": "메뉴 막대 아이콘을 꺼 둔 경우에도 종료할 수 있도록 설정 사이드바에 종료 항목을 추가합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma opção para encerrar o aplicativo na lateral das configurações, útil quando o ícone da barra de menus está desativado."
+          }
         }
       }
     },
@@ -36339,6 +37615,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "웹페이지의 Codenotch 로컬 서버 접근 차단"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Páginas da internet não acessam os servidores locais do Codenotch"
           }
         }
       }
@@ -36357,6 +37639,12 @@
             "state": "translated",
             "value": "Ollama 릴레이와 Windows 이벤트 서버는 다른 사이트에서 오는 브라우저 요청을 거부하고, 원시 응답을 시스템 로그에 남기지 않습니다. DeepSeek 조회 시에도 페이지 주소를 정확히 검사해 이전에는 통과할 수 있었던 유사 도메인을 차단합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O intermediário do Ollama e o servidor de eventos do Windows recusam solicitações do navegador vindas de outros sites. Respostas brutas não são gravadas no log do sistema, e a leitura do DeepSeek verifica o endereço exato da página."
+          }
         }
       }
     },
@@ -36370,6 +37658,12 @@
           }
         },
         "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Windows"
@@ -36391,6 +37685,12 @@
             "state": "translated",
             "value": "진단 정보에는 실제 값 대신 값의 구조를 출력해 민감한 정보가 보고서에 남지 않게 합니다. Windows 버전도 변경할 때마다 빌드를 검사합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O diagnóstico registra a estrutura dos valores, sem expor o conteúdo sensível nos relatórios. A compilação da versão Windows é verificada a cada alteração."
+          }
         }
       }
     },
@@ -36407,6 +37707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "이동 핸들을 카메라 영역에 맞춰 정렬하고, 설정의 중국어 간체 번역을 늘렸습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A alça de movimento se alinha ao recorte da câmera, e mais textos das configurações estão em chinês simplificado."
           }
         }
       }
@@ -36425,6 +37731,12 @@
             "state": "translated",
             "value": "LM Studio, DeepSeek, Devin과 일본어·포르투갈어를 추가하고, 주기적인 키체인 비밀번호 요청을 없앴습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio, DeepSeek e Devin, japonês e português, e menos pedidos de senha das Chaves do macOS."
+          }
         }
       }
     },
@@ -36438,6 +37750,12 @@
           }
         },
         "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "LM Studio"
@@ -36459,6 +37777,12 @@
             "state": "translated",
             "value": "이 Mac의 LM Studio에서 로드된 모델, 각 모델의 생각 중 또는 대기 상태, 생성 속도, 컨텍스트 사용률, 일일 토큰 사용 기록을 읽습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos carregados, atividade ou fila, velocidade de geração, ocupação do contexto e histórico diário de tokens. A leitura é feita no LM Studio deste Mac."
+          }
         }
       }
     },
@@ -36475,6 +37799,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "DeepSeek와 Devin"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DeepSeek e Devin"
           }
         }
       }
@@ -36493,6 +37823,12 @@
             "state": "translated",
             "value": "DeepSeek 플랫폼 잔액과 사용액을 일일 사용량 카드와 함께 표시하며, Devin 사용량도 지원합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saldo e gastos da plataforma DeepSeek, com detalhes do uso diário, além do uso do Devin."
+          }
         }
       }
     },
@@ -36509,6 +37845,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "日本語 및 Português (Brasil)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Japonês e Português (Brasil)"
           }
         }
       }
@@ -36527,6 +37869,12 @@
             "state": "translated",
             "value": "두 언어를 추가하고 모든 언어가 들어가도록 언어 선택기를 메뉴로 바꿨습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais dois idiomas. A seleção de idioma passa a usar um menu para acomodar todas as opções."
+          }
         }
       }
     },
@@ -36543,6 +37891,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "반복되는 키체인 비밀번호 요청 중단"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem pedidos repetidos de senha das Chaves"
           }
         }
       }
@@ -36561,6 +37915,12 @@
             "state": "translated",
             "value": "Claude Code와 Antigravity가 저장된 로그인 정보를 다시 만들면 macOS의 ‘항상 허용’이 유지되지 않아 비밀번호 대화상자가 계속 나타났습니다. 이제 백그라운드 새로 고침에서는 전혀 나타나지 않으며, 설정의 ‘접근 허용’에서만 나타날 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code e Antigravity recriam os logins salvos de uma forma que invalida a autorização permanente do macOS. As atualizações em segundo plano deixam de pedir a senha; o pedido só pode aparecer ao permitir acesso nas configurações."
+          }
         }
       }
     },
@@ -36577,6 +37937,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "다른 가장자리로 노치 이동"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mova a barra para outra borda"
           }
         }
       }
@@ -36595,6 +37961,12 @@
             "state": "translated",
             "value": "노치 위의 호를 길게 누른 뒤 원하는 가장자리에 놓으십시오. 호를 표시하고 싶지 않으면 ‘모양’에서 숨길 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure o arco acima da barra e solte-o em qualquer borda. Você pode esconder o arco em Aparência."
+          }
         }
       }
     },
@@ -36611,6 +37983,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "호버 카드 정보 추가"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais informações nos detalhes"
           }
         }
       }
@@ -36629,6 +38007,12 @@
             "state": "translated",
             "value": "제목 아래에 계정 요금제를 표시하고, 아직 사용하지 않은 Codex 요청 한도 리셋을 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O plano da conta aparece abaixo do título, junto das renovações de limite do Codex que você ainda não utilizou."
+          }
         }
       }
     },
@@ -36645,6 +38029,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude Code가 로그인 정보를 지워도 측정값 유지"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leitura preservada quando o Claude Code remove um login"
           }
         }
       }
@@ -36663,6 +38053,12 @@
             "state": "translated",
             "value": "Claude Code는 자체 업데이트 후 모든 프로필의 저장된 로그인 정보를 한꺼번에 지울 수 있습니다. 이제 마지막 수치를 없애는 대신 흐리게 표시한 채 유지합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Após uma atualização, o Claude Code pode limpar os logins salvos de todos os perfis. Os últimos números agora continuam visíveis, esmaecidos, em vez de desaparecer."
+          }
         }
       }
     },
@@ -36679,6 +38075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "조회 경로와 관계없이 동일한 Antigravity 수치 표시"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity com leitura consistente entre fontes"
           }
         }
       }
@@ -36697,6 +38099,12 @@
             "state": "translated",
             "value": "로컬 서버와 Google 자체 엔드포인트를 하나의 파서로 읽어, 어느 쪽이 응답하든 링이 달라지지 않습니다. 자동 모드에서는 모든 한도를 소진했을 때만 소진된 한도를 기본 링에 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O servidor local e o endereço oficial do Google usam o mesmo processamento. O indicador não muda conforme a fonte que respondeu. No modo automático, um limite esgotado só assume o destaque quando todos estão esgotados."
+          }
         }
       }
     },
@@ -36713,6 +38121,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gemini API에 OpenCode와 Hermes 사용량 합산"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini API inclui OpenCode e Hermes"
           }
         }
       }
@@ -36731,6 +38145,12 @@
             "state": "translated",
             "value": "OpenCode와 Hermes를 통한 대화도 Gemini API 링에 집계합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O uso pelo OpenCode e pelo Hermes agora entra na contagem do indicador Gemini API."
+          }
         }
       }
     },
@@ -36747,6 +38167,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "가운데로 되돌리기가 노치를 즉시 이동시키고, 전체 화면 자동 접기는 카메라 영역을 고려합니다. 요청 제한 대기 후 불필요한 새로 고침 한 주기를 더 기다리지 않습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centralizar move a barra imediatamente. O recolhimento em tela cheia considera o recorte da câmera, e a espera por limite de requisições não exige mais um ciclo adicional de atualização."
           }
         }
       }
@@ -36765,6 +38191,12 @@
             "state": "translated",
             "value": "중국어를 지원하고, 로컬 모델의 생각 중 상태를 표시하며, 화면 가장자리에 단단히 고정됩니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinês, atividade dos modelos locais e uma barra bem alinhada à borda."
+          }
         }
       }
     },
@@ -36781,6 +38213,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "简体中文"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinês simplificado"
           }
         }
       }
@@ -36799,6 +38237,12 @@
             "state": "translated",
             "value": "‘모양’에 언어 선택기를 추가합니다. Mac의 언어를 따르거나 Mac 설정과 관계없이 English 또는 简体中文로 고정할 수 있습니다. 번역 이후 추가된 문구는 빈칸 대신 영어로 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em Aparência, a seleção de idioma permite acompanhar o Mac ou escolher inglês ou chinês simplificado. Textos ainda sem tradução aparecem em inglês, em vez de ficarem vazios."
+          }
         }
       }
     },
@@ -36815,6 +38259,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ollama 모델의 생각 중 상태와 생성 속도 표시"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama mostra atividade e velocidade de geração"
           }
         }
       }
@@ -36833,6 +38283,12 @@
             "state": "translated",
             "value": "로드된 모델마다 개별 칸에 마지막 응답의 초당 토큰 수와 생각 중 표시를 보여 줍니다. 측정은 로컬에서 이루어지며 프롬프트 관련 정보는 기기 밖으로 전송하지 않습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada modelo carregado tem seu próprio indicador, com tokens por segundo da última resposta e um sinal durante o processamento. A medição é local, sem enviar informações dos comandos para fora do computador."
+          }
         }
       }
     },
@@ -36849,6 +38305,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "데스크톱 앱에서 시작한 Claude Code 세션 집계"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessões Claude Code abertas pelo aplicativo entram na contagem"
           }
         }
       }
@@ -36867,6 +38329,12 @@
             "state": "translated",
             "value": "Claude for Mac에서 시작한 세션도 다른 세션처럼 노치에 표시합니다. 로그인도 백그라운드에서 갱신해 일주일 사용 후 링이 만료되어 사라지는 일을 방지합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessões iniciadas pelo Claude para Mac aparecem na barra. O login também é renovado em segundo plano, evitando que o indicador fique desatualizado após uma semana."
+          }
         }
       }
     },
@@ -36883,6 +38351,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "화면 가장자리에 노치 고정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Barra alinhada à borda da tela"
           }
         }
       }
@@ -36901,6 +38375,12 @@
             "state": "translated",
             "value": "어떤 크기에서도 노치 뒤로 배경화면의 가는 틈이 보이지 않습니다. 크기 슬라이더를 드래그하는 동안 위치가 흐트러졌다가 마지막에 맞춰지는 대신, 계속 고정된 위치를 유지합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem frestas mostrando o papel de parede em qualquer tamanho. A barra permanece ancorada durante o ajuste de tamanho."
+          }
         }
       }
     },
@@ -36917,6 +38397,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "프리셋과 슬라이더로 크기 설정"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajuste o tamanho por opções prontas ou controle deslizante"
           }
         }
       }
@@ -36935,6 +38421,12 @@
             "state": "translated",
             "value": "간편하게 세 가지 크기 중 하나를 선택하거나, 슬라이더로 원하는 크기를 직접 조정할 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Três tamanhos prontos para escolher rapidamente ou um controle deslizante para um ajuste específico."
+          }
         }
       }
     },
@@ -36951,6 +38443,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "전체 화면 앱 사용 시 노치 접기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolhimento durante o uso de aplicativos em tela cheia"
           }
         }
       }
@@ -36969,6 +38467,12 @@
             "state": "translated",
             "value": "맨 앞의 전체 화면 앱이 화면 전체를 사용하며, 해당 앱을 벗어나면 노치가 다시 나타납니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O aplicativo em primeiro plano e em tela cheia ocupa toda a tela. A barra reaparece quando você sai."
+          }
         }
       }
     },
@@ -36985,6 +38489,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "설정 톱니바퀴로 열기와 닫기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Botão de configurações abre e fecha a janela"
           }
         }
       }
@@ -37003,6 +38513,12 @@
             "state": "translated",
             "value": "클릭하면 톱니바퀴가 회전하며 눌리고, 다시 클릭하면 설정이 닫힙니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O botão gira e afunda ao clicar. Um segundo clique fecha as configurações."
+          }
         }
       }
     },
@@ -37019,6 +38535,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "오래전에 끝난 Cursor 작업 표시 중단"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cursor deixa de mostrar trabalhos encerrados há meses"
           }
         }
       }
@@ -37037,6 +38559,12 @@
             "state": "translated",
             "value": "종료된 백그라운드 에이전트 때문에 링이 계속 주황색으로 남는 문제가 있었습니다. 이제 실제로 진행 중인 채팅만 응답 대기 상태로 집계합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agentes em segundo plano já concluídos mantinham o indicador amarelo indefinidamente. Agora apenas uma conversa atual, realmente em espera, recebe esse estado."
+          }
         }
       }
     },
@@ -37053,6 +38581,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "CLI만 설치된 Antigravity 지원"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity reconhece instalação só pela linha de comando"
           }
         }
       }
@@ -37071,6 +38605,12 @@
             "state": "translated",
             "value": "데스크톱 앱이 없어도 정상 계정으로 인식하고 일일 할당량을 직접 읽습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalações sem o aplicativo de desktop são reconhecidas como contas, e a cota diária é lida diretamente."
+          }
         }
       }
     },
@@ -37087,6 +38627,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Xcode 없이 바로 다운로드해 실행"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicativo pronto para baixar, sem precisar do Xcode"
           }
         }
       }
@@ -37105,6 +38651,12 @@
             "state": "translated",
             "value": "모든 빌드에서 실행 가능한 앱 번들을 제공하므로 개발 환경을 준비하지 않고도 Codenotch를 사용해 볼 수 있습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada compilação gera um aplicativo pronto para executar. Experimentar o Codenotch não exige mais preparar um ambiente de desenvolvimento."
+          }
         }
       }
     },
@@ -37121,6 +38673,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Avtorizatsiya"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autorização"
           }
         }
       }
@@ -37139,6 +38697,12 @@
             "state": "translated",
             "value": "Koʻrinish va belgi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência e ícone"
+          }
         }
       }
     },
@@ -37155,6 +38719,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sinash"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar"
           }
         }
       }
@@ -37173,6 +38743,12 @@
             "state": "translated",
             "value": "Oylik byudjet ($)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orçamento mensal (US$)"
+          }
         }
       }
     },
@@ -37189,6 +38765,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sozlangan endpointlar"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexões configuradas"
           }
         }
       }
@@ -37224,6 +38806,12 @@
             "state": "translated",
             "value": "Shablonlarni yashirish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar modelos"
+          }
         }
       }
     },
@@ -37240,6 +38828,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hali maxsus endpointlar yoʻq. Boshlash uchun ʼEndpoint qoʻshishʼ ni bosing yoki Tezkor shablonni tanlang."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma conexão personalizada. Clique em Adicionar conexão ou escolha um modelo rápido para começar."
           }
         }
       }
@@ -37258,6 +38852,12 @@
             "state": "translated",
             "value": "Belgi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone"
+          }
         }
       }
     },
@@ -37274,6 +38874,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Endpoint qoʻshish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar conexão"
           }
         }
       }
@@ -37292,6 +38898,12 @@
             "state": "translated",
             "value": "Sozlamalarni oldindan toʻldirish uchun shablon tanlang:"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha um modelo para preencher as configurações:"
+          }
         }
       }
     },
@@ -37308,6 +38920,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lokal dvigatellarni skanerlash"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar serviços locais"
           }
         }
       }
@@ -37343,6 +38961,12 @@
             "state": "translated",
             "value": "masalan, 20.00 (cheksiz uchun boʻsh qoldiring)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: 20.00 (deixe vazio para sem limite)"
+          }
         }
       }
     },
@@ -37359,6 +38983,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "URL http:// yoki https:// bilan boshlanishi va toʻgʻri hostʼga ega boʻlishi kerak."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A URL deve começar com http:// ou https:// e conter um endereço válido."
           }
         }
       }
@@ -37377,6 +39007,12 @@
             "state": "translated",
             "value": "Nomi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
         }
       }
     },
@@ -37393,6 +39029,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auth sarlavhasi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalho de autenticação"
           }
         }
       }
@@ -37411,6 +39053,12 @@
             "state": "translated",
             "value": "Asosiy URL"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL base"
+          }
         }
       }
     },
@@ -37427,6 +39075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Model"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo"
           }
         }
       }
@@ -37445,6 +39099,12 @@
             "state": "translated",
             "value": "Yangi maxsus endpoint"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova conexão personalizada"
+          }
         }
       }
     },
@@ -37461,6 +39121,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Topilgan lokal xizmatlar:"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serviços locais encontrados:"
           }
         }
       }
@@ -37479,6 +39145,12 @@
             "state": "translated",
             "value": "masalan, 4.25"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: 4.25"
+          }
         }
       }
     },
@@ -37495,6 +39167,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Model tanlang..."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione um modelo…"
           }
         }
       }
@@ -37513,6 +39191,12 @@
             "state": "translated",
             "value": "Tahrirlash"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
         }
       }
     },
@@ -37530,6 +39214,12 @@
             "state": "translated",
             "value": "Maxsus rasm yuklash..."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher imagem personalizada…"
+          }
         }
       }
     },
@@ -37546,6 +39236,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Endpointni saqlash"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar conexão"
           }
         }
       }
@@ -37581,6 +39277,12 @@
             "state": "translated",
             "value": "Endpointni tahrirlash"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar conexão"
+          }
         }
       }
     },
@@ -37597,6 +39299,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "API kaliti"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave de API"
           }
         }
       }
@@ -37615,6 +39323,12 @@
             "state": "translated",
             "value": "Model nomi (masalan, gpt-4o, llama-3.3)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do modelo (ex.: gpt-4o, llama-3.3)"
+          }
         }
       }
     },
@@ -37632,6 +39346,12 @@
             "state": "translated",
             "value": "Maxsus endpointlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexões personalizadas"
+          }
         }
       }
     },
@@ -37648,6 +39368,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "masalan, My OpenRouter, Local vLLM"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Meu OpenRouter, vLLM local"
           }
         }
       }
@@ -37683,6 +39409,12 @@
             "state": "translated",
             "value": "sk-... (lokal uchun ixtiyoriy)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sk-... (opcional para serviços locais)"
+          }
         }
       }
     },
@@ -37700,6 +39432,12 @@
             "state": "translated",
             "value": "Hozirgi xarajat ($)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gasto atual (US$)"
+          }
         }
       }
     },
@@ -37716,6 +39454,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oylik byudjet va xarajat kuzatuvi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orçamento mensal e acompanhamento de gastos"
           }
         }
       }
@@ -37751,6 +39495,12 @@
             "state": "translated",
             "value": "Xarajat: $%.2f"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gasto: US$ %.2f"
+          }
         }
       }
     },
@@ -37785,6 +39535,12 @@
             "state": "translated",
             "value": "Ulanishni sinash va modellarni olish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar conexão e buscar modelos"
+          }
         }
       }
     },
@@ -37801,6 +39557,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Halqa urgʻusi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor do anel"
           }
         }
       }
@@ -37836,6 +39598,12 @@
             "state": "translated",
             "value": "Endpointlarga qoʻshish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar às conexões"
+          }
         }
       }
     },
@@ -37852,6 +39620,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Istalgan OpenAI bilan mos API, lokal inference muhiti yoki maxsus proksini ulang."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecte uma API compatível com OpenAI, um serviço local de modelos ou um proxy personalizado."
           }
         }
       }
@@ -37904,6 +39678,12 @@
             "state": "translated",
             "value": "Tezkor shablonlar"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos rápidos"
+          }
         }
       }
     },
@@ -37921,6 +39701,12 @@
             "state": "translated",
             "value": "Xarajatni nolga qaytarish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zerar gasto informado"
+          }
         }
       }
     },
@@ -37937,6 +39723,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekor qilish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
           }
         }
       }
@@ -38054,6 +39846,12 @@
             "state": "translated",
             "value": "%@ / %@ qoldi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ / %@ restantes"
+          }
         }
       }
     },
@@ -38082,6 +39880,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Foiz (%) oʻrniga dollar miqdorini ($) koʻrsatish"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar valor em dinheiro (US$) em vez de percentual (%)"
           }
         }
       }
@@ -38112,6 +39916,12 @@
             "state": "translated",
             "value": "Hisob birligi"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unidade de acompanhamento"
+          }
         }
       }
     },
@@ -38140,6 +39950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tokenlar (million)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens (milhões)"
           }
         }
       }
@@ -38170,6 +39986,12 @@
             "state": "translated",
             "value": "Oylik byudjet (mln token)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orçamento mensal (milhões de tokens)"
+          }
         }
       }
     },
@@ -38198,6 +40020,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ishlatilgan tokenlar (mln token)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens usados (milhões)"
           }
         }
       }
@@ -38256,6 +40084,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tokenlar: %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens: %@"
           }
         }
       }
@@ -38431,6 +40265,12 @@
             "state": "translated",
             "value": "Tokenlarni nolga qaytarish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zerar tokens informados"
+          }
         }
       }
     },
@@ -38460,6 +40300,12 @@
             "state": "translated",
             "value": "Foiz (%) oʻrniga token sonini koʻrsatish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar quantidade de tokens em vez de percentual (%)"
+          }
         }
       }
     },
@@ -38477,6 +40323,12 @@
             "state": "translated",
             "value": "masalan, 10.0 (cheksiz uchun boʻsh qoldiring)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: 10.0 (deixe vazio para sem limite)"
+          }
         }
       }
     },
@@ -38493,6 +40345,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "masalan, 2.5"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: 2.5"
           }
         }
       }
@@ -38632,6 +40490,12 @@
             "state": "translated",
             "value": "Sarflangan oʻrniga qolgan byudjetni koʻrsatish"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar orçamento restante em vez do gasto"
+          }
         }
       }
     },
@@ -38655,6 +40519,12 @@
             "state": "translated",
             "value": "USD ($)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dólar (US$)"
+          }
         }
       }
     },
@@ -38665,6 +40535,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows 자동 업데이트, 메뉴 막대의 5시간 한도 표시, 접을 수 있는 노치를 추가합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizações automáticas no Windows, limites de cinco horas na barra de menus e uma barra de indicadores que você pode recolher."
           }
         }
       }
@@ -38677,6 +40553,12 @@
             "state": "translated",
             "value": "메뉴 막대의 5시간 한도 표시"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites de cinco horas na barra de menus"
+          }
         }
       }
     },
@@ -38687,6 +40569,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "표시할 계정을 직접 선택하면 노치와 함께 메뉴 막대에도 세션 사용 비율과 남은 시간을 표시합니다. 기본적으로는 꺼져 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desativado por padrão: escolha quais contas exibir e a barra de menus mostrará o percentual da sessão e a contagem regressiva, junto da barra de indicadores."
           }
         }
       }
@@ -38699,6 +40587,12 @@
             "state": "translated",
             "value": "모든 Antigravity 계정 지원"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas as contas do Antigravity"
+          }
         }
       }
     },
@@ -38709,6 +40603,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "여러 Antigravity 프로필을 읽으며 각 프로필에 별도의 링과 키체인 접근 권한 응답을 적용합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agora é possível ler vários perfis do Antigravity, cada um com seu próprio indicador e sua própria autorização de acesso às Chaves do macOS."
           }
         }
       }
@@ -38721,6 +40621,12 @@
             "state": "translated",
             "value": "더 선명한 유리 효과"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidro mais legível"
+          }
         }
       }
     },
@@ -38731,6 +40637,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "다크 모드의 Liquid Glass 뒤에 밝은 배경화면이 있어도 툴팁의 보조 설명이 흐려지지 않고 잘 보입니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os textos dos detalhes ficam mais legíveis no Liquid Glass em modo escuro. Antes, uma imagem clara ao fundo podia apagar visualmente as linhas secundárias."
           }
         }
       }
@@ -38743,6 +40655,12 @@
             "state": "translated",
             "value": "Windows 자동 업데이트"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizações automáticas no Windows"
+          }
         }
       }
     },
@@ -38753,6 +40671,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "시작 직후 새 버전을 확인하고 다운로드 서명을 검증한 뒤 자동으로 설치할 수 있습니다. 이전에는 Windows 설치본이 처음 설치한 버전에 머물렀습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O aplicativo procura uma nova versão logo após iniciar e pode instalá-la, verificando primeiro a assinatura do arquivo baixado. Antes, a instalação no Windows permanecia na versão originalmente instalada."
           }
         }
       }
@@ -38765,6 +40689,12 @@
             "state": "translated",
             "value": "이동 가능한 Windows 노치"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma barra móvel no Windows"
+          }
         }
       }
     },
@@ -38775,6 +40705,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "핸들로 모니터 사이를 옮기고, Alt 키를 누른 채 가장자리를 따라 이동할 수 있습니다. 사용하지 않을 때는 Mac의 ‘마우스를 올리면 표시’처럼 작은 필로 접을 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a alça para mover a barra entre monitores, segure Alt para deslizá-la ao longo de uma borda e recolha-a quando não estiver em uso, como na opção de mostrar ao passar o mouse no Mac."
           }
         }
       }
@@ -38787,6 +40723,12 @@
             "state": "translated",
             "value": "Windows에서 Z.AI와 모든 Claude 계정 지원"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Z.AI e todas as contas Claude no Windows"
+          }
         }
       }
     },
@@ -38797,6 +40739,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Z.AI Coding Plan 링을 추가하고 기본 계정뿐 아니라 모든 Claude 계정에 개별 링을 표시합니다. 카드에서 직접 Claude에 로그인할 수도 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um indicador para o Z.AI Coding Plan, outro para cada conta Claude, além da possibilidade de entrar no Claude pelo próprio cartão."
           }
         }
       }
@@ -38809,6 +40757,12 @@
             "state": "translated",
             "value": "日本語 및 러시아어 노치 배치 설정"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Japonês e posicionamento da barra em russo"
+          }
         }
       }
     },
@@ -38819,6 +40773,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "릴리스 노트를 일본어로, Windows 노치 배치 설정을 러시아어로 제공합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As notas de versão agora estão em japonês, e as configurações de posição da barra no Windows, em russo."
           }
         }
       }
@@ -38831,6 +40791,12 @@
             "state": "translated",
             "value": "QianwenAI 조회를 복구하고 잘못된 알림을 줄였으며 Windows 노치의 동작을 안정화했습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leitura do QianwenAI restaurada, menos alertas incorretos e uma barra mais estável no Windows."
+          }
         }
       }
     },
@@ -38841,6 +40807,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QianwenAI 조회 복구"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QianwenAI volta a funcionar"
           }
         }
       }
@@ -38853,6 +40825,12 @@
             "state": "translated",
             "value": "실제 재설정만 알림"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somente renovações reais"
+          }
         }
       }
     },
@@ -38863,6 +40841,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "남은 시간이 몇 초 바뀌는 것만으로는 재설정 알림을 보내지 않으며, 실제 재설정 시에는 계속 알립니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pequenas variações de alguns segundos na contagem regressiva não geram mais avisos de renovação. As renovações reais continuam sendo avisadas."
           }
         }
       }
@@ -38875,6 +40859,12 @@
             "state": "translated",
             "value": "창 없이 실행한 Grok도 감지"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grok também pelo terminal"
+          }
         }
       }
     },
@@ -38885,6 +40875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "grok 자체 창뿐 아니라 grok -p로 실행한 경우에도 작업 중으로 표시합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Grok aparece como trabalhando durante a execução de grok -p, além do uso na própria janela."
           }
         }
       }
@@ -38897,6 +40893,12 @@
             "state": "translated",
             "value": "Windows 노치가 작업 표시줄을 피하도록 개선"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A barra no Windows não cobre a barra de tarefas"
+          }
         }
       }
     },
@@ -38907,6 +40909,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "작업 영역 안에 배치하고 작업 표시줄이 이동하면 가장자리를 다시 찾습니다. Mac처럼 링 끝을 둥글게 표시하며 측정값이 오래되면 흐리게 표시합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ela respeita a área de trabalho disponível e se reposiciona quando a barra de tarefas muda de lugar. Os indicadores ficam esmaecidos quando a leitura está antiga e ganham pontas arredondadas, como no Mac."
           }
         }
       }
@@ -38919,6 +40927,12 @@
             "state": "translated",
             "value": "새로운 설정, QianwenAI, 중국어 번체, 원하는 가장자리로 옮길 수 있는 Windows 노치를 추가합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novas configurações, QianwenAI, chinês tradicional e uma barra no Windows que pode ficar em qualquer borda."
+          }
         }
       }
     },
@@ -38929,6 +40943,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "새로운 설정 화면"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novas configurações"
           }
         }
       }
@@ -38941,6 +40961,12 @@
             "state": "translated",
             "value": "차분한 어두운 화면에 각 패널 제목과 제공자 고유 로고를 표시하고 DeepSeek, Ollama, LM Studio를 ‘계정’ 아래에 모았습니다. 포인터에 따라 각 요소가 반응하며 새 버전이 있으면 버전 옆에 업데이트 버튼을 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual escuro e discreto, com título em cada seção, logotipos dos serviços e DeepSeek, Ollama e LM Studio dentro de Contas. Os controles respondem ao mouse, e um botão de atualização aparece ao lado da versão quando há uma nova disponível."
+          }
         }
       }
     },
@@ -38948,6 +40974,12 @@
       "extractionState": "manual",
       "localizations": {
         "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QianwenAI"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "QianwenAI"
@@ -38963,6 +40995,12 @@
             "state": "translated",
             "value": "Codenotch에서 로그인하는 QianwenAI Token Plan 링을 추가합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um indicador para o plano de tokens do QianwenAI, com login pelo Codenotch."
+          }
         }
       }
     },
@@ -38973,6 +41011,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "繁體中文 추가 및 언어별 번역 완성"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinês tradicional e traduções completas"
           }
         }
       }
@@ -38985,6 +41029,12 @@
             "state": "translated",
             "value": "Mac과 Windows에 중국어 번체를 추가해 대만과 홍콩에서 자동으로 선택합니다. 중국어 간체와 우크라이나어도 모든 문자열을 번역했습니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinês tradicional no Mac e no Windows, selecionado automaticamente em Taiwan e Hong Kong. As traduções em chinês simplificado e ucraniano agora cobrem todos os textos."
+          }
         }
       }
     },
@@ -38995,6 +41045,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows 노치를 원하는 곳으로 이동"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A barra do Windows em qualquer borda"
           }
         }
       }
@@ -39007,6 +41063,12 @@
             "state": "translated",
             "value": "핸들을 드래그해 원하는 가장자리로 옮기고, 구체 버튼으로 설정을 열 수 있습니다. 링을 클릭하면 다시 조회하고 오른쪽 버튼을 클릭하면 추가 메뉴를 엽니다. 호버 카드는 작업 표시줄을 피해서 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste pela alça até qualquer borda, abra as configurações pelo botão circular, clique em um indicador para atualizar a leitura ou use o botão direito para mais opções. O cartão de detalhes não cobre a barra de tarefas."
+          }
         }
       }
     },
@@ -39017,6 +41079,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "새 로고"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logotipos atualizados"
           }
         }
       }
@@ -39029,6 +41097,12 @@
             "state": "translated",
             "value": "MiniMax, QianwenAI, Z.ai, Kimi, OpenCode, Command Code의 고유 로고를 표시합니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MiniMax, QianwenAI, Z.ai, Kimi, OpenCode e Command Code agora exibem seus próprios logotipos."
+          }
         }
       }
     },
@@ -39039,6 +41113,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "OpenAI 호환 API, 로컬 런타임 및 사용자 지정 프록시입니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APIs compatíveis com OpenAI, serviços locais e proxies personalizados."
           }
         }
       }
@@ -39051,6 +41131,12 @@
             "state": "translated",
             "value": "새로 고칠 때마다 링에 ‘HTTP 0’이 표시되던 문제를 수정하고, QianwenAI가 요청을 거부하면 명확히 알립니다."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O indicador deixa de mostrar “HTTP 0” em cada atualização e informa claramente quando o QianwenAI recusa uma solicitação."
+          }
         }
       }
     },
@@ -39061,6 +41147,122 @@
           "stringUnit": {
             "state": "translated",
             "value": "업데이트 확인이 ‘확인 중…’에서 멈추지 않으며 컨텍스트 사용량이 적어도 호를 표시합니다. Claude 계정 파일은 변경될 때만 다시 읽고, 중국어 번체는 대만에서 쓰는 표현으로 다듬었습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A busca de atualizações não fica mais presa em “Verificando…”. Leituras pequenas de contexto ainda desenham um arco; o arquivo de conta Claude só é relido quando muda; e o chinês tradicional usa termos de Taiwan."
+          }
+        }
+      }
+    },
+    "Available": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponível"
+          }
+        }
+      }
+    },
+    "Quota display": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exibição do limite"
+          }
+        }
+      }
+    },
+    "Available counts down from 100% to 0%. Alerts still follow actual usage.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponível diminui de 100% até 0%. Os alertas continuam seguindo o consumo real."
+          }
+        }
+      }
+    },
+    "Claude icon in coral red": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone do Claude em vermelho coral"
+          }
+        }
+      }
+    },
+    "Rename account": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear conta"
+          }
+        }
+      }
+    },
+    "Account name": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da conta"
+          }
+        }
+      }
+    },
+    "Restore original name": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar nome original"
+          }
+        }
+      }
+    },
+    "Used": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado"
+          }
+        }
+      }
+    },
+    "One display": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma tela"
+          }
+        }
+      }
+    },
+    "Choose a fixed display below, or follow the active window.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha abaixo um monitor fixo ou acompanhe a janela ativa. Para repetir a barra em cada monitor, selecione Todas as telas."
           }
         }
       }

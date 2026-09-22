@@ -13,6 +13,8 @@ SCHEME  := Codenotch
 RESOLVED_PACKAGES := $(PROJECT)/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 ARCH    ?= $(shell uname -m)
 DEST    ?= platform=macOS,arch=$(ARCH)
+# Keep local compilation bounded while the desktop is in use. CI may override.
+BUILD_JOBS ?= 2
 
 # Debug signs itself when the maintainer's Developer ID certificate isn't in
 # the keychain, which is every machine but the maintainer's — so a contributor
@@ -63,18 +65,18 @@ gen:
 
 build: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug $(DEV_SIGN) build
+		-configuration Debug -jobs $(BUILD_JOBS) $(DEV_SIGN) build
 
 test: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug $(DEV_SIGN) test
+		-configuration Debug -jobs $(BUILD_JOBS) -parallel-testing-enabled NO $(DEV_SIGN) test
 
 # Continuous integration: no Developer ID identity exists on a CI runner, and
 # unit tests need none — override the manual signing with plain unsigned
 # builds rather than asking every contributor to hold a certificate.
 test-ci: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug test \
+		-configuration Debug -jobs $(BUILD_JOBS) -parallel-testing-enabled NO test \
 		CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
 verify-deps:
@@ -90,7 +92,6 @@ run: build
 	@APP=$$(xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
 		-configuration Debug -showBuildSettings 2>/dev/null \
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2; exit}')/Codenotch.app; \
-	pkill -x Codenotch 2>/dev/null; sleep 0.5; \
 	open "$$APP"
 
 # Build a Release .app, sign it with whatever identity is available (Developer
@@ -103,13 +104,20 @@ run: build
 # identity rather than left unsigned.
 install: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Release $(DEV_SIGN) build
+		-configuration Release -jobs $(BUILD_JOBS) $(DEV_SIGN) build
 	@APP=$$(xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
 		-configuration Release -showBuildSettings 2>/dev/null \
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2; exit}')/Codenotch.app; \
-	pkill -x Codenotch || true; \
-	cp -R "$$APP" /Applications/; \
-	open /Applications/Codenotch.app
+	test "$$('/usr/libexec/PlistBuddy' -c 'Print CFBundleIdentifier' "$$APP/Contents/Info.plist")" = "com.vinicius.codenotch.personal" || exit 1; \
+	codesign --verify --deep --strict "$$APP" || exit 1; \
+	STAGING=$$(mktemp -d /tmp/codenotch-personal-XXXXXX); \
+	ditto "$$APP" "$$STAGING/CodeNotch Pessoal.app" || exit 1; \
+	if test -e '/Applications/CodeNotch Pessoal.app'; then mv '/Applications/CodeNotch Pessoal.app' "$$STAGING/Previous.app" || exit 1; fi; \
+	if mv "$$STAGING/CodeNotch Pessoal.app" '/Applications/CodeNotch Pessoal.app'; then \
+	  echo "Installed /Applications/CodeNotch Pessoal.app; previous copy, if any: $$STAGING/Previous.app"; \
+	else \
+	  test ! -e "$$STAGING/Previous.app" || mv "$$STAGING/Previous.app" '/Applications/CodeNotch Pessoal.app'; exit 1; \
+	fi
 
 clean:
 	rm -rf build DerivedData $(PROJECT)

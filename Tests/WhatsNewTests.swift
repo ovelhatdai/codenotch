@@ -35,6 +35,29 @@ final class ReleaseNotesTests: XCTestCase {
 
     // MARK: - What ships
 
+    func testReleaseHeadlinesAndDetailsAreTranslatedIntoBrazilianPortuguese() {
+        let previous = L10n.testLocale
+        defer { L10n.testLocale = previous }
+        L10n.testLocale = Locale(identifier: "en")
+        let english = ReleaseNotes.all
+        L10n.testLocale = Locale(identifier: "pt-BR")
+        let portuguese = ReleaseNotes.all
+        XCTAssertEqual(english.map(\.version), portuguese.map(\.version))
+        for (source, translated) in zip(english, portuguese) {
+            XCTAssertNotEqual(source.headline, translated.headline, source.version)
+            XCTAssertEqual(source.changes.count, translated.changes.count)
+            for (original, localized) in zip(source.changes, translated.changes)
+            where !original.detail.isEmpty {
+                XCTAssertNotEqual(original.detail, localized.detail,
+                                  "\(source.version): \(original.title) still uses English")
+            }
+        }
+        let current = ReleaseNotes.note(for: "1.16.0")!
+        XCTAssertEqual(current.changes.first?.title, "Limites de cinco horas na barra de menus")
+        XCTAssertEqual(current.changes[1].title, "Todas as contas do Antigravity")
+        XCTAssertEqual(current.changes[2].title, "Vidro mais legível")
+    }
+
     func testEveryShippedNoteSaysSomething() {
         for note in ReleaseNotes.all {
             XCTAssertFalse(note.version.isEmpty, "a note with no version")

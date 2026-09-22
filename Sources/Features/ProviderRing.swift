@@ -32,6 +32,7 @@ struct ProviderRing: View {
     /// Where the user asked for it, if at all.
     var weeklyRing: WeeklyRing = .off
     var bandOverride: UsageBand? = nil
+    var displayMode: UsageDisplayMode = .used
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.codenotchReduceTransparency) private var reduceTransparency
@@ -39,6 +40,8 @@ struct ProviderRing: View {
     @Environment(\.usageCriticalLimit) private var criticalLimit
     @Environment(\.codenotchAccentColor) private var accentColor
     @Environment(\.weeklyRingDashed) private var weeklyRingDashed
+
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
     @State private var spin: Double = 0
 
     private var band: UsageBand {
@@ -46,7 +49,7 @@ struct ProviderRing: View {
         if let bandOverride { return bandOverride }
         return UsageBand.band(for: usedFraction ?? 0, watchLimit: watchLimit, criticalLimit: criticalLimit)
     }
-    private var sweep: CGFloat { CGFloat(min(max(usedFraction ?? 0, 0), 1)) }
+    private var sweep: CGFloat { CGFloat(displayMode.fraction(for: usedFraction ?? 0)) }
     private var localSweep: CGFloat { Self.localSweep(for: localContextFraction) }
     /// The floor is a drawing decision only — the number under the ring and in
     /// the card stays true.
@@ -61,7 +64,7 @@ struct ProviderRing: View {
     private var weeklyBand: UsageBand {
         isBlocked ? .exhausted : UsageBand.band(for: weeklyFraction ?? 0, watchLimit: watchLimit, criticalLimit: criticalLimit)
     }
-    private var weeklySweep: CGFloat { CGFloat(min(max(weeklyFraction ?? 0, 0), 1)) }
+    private var weeklySweep: CGFloat { CGFloat(displayMode.fraction(for: weeklyFraction ?? 0)) }
 
     /// Inside, the weekly ring and the working indicator want the same band —
     /// 1.03pt apart, one of them spinning. Rather than shave both until neither
@@ -159,7 +162,8 @@ struct ProviderRing: View {
                 }
 
                 ProviderGlyphView(glyph: glyph, customIconFilename: customIconFilename)
-                    .foregroundStyle(Palette.textPrimary)
+                    .foregroundStyle(glyph == .claude && claudeCoralIcon
+                                     ? Color(red: 0.90, green: 0.36, blue: 0.28) : Palette.textPrimary)
                     // A spent limit dims its glyph so the ring reads as "waiting".
                     // Under reduce-transparency, boost opacity so it stays legible without low alpha.
                     .opacity(band == .exhausted ? (reduceTransparency ? 0.7 : 0.35) : 1)
@@ -261,31 +265,44 @@ private struct ActivityArc: View {
 }
 
 struct ProviderCell: View {
+    @AppStorage("resetTimeFormat") private var resetTimeFormat: ResetTimeFormat = .automatic
+    @AppStorage(AccountNames.key) private var accountNames = Data()
+    private var accountName: String {
+        AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: accountNames, email: snapshot.accountEmail)
+    }
+
     let snapshot: ProviderSnapshot
     var activity: ActivitySummary?
     var isRefreshing: Bool = false
     var weeklyRing: WeeklyRing = .off
 
+    @Environment(\.usageDisplayMode) private var displayMode
+    @Environment(\.notchQuota) private var quota
+    @Environment(\.notchPresentation) private var presentation
+    @Environment(\.readingHealth) private var health
+    private var selectedReading: ProviderSnapshot { quota.reading(from: snapshot) }
+
     /// A dash, not "0%": nothing read is not the same as nothing used.
     private var readingText: String {
-        snapshot.hasReading ? snapshot.headlineText : "—"
+        displayMode.text(for: selectedReading)
     }
 
-    var body: some View {
+    private var minimalBody: some View {
         VStack(spacing: NotchLayout.ringLabelGap) {
             ProviderRing(
-                usedFraction: snapshot.localModel == nil && snapshot.hasReading ? snapshot.ringFraction : nil,
+                usedFraction: snapshot.localModel == nil && selectedReading.hasReading ? selectedReading.ringFraction : nil,
                 glyph: snapshot.glyph,
                 customIconFilename: snapshot.customIconFilename,
-                isStale: snapshot.status.isStale || !snapshot.hasReading,
+                isStale: snapshot.status.isStale || !selectedReading.hasReading,
                 isBlocked: snapshot.block != nil,
                 activity: activity,
                 isRefreshing: isRefreshing,
                 localPerformance: snapshot.localPerformance,
                 localContextFraction: snapshot.localContextFraction,
-                weeklyFraction: snapshot.hasReading ? snapshot.weeklyFraction : nil,
+                weeklyFraction: selectedReading.hasReading ? selectedReading.weeklyFraction : nil,
                 weeklyRing: weeklyRing,
-                bandOverride: snapshot.bandOverride
+                bandOverride: selectedReading.bandOverride,
+                displayMode: displayMode
             )
             Text(readingText)
                 .font(Typography.percent)
@@ -304,13 +321,71 @@ struct ProviderCell: View {
         .frame(height: NotchLayout.cellExtent)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
+        .help(snapshot.kind == .localRuntime ? snapshot.displayName
+              : "\(accountName): \(readingText) · \(displayMode.title) · \(selectedReading.headline.map { $0.label } ?? quota.title)")
+    }
+
+    var body: some View {
+        Group {
+            if snapshot.id.hasPrefix(NotchGrouping.prefix) {
+                VStack(spacing: 2) {
+                    ProviderRing(usedFraction: nil, glyph: snapshot.glyph)
+                        .overlay(alignment: .topTrailing) {
+                            if snapshot.windows.contains(where: { $0.usedFraction == nil }) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .font(.system(size: 12)).foregroundStyle(.orange)
+                                    .help("Há conta sem leitura atual. Passe o mouse para identificar.")
+                            }
+                        }
+                    Text(snapshot.displayName).font(.system(size: 10, weight: .semibold))
+                    Text("\(snapshot.windows.count) \(snapshot.windows.count == 1 ? "conta" : "contas")").font(.system(size: 10))
+                }
+                .frame(width: presentation == .minimal ? NotchLayout.ringDiameter : presentation.width,
+                       height: presentation.height)
+                .accessibilityElement(children: .combine)
+                .help("Passe o mouse para ver cada conta. Clique para abrir o dashboard deste serviço.")
+            } else if presentation == .minimal || snapshot.kind == .localRuntime { minimalBody }
+            else {
+                VStack(spacing: 3) {
+                    ProviderRing(usedFraction: selectedReading.hasReading ? selectedReading.ringFraction : nil,
+                        glyph: snapshot.glyph, isStale: snapshot.status.isStale || !snapshot.hasReading,
+                        isBlocked: snapshot.block != nil, isRefreshing: isRefreshing,
+                        weeklyFraction: selectedReading.weeklyFraction, weeklyRing: weeklyRing,
+                        bandOverride: selectedReading.bandOverride, displayMode: displayMode)
+                    Text(accountName).font(.system(size: 11, weight: .semibold)).lineLimit(1)
+                    Text("5h: " + displayMode.text(for: NotchQuota.session.reading(from: snapshot)))
+                        .font(.system(size: 11).monospacedDigit())
+                    Text("7d: " + displayMode.text(for: NotchQuota.weekly.reading(from: snapshot)))
+                        .font(.system(size: 11).monospacedDigit())
+                    if presentation == .complete {
+                        TimelineView(.periodic(from: .now, by: 60)) { timeline in
+                            VStack(spacing: 2) {
+                                Text("5h renova: " + resetText(snapshot.fiveHourWindow?.resetsAt, now: timeline.date))
+                                Text("7d renova: " + resetText(NotchQuota.weekly.reading(from: snapshot).headline?.resetsAt, now: timeline.date))
+                                Text(health[snapshot.providerID]?.at(timeline.date).title ?? "Sem atualização").lineLimit(1)
+                                if let date = health[snapshot.providerID]?.measuredAt {
+                                    Text(date, style: .relative)
+                                }
+                            }.font(.system(size: 10)).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .frame(width: presentation.width, height: presentation.height, alignment: .top)
+                .accessibilityElement(children: .combine)
+                .help("\(accountName) · \(displayMode.title)")
+            }
+        }
+    }
+    private func resetText(_ date: Date?, now: Date) -> String {
+        guard let date else { return "não informado" }
+        return ResetCopy.text(for: date, now: now, format: resetTimeFormat)
     }
 
     /// Everything the cell says, as one sentence for VoiceOver and the tests.
     var accessibilityText: String {
         snapshot.localModel.map {
             "\($0.brand.map { "\($0.displayName), " } ?? "")\($0.name), \(snapshot.displayName) local, \(snapshot.showsLocalPerformance ? (snapshot.localPerformance.map { "Last generation speed \($0.speedText), \($0.band.label)" } ?? "Speed not measured") : "Loaded"), \($0.detail)\(localActivityText)\(localLedgerText)"
-        } ?? "\(snapshot.displayName), \(readingText)"
+        } ?? "\(accountName), \(readingText), \(displayMode.title)"
     }
 
     /// What the model is doing, the way the tooltip's header says it.

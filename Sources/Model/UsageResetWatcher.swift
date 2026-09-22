@@ -53,6 +53,7 @@ final class UsageResetWatcher {
     }
 
     private var states: [String: TrackedState] = [:]
+    private var identities: [String: String] = [:]
     private let isMuted: (String) -> Bool
     private let deliver: (UsageResetEvent) -> Void
     private let now: () -> Date
@@ -77,6 +78,11 @@ final class UsageResetWatcher {
         guard let headline = snapshot.headline,
               let fraction = snapshot.usedFraction else { return }
 
+        let identity = snapshot.accountEmail?.lowercased() ?? ""
+        if let previousIdentity = identities[snapshot.id], previousIdentity != identity {
+            states.removeValue(forKey: snapshot.id)
+        }
+        identities[snapshot.id] = identity
         guard var previous = states[snapshot.id] else {
             states[snapshot.id] = TrackedState(
                 fraction: fraction,

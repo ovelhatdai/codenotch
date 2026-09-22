@@ -16,7 +16,7 @@ enum NotchScreenScope: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .mainDisplay: return L10n.t("Main display")
+        case .mainDisplay: return L10n.t("One display")
         case .allDisplays: return L10n.t("All displays")
         }
     }
@@ -24,7 +24,7 @@ enum NotchScreenScope: String, CaseIterable, Identifiable {
     var explanation: String {
         switch self {
         case .mainDisplay:
-            return L10n.t("The notch appears only on the display with the menu bar.")
+            return L10n.t("Choose a fixed display below, or follow the active window.")
         case .allDisplays:
             return L10n.t("Each display gets its own notch, and hovering one opens only that one.")
         }

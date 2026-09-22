@@ -30,7 +30,20 @@ final class UsageStore: ObservableObject {
     /// summaries without re-reading every credential on every polling pass.
     @Published private(set) var providerAccountRevision = 0
 
+    @Published private(set) var readingHealth: [String: ReadingHealth] = [:]
+    let consumptionHistory: ConsumptionHistory?
+
     private var providers: [UsageProvider]
+
+    func registerLinkedAccount(_ account: LinkedAccount) {
+        let provider: UsageProvider = account.service == .claude ? ClaudeOAuthProvider(profile: account.profile) : CodexLocalProvider(profile: account.codexProfile)
+        providers.removeAll { $0.id == provider.id }
+        providers.append(provider)
+        disconnected.remove(provider.id)
+        publish(Self.placeholder(provider))
+        providerAccountRevision += 1
+        refresh(providerID: provider.id)
+    }
 
     func registerCustomProviders(_ custom: [UsageProvider]) {
         providers.removeAll { $0.id.hasPrefix("custom-endpoint-") }
@@ -162,6 +175,7 @@ final class UsageStore: ObservableObject {
         // one tick rather than the rest of the day.
         refreshDeadline: TimeInterval = 60,
         archive: UsageArchive = UsageArchive(),
+        consumptionHistory: ConsumptionHistory? = nil,
         disconnected: Set<String> = [],
         order: [String] = [],
         pollingNow: @escaping () -> Date = Date.init
@@ -174,6 +188,7 @@ final class UsageStore: ObservableObject {
         self.staleAfter = staleAfter
         self.refreshDeadline = refreshDeadline
         self.archive = archive
+        self.consumptionHistory = consumptionHistory
 
         // Open on what we knew last time rather than on an empty ring; the
         // first fetch will either confirm it or replace it.
@@ -185,6 +200,7 @@ final class UsageStore: ObservableObject {
         _disconnected = Published(initialValue: disconnected)
         _order = Published(initialValue: order)
         lastGood = archive.load()
+        readingHealth = lastGood.mapValues { ReadingHealth(state: .previous, measuredAt: $0.fetchedAt, attemptedAt: nil) }
         for provider in providers where provider.kind == .localRuntime {
             lastGood.removeValue(forKey: provider.id)
         }
@@ -630,13 +646,28 @@ final class UsageStore: ObservableObject {
         // A scheduled task can be disconnected before it begins; avoid reading
         // its credential at all, as well as rejecting an obsolete response.
         guard acceptsResult(from: provider, generation: generation) else { return nil }
+        let startingEmail = provider.account()?.label
+        if provider.id == "codex", lastGood[provider.id]?.snapshot.accountEmail != startingEmail {
+            lastGood.removeValue(forKey: provider.id)
+            archive.forget(provider.id)
+        }
         do {
-            let fresh = try await provider.fetchSnapshot()
+            var fresh = try await provider.fetchSnapshot()
+            guard startingEmail == provider.account()?.label else {
+                lastGood.removeValue(forKey: provider.id)
+                archive.forget(provider.id)
+                readingHealth[provider.id] = ReadingHealth.failure(UsageProviderError.identityMismatch, measuredAt: nil, now: Date())
+                return Self.placeholder(provider)
+            }
+            fresh.accountEmail = startingEmail
             guard acceptsResult(from: provider, generation: generation) else { return nil }
             // Model residency becomes untrue as soon as a server stops. It must
             // never use quota's last-good cache or survive an app relaunch.
             if provider.kind == .usage {
-                lastGood[provider.id] = (fresh, Date())
+                let measuredAt = fresh.sourceUpdatedAt ?? Date()
+                lastGood[provider.id] = (fresh, measuredAt)
+                readingHealth[provider.id] = ReadingHealth.success(fresh, now: Date(), staleAfter: staleAfter)
+                consumptionHistory?.record(fresh, email: startingEmail, at: measuredAt)
                 archive.save(lastGood)
             }
             refusedAccess.remove(provider.id)
@@ -672,6 +703,8 @@ final class UsageStore: ObservableObject {
             return nil
         }
 
+        readingHealth[provider.id] = ReadingHealth.failure(error, measuredAt: lastGood[provider.id]?.fetchedAt, now: Date())
+        if readingHealth[provider.id]?.state == .expired { needsRenewal.insert(provider.id) }
         let status = Self.status(for: error)
 
         // Remembered apart from the snapshot on purpose. The snapshot answers
@@ -745,6 +778,8 @@ final class UsageStore: ObservableObject {
 
     private static func status(for error: Error) -> ProviderStatus {
         switch error {
+        case UsageProviderError.identityMismatch:
+            return .unsupported("Identidade diferente da conta vinculada. Reconecte a sessão independente.")
         case UsageProviderError.needsAuth:
             return .needsAuth
         case UsageProviderError.credentialExpired:

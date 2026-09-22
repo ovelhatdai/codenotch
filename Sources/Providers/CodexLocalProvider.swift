@@ -37,6 +37,10 @@ actor CodexLocalProvider: UsageProvider {
     }
 
     func fetchSnapshot() async throws -> ProviderSnapshot {
+        if let linked = LinkedAccount.account(providerID: id),
+           CodexCredentials.account(from: authURL)?.label?.lowercased() != linked.email.lowercased() {
+            throw UsageProviderError.identityMismatch
+        }
         let now = Date()
         if let retryNoEarlierThan, retryNoEarlierThan > now {
             throw UsageProviderError.rateLimited(retryAfter: retryNoEarlierThan.timeIntervalSince(now))

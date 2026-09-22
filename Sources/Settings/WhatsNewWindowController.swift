@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// Puts up the What's New dialogue, once per version.
@@ -15,10 +16,20 @@ final class WhatsNewWindowController {
     private var window: NSWindow?
     private let preferences: Preferences
     private let version: String
+    private var languageSubscription: AnyCancellable?
 
     init(preferences: Preferences, version: String) {
         self.preferences = preferences
         self.version = version
+        languageSubscription = NotificationCenter.default.publisher(for: L10n.didChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          let note = ReleaseNotes.note(for: self.version) else { return }
+                    self.updateContent(of: window, note: note)
+                }
+            }
     }
 
     /// Show this version's changes, if it has any that have not been shown.
@@ -49,12 +60,7 @@ final class WhatsNewWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = L10n.t("What's New")
-        window.contentView = NSHostingView(
-            rootView: WhatsNewView(note: note) { [weak self] in self?.dismiss() }
-                .tint(preferences.accentColor.color)
-                .environment(\.codenotchAccentColor, preferences.accentColor.color)
-        )
+        updateContent(of: window, note: note)
         window.center()
         window.isReleasedWhenClosed = false
         // Closing it by the red button counts as having read it, the same as
@@ -68,6 +74,15 @@ final class WhatsNewWindowController {
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
+    }
+
+    private func updateContent(of window: NSWindow, note: ReleaseNote) {
+        window.title = L10n.t("What's New")
+        window.contentView = NSHostingView(
+            rootView: WhatsNewView(note: note) { [weak self] in self?.dismiss() }
+                .tint(preferences.accentColor.color)
+                .environment(\.codenotchAccentColor, preferences.accentColor.color)
+        )
     }
 
     /// Put it away, and count it as read.

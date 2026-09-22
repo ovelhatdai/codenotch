@@ -29,6 +29,16 @@ final class UsageResetWatcherTests: XCTestCase {
         )
     }
 
+    func testChangingAccountDoesNotAnnounceQuotaReset() {
+        var first = snapshot("codex", "Codex", 0.9)
+        first.accountEmail = "first@example.invalid"
+        var second = snapshot("codex", "Codex", 0.05)
+        second.accountEmail = "second@example.invalid"
+        watcher.observe([first])
+        watcher.observe([second])
+        XCTAssertTrue(alerts.isEmpty)
+    }
+
     func testNoAlertOnInitialObservation() {
         watcher.observe([snapshot("claude", "Claude", 0.85)])
         XCTAssertTrue(alerts.isEmpty, "initial reading records baseline and does not alert")

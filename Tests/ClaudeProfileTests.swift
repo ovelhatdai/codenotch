@@ -187,6 +187,51 @@ final class ClaudeProfileTests: XCTestCase {
                        ["claude"])
     }
 
+    func testSymlinkedProfilesUseTheirSignedInTargetsWithoutMixingAccounts() throws {
+        let home = try home([
+            "profiles/work": ["settings.json"],
+            "profiles/client": ["settings.json"]
+        ])
+        for slug in ["work", "client"] {
+            let target = home.appendingPathComponent("profiles/\(slug)")
+            let json = #"{"oauthAccount":{"emailAddress":"\#(slug)@example.com"}}"#
+            try Data(json.utf8).write(to: target.appendingPathComponent(".claude.json"))
+            try FileManager.default.createSymbolicLink(
+                at: home.appendingPathComponent(".claude-\(slug)"),
+                withDestinationURL: target)
+        }
+        let work = home.appendingPathComponent("profiles/work").resolvingSymlinksInPath()
+        let client = home.appendingPathComponent("profiles/client").resolvingSymlinksInPath()
+        let found = ClaudeProfile.discover(home: home) {
+            [work.path, client.path].contains($0.configDirectory.path)
+        }
+        XCTAssertEqual(found.map(\.id), ["claude", "claude-client", "claude-work"])
+        XCTAssertEqual(found[1].configDirectory.path, client.path)
+        XCTAssertEqual(found[2].configDirectory.path, work.path)
+        XCTAssertEqual(found[1].signedInAddress(), "client@example.com")
+        XCTAssertEqual(found[2].signedInAddress(), "work@example.com")
+        XCTAssertNotEqual(found[1].keychainService, found[2].keychainService)
+    }
+
+    func testAnAlreadySignedInSymlinkKeepsItsOriginalPath() throws {
+        let home = try home(["profiles/work": ["settings.json"]])
+        let alias = home.appendingPathComponent(".claude-work")
+        try FileManager.default.createSymbolicLink(
+            at: alias, withDestinationURL: home.appendingPathComponent("profiles/work"))
+        let found = ClaudeProfile.discover(home: home, hasCredential: signedIn)
+        XCTAssertEqual(found.map(\.id), ["claude", "claude-work"])
+        XCTAssertEqual(found[1].configDirectory.path, alias.path)
+    }
+
+    func testASymlinkWithoutItsOwnOrTargetCredentialIsIgnored() throws {
+        let home = try home(["profiles/work": ["settings.json"]])
+        try FileManager.default.createSymbolicLink(
+            at: home.appendingPathComponent(".claude-work"),
+            withDestinationURL: home.appendingPathComponent("profiles/work"))
+        XCTAssertEqual(ClaudeProfile.discover(home: home, hasCredential: signedOut).map(\.id),
+                       ["claude"])
+    }
+
     // MARK: - What the rest of the app derives from the id
 
     /// The tooltip's sign-in prompt has to name the directory, because plain

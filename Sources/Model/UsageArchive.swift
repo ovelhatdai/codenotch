@@ -10,6 +10,7 @@ struct UsageArchive {
     private struct Entry: Codable {
         let id: String
         let displayName: String
+        let accountEmail: String?
         let glyph: ProviderGlyph
         let fidelity: Fidelity
         let windows: [LimitWindow]
@@ -23,6 +24,9 @@ struct UsageArchive {
         /// continue to open and show their last quota reading.
         let tokenUsage: CodexTokenUsage?
         let usageDetail: ProviderUsageDetail?
+        /// Older named-Claude readings may have come from another member of the
+        /// same organization's Desktop cache. Only token-scoped readings survive.
+        let claudeProfileTokenRead: Bool?
     }
 
     private let defaults: UserDefaults
@@ -74,6 +78,8 @@ struct UsageArchive {
 
         var result: [String: (snapshot: ProviderSnapshot, fetchedAt: Date)] = [:]
         for entry in entries {
+            if ClaudeProfile.slug(fromProviderID: entry.id) != nil,
+               entry.claudeProfileTokenRead != true { continue }
             // Spark and code-review are live windows. Older Codex readings also
             // carried rollout quotas the provider no longer displays. Strip
             // those leftovers rather than discarding a Spark snapshot — and
@@ -86,6 +92,7 @@ struct UsageArchive {
                 windows = entry.windows
             }
             let snapshot = ProviderSnapshot(
+                accountEmail: entry.accountEmail,
                 id: entry.id,
                 displayName: entry.displayName,
                 glyph: entry.id == "devin" && entry.glyph == .third ? .devin : entry.glyph,
@@ -114,6 +121,7 @@ struct UsageArchive {
             Entry(
                 id: $0.snapshot.id,
                 displayName: $0.snapshot.displayName,
+                accountEmail: $0.snapshot.accountEmail,
                 glyph: $0.snapshot.glyph,
                 fidelity: $0.snapshot.fidelity,
                 windows: $0.snapshot.windows,
@@ -121,7 +129,8 @@ struct UsageArchive {
                 headlineID: $0.snapshot.headlineID,
                 weeklyID: $0.snapshot.weeklyID,
                 tokenUsage: $0.snapshot.tokenUsage,
-                usageDetail: $0.snapshot.usageDetail
+                usageDetail: $0.snapshot.usageDetail,
+                claudeProfileTokenRead: ClaudeProfile.slug(fromProviderID: $0.snapshot.id) != nil ? true : nil
             )
         }
         guard let data = try? JSONEncoder().encode(entries) else { return }

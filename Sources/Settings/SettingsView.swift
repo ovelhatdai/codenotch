@@ -368,6 +368,9 @@ private extension AnyTransition {
 /// are the one section long enough on their own to want somewhere apart from
 /// everything else.
 struct SettingsView: View {
+    @State private var addingService: AccountService?
+    @State private var reconnectingAccount: LinkedAccount?
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
     @ObservedObject var preferences: Preferences
     let providers: () -> [ProviderSummary]
     var phoneLinkPairing: PhoneLinkPairing?
@@ -407,6 +410,7 @@ struct SettingsView: View {
     /// already be centred, in which case the action has no visible movement;
     /// the acknowledgement keeps the button from feeling inert.
     @State private var didRecentre = false
+    @State private var showsReleaseNotes = false
     /// Switching off has to reach the store's archive, not just the preference
     /// — see `UsageStore.signOut(providerID:)`.
     let signOut: (String) -> Void
@@ -561,6 +565,14 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
+                    if let usageStore {
+                        Button {
+                            UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen)
+                        } label: {
+                            Label("Dashboard", systemImage: "rectangle.grid.2x2.fill")
+                                .frame(maxWidth: .infinity, alignment: .leading).padding(10)
+                        }.buttonStyle(.plain).help("Abrir painel de consumo em uma janela separada")
+                    }
                     ForEach(SettingsSection.topLevel) { section in
                         SettingsSidebarRow(
                             section: section,
@@ -699,6 +711,40 @@ struct SettingsView: View {
 
     private var accountsPane: some View {
         Form {
+            Section {
+                if let usageStore {
+                    Button("Abrir dashboard de consumo") {
+                        UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen)
+                    }
+                }
+                ForEach(AccountService.allCases) { service in
+                    Button("Adicionar conta \(service.title)…") { reconnectingAccount = nil; addingService = service }
+                }
+                .sheet(item: $addingService) { service in
+                    AddLinkedAccountView(service: service, existing: providers(), reconnecting: reconnectingAccount) { account, replacedIDs in
+                        for id in replacedIDs { preferences.setConnected(false, for: id) }
+                        preferences.setConnected(true, for: account.providerID)
+                        usageStore?.registerLinkedAccount(account)
+                        accounts = providers()
+                    }
+                }
+            }
+
+            if !LinkedAccount.load().isEmpty {
+                Section("Sessões independentes") {
+                    ForEach(LinkedAccount.load()) { linked in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(linked.name) · \(linked.service.title)").font(.headline)
+                                Text(linked.email).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Reconectar") { reconnectingAccount = linked; addingService = linked.service }
+                        }
+                    }
+                }
+            }
+
             // Split in two, because ordering only means anything for the
             // first group: a provider switched off has no ring in the notch,
             // so dragging it was arranging something that is not on screen.
@@ -771,9 +817,127 @@ struct SettingsView: View {
     // where it turns up. Split across several it read as unrelated settings,
     // and "Where Codenotch appears" was a header long enough to look like a
     // warning.
+    private var appearancePreview: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Prévia ao vivo · dados de exemplo").font(.caption.bold())
+            HStack(spacing: 26) {
+                ForEach(previewSnapshots) { snapshot in
+                    ProviderCell(snapshot: snapshot, weeklyRing: preferences.weeklyRing)
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(preferences.notchQuota.title + " · " + preferences.usageDisplayMode.title)
+                    Text(preferences.weeklyRing == .off ? "Anel fino oculto" :
+                        preferences.weeklyRing == .inside ? "Anel fino por dentro" : "Anel fino por fora")
+                    Text("Se o indicador principal já mostra a semana, o anel semanal não se repete.")
+                    Text(ResetCopy.text(for: Date().addingTimeInterval(7200), now: Date(), format: preferences.resetTimeFormat))
+                }.font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+            Text(preferences.claudeDailyPaceRing
+                 ? "Ritmo diário: estimativa que distribui a cota semanal em 7 partes, acumuladas ao longo da semana. Não é um limite diário informado pelo Claude. Para vê-la no anel principal, escolha Automático."
+                 : "Exemplo: Claude com 20% da sessão e 65% da semana usados. Alterar Usado/Disponível muda os números e o preenchimento imediatamente.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .environment(\.usageDisplayMode, preferences.usageDisplayMode)
+        .environment(\.notchQuota, preferences.notchQuota)
+        .environment(\.notchPresentation, preferences.notchPresentation)
+        .environment(\.weeklyRingDashed, preferences.weeklyRingDashed)
+        .environment(\.usageWatchLimit, preferences.watchLimit)
+        .environment(\.usageCriticalLimit, preferences.criticalLimit)
+        .environment(\.codenotchAccentColor, preferences.accentColor.color)
+    }
+
+    private var previewSnapshots: [ProviderSnapshot] {
+        let now = Date()
+        let examples = [("claude-preview", "Claude", ProviderGlyph.claude), ("codex-preview", "Codex", ProviderGlyph.openai)].map { id, name, glyph in
+            ProviderSnapshot(id: id, displayName: name, glyph: glyph, fidelity: .official, status: .ok,
+                windows: [LimitWindow(id: "session", label: "Sessão atual", usedFraction: 0.20, resetsAt: now.addingTimeInterval(7200), duration: 18000),
+                          LimitWindow(id: "weekly_all", label: "Todos os modelos", usedFraction: 0.65, resetsAt: now.addingTimeInterval(172800), duration: 604800)],
+                headlineID: "session", weeklyID: "weekly_all")
+        }
+        return DailyPace.apply(to: examples, enabled: preferences.claudeDailyPaceRing, now: now)
+    }
+
     private var appearancePane: some View {
         Form {
+            Section("Dashboard e monitores") {
+                if let usageStore {
+                    Button { UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen) } label: {
+                        Label("Abrir dashboard de consumo", systemImage: "rectangle.grid.2x2")
+                    }.buttonStyle(.borderedProminent)
+                    Text("Janela separada com anéis animados e cartões de vidro. Escolha o monitor no dashboard; o painel se adapta também à tela vertical.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Picker(L10n.t("Displays"), selection: $preferences.notchScope) {
+                    ForEach(NotchScreenScope.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+
+                Text(preferences.notchScope.explanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // Pinning to one display only means something when there is
+                // one notch to place — under "All displays" every screen
+                // already gets its own, so there is nothing left to pin.
+                if preferences.notchScope == .mainDisplay {
+                    Picker(L10n.t("Display"), selection: $preferences.displayPreference) {
+                        Text(L10n.t("Follow active window")).tag(DisplayPreference.followActiveWindow)
+                        ForEach(displays) { display in
+                            Text(display.name).tag(DisplayPreference.display(display.id))
+                        }
+                        if case .display(let id) = preferences.displayPreference,
+                           !displays.contains(where: { $0.id == id }) {
+                            Text(L10n.t("Unavailable display")).tag(DisplayPreference.display(id))
+                        }
+                    }
+
+                    Text(displayExplanation)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Section("Organização da barra") {
+                Picker("Contas exibidas", selection: $preferences.notchGrouping) {
+                    ForEach(NotchGrouping.allCases) { Text($0.title).tag($0) }
+                }.pickerStyle(.segmented)
+                HStack(spacing: 24) {
+                    ForEach(preferences.notchGrouping.apply(to: previewSnapshots, quota: preferences.notchQuota)) { snapshot in
+                        ProviderCell(snapshot: snapshot)
+                    }
+                }
+                .environment(\.usageDisplayMode, preferences.usageDisplayMode)
+                .environment(\.notchQuota, preferences.notchQuota)
+                .padding(12)
+                Text("Prévia da organização · dados de exemplo").font(.caption).foregroundStyle(.secondary)
+                Text("Todas as contas mantém os Claude juntos e os Codex juntos. Grupos por serviço recolhe cada serviço em um ícone. Passe o mouse para ver os saldos individuais; clique para abrir o dashboard. Os percentuais das contas não são somados. O filtro só muda a exibição: a coleta continua.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
             Section(L10n.t("Notch")) {
+                Picker("Formato da barra", selection: $preferences.notchPresentation) {
+                    ForEach(NotchPresentation.allCases) { Text($0.title).tag($0) }
+                }.pickerStyle(.segmented)
+                Text("Compacto mostra nome, 5h e 7d juntos. Completo inclui renovação e atualização.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Picker("Indicador na barra", selection: $preferences.notchQuota) {
+                    ForEach(NotchQuota.allCases) { Text($0.title).tag($0) }
+                }
+                Text("Semanal usa Todos os modelos no Claude e o limite semanal no Codex. Quando o serviço não informa o limite escolhido, aparece um traço.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker(L10n.t("Quota display"), selection: $preferences.usageDisplayMode) {
+                    ForEach(UsageDisplayMode.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text(L10n.t("Available counts down from 100% to 0%. Alerts still follow actual usage."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle(L10n.t("Claude icon in coral red"), isOn: $claudeCoralIcon)
+
                 Picker(L10n.t("Reset time"), selection: $preferences.resetTimeFormat) {
                     ForEach(ResetTimeFormat.allCases) { Text($0.title).tag($0) }
                 }
@@ -784,6 +948,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
+                appearancePreview
                 Toggle(L10n.t("Show usage pace"), isOn: $preferences.showUsagePace)
                 Text(L10n.t("Compares each timed allowance with the time left until reset, showing quota in deficit or held in reserve."))
                     .font(.caption)
@@ -806,6 +971,7 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
 
+                appearancePreview
                 Text(preferences.weeklyRing.explanation)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -913,7 +1079,7 @@ struct SettingsView: View {
                 // This is also the only way back from a nudge that went too
                 // far, short of dragging it out again.
                 HStack {
-                    Text(L10n.t("Hold ⌥ and drag the notch to slide it along its edge. Each edge remembers where you left it."))
+                    Text("Clique e arraste a barra para deslocá-la pela borda. A posição fica salva; use Recentralizar para voltar ao centro.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -947,36 +1113,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Picker(L10n.t("Displays"), selection: $preferences.notchScope) {
-                    ForEach(NotchScreenScope.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
 
-                Text(preferences.notchScope.explanation)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                // Pinning to one display only means something when there is
-                // one notch to place — under "All displays" every screen
-                // already gets its own, so there is nothing left to pin.
-                if preferences.notchScope == .mainDisplay {
-                    Picker(L10n.t("Display"), selection: $preferences.displayPreference) {
-                        Text(L10n.t("Follow active window")).tag(DisplayPreference.followActiveWindow)
-                        ForEach(displays) { display in
-                            Text(display.name).tag(DisplayPreference.display(display.id))
-                        }
-                        if case .display(let id) = preferences.displayPreference,
-                           !displays.contains(where: { $0.id == id }) {
-                            Text(L10n.t("Unavailable display")).tag(DisplayPreference.display(id))
-                        }
-                    }
-
-                    Text(displayExplanation)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
 
             Section(L10n.t("Usage Limits")) {
@@ -1237,6 +1374,7 @@ struct SettingsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
+                if updater.supportsUpdates {
                 Toggle(L10n.t("Install updates automatically"), isOn: Binding(
                     get: { updater.automatic },
                     set: { updater.automatic = $0 }
@@ -1257,6 +1395,18 @@ struct SettingsView: View {
                     Button(L10n.t("Check now")) { updater.checkNow() }
                         .controlSize(.small)
                 }
+
+                } else {
+                    Text("CodeNotch Pessoal · versão local independente. Atualizações do aplicativo original não são instaladas nesta versão.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+
+                Button(L10n.t("What's New")) { showsReleaseNotes = true }
+                    .sheet(isPresented: $showsReleaseNotes) {
+                        if let note = ReleaseNotes.note(for: updater.currentVersion) {
+                            WhatsNewView(note: note) { showsReleaseNotes = false }
+                        }
+                    }
 
                 // Says what happened, where the user is already looking.
                 // Sparkle's own answer to a failed check is a modal reading
@@ -1611,6 +1761,14 @@ private struct SoundRow: View {
 }
 
 private struct AccountRow: View {
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
+    @AppStorage(AccountNames.key) private var accountNames = Data()
+    @State private var isRenaming = false
+    @State private var editedName = ""
+    private var displayName: String {
+        AccountNames.name(for: provider.id, fallback: provider.name, in: accountNames, email: provider.account?.label)
+    }
+
     let provider: ProviderSummary
     @ObservedObject var preferences: Preferences
     let signOut: (String) -> Void
@@ -1647,6 +1805,11 @@ private struct AccountRow: View {
     private var isConnected: Bool { preferences.isConnected(provider.id) }
     private var isMuted: Bool { preferences.isMutedAlerts(for: provider.id) }
 
+    private func saveName() {
+        accountNames = AccountNames.setting(editedName, for: provider.id, in: accountNames)
+        isRenaming = false
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Centred, not baseline-aligned. A glyph is a `Shape` and has no
@@ -1662,9 +1825,11 @@ private struct AccountRow: View {
                     if isOrderable { handle }
 
                     ProviderGlyphView(glyph: provider.glyph, customIconFilename: provider.customIconFilename, size: 16)
-                        .foregroundStyle(isConnected ? .primary : .tertiary)
+                        .foregroundStyle(provider.glyph == .claude && claudeCoralIcon
+                                         ? Color(red: 0.90, green: 0.36, blue: 0.28) : Palette.textPrimary)
+                        .opacity(isConnected ? 1 : 0.4)
 
-                    Text(provider.name)
+                    Text(displayName)
                         .foregroundStyle(isConnected ? .primary : .secondary)
                 }
                 // Without this only the drawn pixels are grabbable, and the
@@ -1688,7 +1853,7 @@ private struct AccountRow: View {
                     // up.
                     HStack(spacing: 6) {
                         ProviderGlyphView(glyph: provider.glyph, customIconFilename: provider.customIconFilename, size: 12)
-                        Text(provider.name)
+                        Text(displayName)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -1710,6 +1875,39 @@ private struct AccountRow: View {
                     if isOrderable {
                         GrabCursor(refreshToken: cursorRefresh)
                             .allowsHitTesting(false)
+                    }
+                }
+
+                if provider.localModel == nil {
+                    Button {
+                        editedName = displayName
+                        isRenaming = true
+                    } label: {
+                        Image(systemName: "pencil")
+                    }
+                    .buttonStyle(.plain)
+                    .help(L10n.t("Rename account"))
+                    .accessibilityLabel(L10n.t("Rename account"))
+                    .popover(isPresented: $isRenaming) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(L10n.t("Rename account")).font(.headline)
+                            Text(provider.name).font(.caption).foregroundStyle(.secondary)
+                            TextField(L10n.t("Account name"), text: $editedName)
+                                .textFieldStyle(.roundedBorder)
+                                .onSubmit { saveName() }
+                            HStack {
+                                Button(L10n.t("Restore original name")) {
+                                    accountNames = AccountNames.setting("", for: provider.id, in: accountNames)
+                                    isRenaming = false
+                                }
+                                Spacer()
+                                Button(L10n.t("Cancel")) { isRenaming = false }
+                                Button(L10n.t("Save")) { saveName() }
+                                    .keyboardShortcut(.defaultAction)
+                            }
+                        }
+                        .padding(16)
+                        .frame(width: 340)
                     }
                 }
 
@@ -2075,7 +2273,9 @@ private struct AccountRow: View {
                 }
                 // Says where the account actually lives, which is the whole
                 // answer to "how do I change it" — not here.
-                Text(provider.signIn.switchHint)
+                Text(LinkedAccount.account(providerID: provider.id) != nil
+                     ? "Sessão independente. Use Reconectar neste aplicativo quando necessário."
+                     : provider.signIn.switchHint)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }

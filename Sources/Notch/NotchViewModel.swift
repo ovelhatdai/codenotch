@@ -3,6 +3,10 @@ import Combine
 
 @MainActor
 final class NotchViewModel: ObservableObject {
+    @Published var presentation: NotchPresentation = .minimal
+    @Published var readingHealth: [String: ReadingHealth] = [:]
+    @Published var notchQuota: NotchQuota = .automatic
+    @Published var usageDisplayMode: UsageDisplayMode = .used
     @Published var snapshots: [ProviderSnapshot] = []
     /// Per runtime, so Ollama's relay switching off clears its own readings
     /// and nobody else's.
@@ -81,6 +85,24 @@ final class NotchViewModel: ObservableObject {
 
     /// Active usage reset notification event to present beside the notch.
     @Published var activeResetAlert: UsageResetEvent?
+    private var dashboardAlertGeneration = UUID()
+
+    /// Receives the same permitted events as the bar, even when it is hidden.
+    /// A generation prevents an older timeout from dismissing a newer repeat.
+    func showDashboardAlert(_ event: UsageResetEvent, duration: TimeInterval) {
+        let generation = UUID()
+        dashboardAlertGeneration = generation
+        activeResetAlert = event
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0, duration)) { [weak self] in
+            guard let self, self.dashboardAlertGeneration == generation else { return }
+            self.dismissDashboardAlert()
+        }
+    }
+
+    func dismissDashboardAlert() {
+        dashboardAlertGeneration = UUID()
+        activeResetAlert = nil
+    }
 
     func resetAlertIndex(for event: UsageResetEvent) -> Int? {
         snapshots.firstIndex { $0.id == event.providerID }
@@ -315,7 +337,7 @@ final class NotchViewModel: ObservableObject {
         // the drawn width *is* the shape's length, and that is what has to
         // clear the hardware.
         let drawn = NotchLayout.shapeLength(
-            cellCount: cellCount, edge: edge, flare: flare
+            cellCount: cellCount, edge: edge, flare: flare, presentation: presentation
         )
         let wanted = hardwareNotch.width + 2 * NotchLayout.cornerRadius
         return max(0, (wanted - drawn) / 2)
@@ -376,7 +398,7 @@ final class NotchViewModel: ObservableObject {
 
     var orbInset: CGFloat {
         guard orbHugsCorner else { return contentInset + NotchLayout.orbInsetFromEdge }
-        return contentInset + NotchLayout.bodyDepth(for: edge)
+        return contentInset + NotchLayout.bodyDepth(for: edge, presentation: presentation)
             - drawnCornerRadius + NotchLayout.orbCornerOffset(corner: drawnCornerRadius)
     }
 
@@ -481,13 +503,13 @@ final class NotchViewModel: ObservableObject {
     /// drawn at that size, so this is the seam between the two spaces rather
     /// than a measurement either of them owns.
     var notchDrawnDepth: CGFloat {
-        (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
+        (contentInset + NotchLayout.bodyDepth(for: edge, presentation: presentation)) * sizeScale
     }
 
     /// The straight part of the shape, flares excluded.
     var bodyLength: CGFloat {
         NotchLayout.bodyLength(
-            cellCount: snapshots.count, edge: edge, spacing: cellSpacing
+            cellCount: snapshots.count, edge: edge, spacing: cellSpacing, presentation: presentation
         ) + 2 * endSpread
     }
 
@@ -495,11 +517,11 @@ final class NotchViewModel: ObservableObject {
     /// included so the readings stay in the middle of the bar.
     func ringCenter(index: Int) -> CGFloat {
         NotchLayout.ringCenter(index: index, edge: edge, flare: flare,
-                              spacing: cellSpacing) + endSpread
+                              spacing: cellSpacing, presentation: presentation) + endSpread
     }
 
     var cellSpacing: CGFloat { cellSpacing(cellCount: snapshots.count) }
-    var cellPitch: CGFloat { NotchLayout.cellAlong(for: edge) + cellSpacing }
+    var cellPitch: CGFloat { NotchLayout.cellAlong(for: edge, presentation: presentation) + cellSpacing }
 
     private func cellSpacing(cellCount: Int) -> CGFloat {
         guard edge.isVertical, screenSize.height > 0, cellCount > 1 else {
@@ -512,7 +534,7 @@ final class NotchViewModel: ObservableObject {
                 : contentCardHeight(sessionCap: 0),
             notchScale: sizeScale)
         let packed = NotchLayout.shapeLength(cellCount: cellCount, edge: edge,
-                                             flare: flare, spacing: 0)
+                                             flare: flare, spacing: 0, presentation: presentation)
         return min(NotchLayout.cellSpacing,
                    max(0, ((screenSize.height - 2 * slack) / sizeScale - packed) / CGFloat(cellCount - 1)))
     }
@@ -630,7 +652,7 @@ final class NotchViewModel: ObservableObject {
         }
         return screenSize.height / sizeScale
             - contentInset
-            - NotchLayout.bodyDepth(for: edge)
+            - NotchLayout.bodyDepth(for: edge, presentation: presentation)
             - NotchLayout.tailLength
             - NotchLayout.tailGap
     }
@@ -650,7 +672,7 @@ final class NotchViewModel: ObservableObject {
 
     /// And across it.
     var notchDepth: CGFloat {
-        if isExpanded { return contentInset + NotchLayout.bodyDepth(for: edge) }
+        if isExpanded { return contentInset + NotchLayout.bodyDepth(for: edge, presentation: presentation) }
         return hardwareNotch?.height ?? NotchLayout.pillWidth
     }
 
@@ -694,7 +716,7 @@ final class NotchViewModel: ObservableObject {
     func shapeLength(cellCount: Int) -> CGFloat {
         NotchLayout.shapeLength(cellCount: cellCount,
                                 edge: edge, flare: flare,
-                                spacing: cellSpacing(cellCount: cellCount))
+                                spacing: cellSpacing(cellCount: cellCount), presentation: presentation)
             + 2 * endSpread(cellCount: cellCount)
     }
 
@@ -714,7 +736,7 @@ final class NotchViewModel: ObservableObject {
             edge: edge,
             length: shapeLength(cellCount: cellCount) * sizeScale
                 + 2 * NotchLayout.slack(for: edge, maxCardHeight: card, notchScale: sizeScale),
-            depth: (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
+            depth: (contentInset + NotchLayout.bodyDepth(for: edge, presentation: presentation)) * sizeScale
                 + NotchLayout.tooltipDepth(for: edge, maxCardHeight: card)
         )
     }

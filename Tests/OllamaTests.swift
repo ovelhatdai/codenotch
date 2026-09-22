@@ -227,6 +227,10 @@ final class OllamaModelCellTests: XCTestCase {
                 var requestedIDs: [String] = []
                 controller.onRefreshProvider = { requestedIDs.append($0) }
                 panel.mouseDown(with: event)
+                let release = try XCTUnwrap(NSEvent.mouseEvent(with: .leftMouseUp,
+                    location: event.locationInWindow, modifierFlags: [], timestamp: 0.1,
+                    windowNumber: panel.windowNumber, context: nil, eventNumber: 1, clickCount: 1, pressure: 0))
+                panel.mouseUp(with: release)
                 for _ in 0..<100 where requestedIDs.isEmpty { await Task.yield() }
                 XCTAssertEqual(requestedIDs, ["ollama-local"], edge.rawValue)
                 XCTAssertTrue(model.isRefreshing(model.snapshots[1]), edge.rawValue)

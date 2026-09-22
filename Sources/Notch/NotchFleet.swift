@@ -56,6 +56,10 @@ final class NotchFleet {
     private var criticalLimit: Double = 0.70
     /// One choice for the whole fleet, like the edge and the size: a weekly
     /// ring on one display and not another would read as a bug.
+    private var presentation: NotchPresentation = .minimal
+    private var readingHealth: [String: ReadingHealth] = [:]
+    private var notchQuota: NotchQuota = .automatic
+    private var usageDisplayMode: UsageDisplayMode = .used
     private var weeklyRing: WeeklyRing = .off
     private var weeklyRingDashed: Bool = false
     private var showsMoveHandle = true
@@ -80,6 +84,8 @@ final class NotchFleet {
     /// An ⌥-drag on any one panel settled at a new offset. Persisting it is
     /// Preferences' job, same division `apply(edge:)` already keeps.
     var onReposition: ((CGFloat) -> Void)?
+    var screenOffset: ((String, NotchEdge) -> CGFloat?)?
+    var onScreenReposition: ((String, NotchEdge, CGFloat) -> Void)?
     /// A move handle carried a notch to another edge. Persisting it is
     /// Preferences' job, the same division `onReposition` keeps.
     var onMoveToEdge: ((NotchEdge) -> Void)?
@@ -179,6 +185,26 @@ final class NotchFleet {
         }
     }
 
+    func apply(presentation: NotchPresentation) {
+        self.presentation = presentation
+        for controller in controllers.values { controller.apply(presentation: presentation) }
+        menuModel.presentation = presentation
+    }
+    func apply(readingHealth: [String: ReadingHealth]) {
+        self.readingHealth = readingHealth
+        for model in models { model.readingHealth = readingHealth }
+    }
+
+    func apply(notchQuota: NotchQuota) {
+        self.notchQuota = notchQuota
+        for model in models { model.notchQuota = notchQuota }
+    }
+
+    func apply(usageDisplayMode: UsageDisplayMode) {
+        self.usageDisplayMode = usageDisplayMode
+        for model in models { model.usageDisplayMode = usageDisplayMode }
+    }
+
     func apply(weeklyRingDashed: Bool) {
         self.weeklyRingDashed = weeklyRingDashed
         for controller in controllers.values {
@@ -233,7 +259,8 @@ final class NotchFleet {
     func apply(alongOffset: CGFloat) {
         self.alongOffset = alongOffset
         for controller in controllers.values {
-            controller.apply(alongOffset: alongOffset)
+            let offset = controller.assignedScreen?.displayIdentifier.flatMap { screenOffset?($0, edge) } ?? alongOffset
+            controller.apply(alongOffset: offset)
         }
     }
 
@@ -301,6 +328,7 @@ final class NotchFleet {
     /// every notch hidden the alert would otherwise vanish without a trace.
     @discardableResult
     func showResetAlert(_ event: UsageResetEvent, duration: TimeInterval = 5.0) -> Bool {
+        menuModel.showDashboardAlert(event, duration: duration)
         var shown = false
         for controller in controllers.values {
             shown = controller.showResetAlert(event, duration: duration) || shown
@@ -391,6 +419,7 @@ final class NotchFleet {
         if scope == .mainDisplay, controllers.count == 1,
            let screen = desired.first, let controller = controllers.values.first {
             controller.assignedScreen = screen
+            controller.model.alongOffset = screen.displayIdentifier.flatMap { screenOffset?($0, edge) } ?? alongOffset
             controller.relocate()
             return
         }
@@ -413,7 +442,7 @@ final class NotchFleet {
         controller.displayPreference = displayPreference
         controller.foldsForFullScreen = foldsForFullScreen
         controller.model.edge = edge
-        controller.model.alongOffset = alongOffset
+        controller.model.alongOffset = screen.displayIdentifier.flatMap { screenOffset?($0, edge) } ?? alongOffset
         // Set before `show()`, so a display plugged in later builds its panel
         // at the current size rather than at medium and resizing a beat later.
         controller.model.sizeScale = scale
@@ -421,6 +450,10 @@ final class NotchFleet {
         controller.model.accentColor = accentColor
         controller.model.watchLimit = watchLimit
         controller.model.criticalLimit = criticalLimit
+        controller.model.presentation = presentation
+        controller.model.readingHealth = readingHealth
+        controller.model.notchQuota = notchQuota
+        controller.model.usageDisplayMode = usageDisplayMode
         controller.model.weeklyRing = weeklyRing
         controller.model.weeklyRingDashed = weeklyRingDashed
         controller.model.showsMoveHandle = showsMoveHandle
@@ -433,7 +466,12 @@ final class NotchFleet {
         controller.onOpenSettings = onOpenSettings
         controller.model.onOpenSettings = onOpenSettings
         controller.model.onFocusSession = onFocusSession
-        controller.onReposition = onReposition
+        controller.onReposition = { [weak self, weak controller] offset in
+            guard let self else { return }
+            if let id = controller?.assignedScreen?.displayIdentifier, let save = self.onScreenReposition {
+                save(id, self.edge, offset)
+            } else { self.onReposition?(offset) }
+        }
         controller.onMoveToEdge = onMoveToEdge
         controller.signInItems = signInItems
         controller.model.updateSnapshots(snapshots)
