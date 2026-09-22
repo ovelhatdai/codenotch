@@ -27,3 +27,17 @@ Credentials are created by the official CLI in the directory chosen at connectio
 - Physical display disconnection/reconnection and startup after a full macOS restart remain unverified. Geometry tests do not substitute for these checks.
 - Codex credential expiry requires reconnecting the independent account. This change does not implement new billing integrations for Gemini, WaveSpeed, Higgsfield or ZapSign.
 - Personal screens currently use Portuguese copy. They are not yet localized to every language supported upstream. This personal branch should be adapted before proposing it as a general upstream contribution.
+
+## Appearance and dashboard follow-up
+
+- Dashboard has a direct sidebar entry and a prominent Appearance button. Display scope and the fixed-monitor picker are at the beginning of Appearance, with numbered monitors and orientation labels.
+- A portrait-monitor shortcut moves the dashboard while preserving its visual layout; ring cards adapt to narrow windows. The bar can be mirrored on every display; the dashboard remains one movable window.
+- Appearance includes explicitly simulated, live previews using the actual ring/cell views. Secondary rings now also render in compact and complete presentations. Weekly selection keeps the real all-models week when daily pacing is enabled.
+- Bar organization supports individual accounts ordered Claude then Codex (preserving relative order within each service), one group per service, Claude only, or Codex only. Groups show account counts, individual quota rows on hover, and open a filtered dashboard on click. No aggregate percentage is invented; source polling and history remain unchanged.
+- Missing Portuguese settings and tooltip translations were added, including weekly rings, extra Codex limits and reset-credit labels.
+- Cards and compact lists show extra reset credits and expiry when supplied. Missing data says “Não informado”; zero is shown only when reported. No reset redemption is implemented by this display.
+- Follow-up verification: 39 targeted tests passed, covering grouping, quota selection, display geometry and Codex usage/reset-credit parsing. Release build and installation succeeded.
+- Installed UI verification: Portuguese labels, direct Dashboard entry and reset-credit rows were inspected. All-display bar scope was exercised; the user subsequently returned to one display. The portrait shortcut changed the saved dashboard monitor. Physical cable disconnection and login startup still require their separate checks.
+- Opening Dashboard from Settings brings it onto the Settings window monitor. Ring-panel/list and grouping choices use segmented controls under the organization button; the portrait shortcut still moves the standalone window afterward.
+
+- The dashboard ring panel reuses ProviderRing and TooltipCard: enlarged rings, numeric transitions, native glass cards, hover emphasis, and hover/click details. It follows the selected bar quota and percentage mode. Controls are collapsible, while filters, history and monitor selection remain accessible. Reduced-motion settings suppress card scaling. The portrait shortcut retains this panel instead of forcing a plain list.

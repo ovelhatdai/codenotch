@@ -565,6 +565,14 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
+                    if let usageStore {
+                        Button {
+                            UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen)
+                        } label: {
+                            Label("Dashboard", systemImage: "rectangle.grid.2x2.fill")
+                                .frame(maxWidth: .infinity, alignment: .leading).padding(10)
+                        }.buttonStyle(.plain).help("Abrir painel de consumo em uma janela separada")
+                    }
                     ForEach(SettingsSection.topLevel) { section in
                         SettingsSidebarRow(
                             section: section,
@@ -706,7 +714,7 @@ struct SettingsView: View {
             Section {
                 if let usageStore {
                     Button("Abrir dashboard de consumo") {
-                        UsageDashboardController.shared.show(store: usageStore, preferences: preferences)
+                        UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen)
                     }
                 }
                 ForEach(AccountService.allCases) { service in
@@ -809,8 +817,106 @@ struct SettingsView: View {
     // where it turns up. Split across several it read as unrelated settings,
     // and "Where Codenotch appears" was a header long enough to look like a
     // warning.
+    private var appearancePreview: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Prévia ao vivo · dados de exemplo").font(.caption.bold())
+            HStack(spacing: 26) {
+                ForEach(previewSnapshots) { snapshot in
+                    ProviderCell(snapshot: snapshot, weeklyRing: preferences.weeklyRing)
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(preferences.notchQuota.title + " · " + preferences.usageDisplayMode.title)
+                    Text(preferences.weeklyRing == .off ? "Anel fino oculto" :
+                        preferences.weeklyRing == .inside ? "Anel fino por dentro" : "Anel fino por fora")
+                    Text("Se o indicador principal já mostra a semana, o anel semanal não se repete.")
+                    Text(ResetCopy.text(for: Date().addingTimeInterval(7200), now: Date(), format: preferences.resetTimeFormat))
+                }.font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+            Text(preferences.claudeDailyPaceRing
+                 ? "Ritmo diário: estimativa que distribui a cota semanal em 7 partes, acumuladas ao longo da semana. Não é um limite diário informado pelo Claude. Para vê-la no anel principal, escolha Automático."
+                 : "Exemplo: Claude com 20% da sessão e 65% da semana usados. Alterar Usado/Disponível muda os números e o preenchimento imediatamente.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .environment(\.usageDisplayMode, preferences.usageDisplayMode)
+        .environment(\.notchQuota, preferences.notchQuota)
+        .environment(\.notchPresentation, preferences.notchPresentation)
+        .environment(\.weeklyRingDashed, preferences.weeklyRingDashed)
+        .environment(\.usageWatchLimit, preferences.watchLimit)
+        .environment(\.usageCriticalLimit, preferences.criticalLimit)
+        .environment(\.codenotchAccentColor, preferences.accentColor.color)
+    }
+
+    private var previewSnapshots: [ProviderSnapshot] {
+        let now = Date()
+        let examples = [("claude-preview", "Claude", ProviderGlyph.claude), ("codex-preview", "Codex", ProviderGlyph.openai)].map { id, name, glyph in
+            ProviderSnapshot(id: id, displayName: name, glyph: glyph, fidelity: .official, status: .ok,
+                windows: [LimitWindow(id: "session", label: "Sessão atual", usedFraction: 0.20, resetsAt: now.addingTimeInterval(7200), duration: 18000),
+                          LimitWindow(id: "weekly_all", label: "Todos os modelos", usedFraction: 0.65, resetsAt: now.addingTimeInterval(172800), duration: 604800)],
+                headlineID: "session", weeklyID: "weekly_all")
+        }
+        return DailyPace.apply(to: examples, enabled: preferences.claudeDailyPaceRing, now: now)
+    }
+
     private var appearancePane: some View {
         Form {
+            Section("Dashboard e monitores") {
+                if let usageStore {
+                    Button { UsageDashboardController.shared.show(store: usageStore, preferences: preferences, on: NSApp.keyWindow?.screen) } label: {
+                        Label("Abrir dashboard de consumo", systemImage: "rectangle.grid.2x2")
+                    }.buttonStyle(.borderedProminent)
+                    Text("Janela separada com anéis animados e cartões de vidro. Escolha o monitor no dashboard; o painel se adapta também à tela vertical.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Picker(L10n.t("Displays"), selection: $preferences.notchScope) {
+                    ForEach(NotchScreenScope.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+
+                Text(preferences.notchScope.explanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // Pinning to one display only means something when there is
+                // one notch to place — under "All displays" every screen
+                // already gets its own, so there is nothing left to pin.
+                if preferences.notchScope == .mainDisplay {
+                    Picker(L10n.t("Display"), selection: $preferences.displayPreference) {
+                        Text(L10n.t("Follow active window")).tag(DisplayPreference.followActiveWindow)
+                        ForEach(displays) { display in
+                            Text(display.name).tag(DisplayPreference.display(display.id))
+                        }
+                        if case .display(let id) = preferences.displayPreference,
+                           !displays.contains(where: { $0.id == id }) {
+                            Text(L10n.t("Unavailable display")).tag(DisplayPreference.display(id))
+                        }
+                    }
+
+                    Text(displayExplanation)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Section("Organização da barra") {
+                Picker("Contas exibidas", selection: $preferences.notchGrouping) {
+                    ForEach(NotchGrouping.allCases) { Text($0.title).tag($0) }
+                }.pickerStyle(.segmented)
+                HStack(spacing: 24) {
+                    ForEach(preferences.notchGrouping.apply(to: previewSnapshots, quota: preferences.notchQuota)) { snapshot in
+                        ProviderCell(snapshot: snapshot)
+                    }
+                }
+                .environment(\.usageDisplayMode, preferences.usageDisplayMode)
+                .environment(\.notchQuota, preferences.notchQuota)
+                .padding(12)
+                Text("Prévia da organização · dados de exemplo").font(.caption).foregroundStyle(.secondary)
+                Text("Todas as contas mantém os Claude juntos e os Codex juntos. Grupos por serviço recolhe cada serviço em um ícone. Passe o mouse para ver os saldos individuais; clique para abrir o dashboard. Os percentuais das contas não são somados. O filtro só muda a exibição: a coleta continua.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
             Section(L10n.t("Notch")) {
                 Picker("Formato da barra", selection: $preferences.notchPresentation) {
                     ForEach(NotchPresentation.allCases) { Text($0.title).tag($0) }
@@ -842,6 +948,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
+                appearancePreview
                 Toggle(L10n.t("Show usage pace"), isOn: $preferences.showUsagePace)
                 Text(L10n.t("Compares each timed allowance with the time left until reset, showing quota in deficit or held in reserve."))
                     .font(.caption)
@@ -864,6 +971,7 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
 
+                appearancePreview
                 Text(preferences.weeklyRing.explanation)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -1005,36 +1113,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Picker(L10n.t("Displays"), selection: $preferences.notchScope) {
-                    ForEach(NotchScreenScope.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
 
-                Text(preferences.notchScope.explanation)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                // Pinning to one display only means something when there is
-                // one notch to place — under "All displays" every screen
-                // already gets its own, so there is nothing left to pin.
-                if preferences.notchScope == .mainDisplay {
-                    Picker(L10n.t("Display"), selection: $preferences.displayPreference) {
-                        Text(L10n.t("Follow active window")).tag(DisplayPreference.followActiveWindow)
-                        ForEach(displays) { display in
-                            Text(display.name).tag(DisplayPreference.display(display.id))
-                        }
-                        if case .display(let id) = preferences.displayPreference,
-                           !displays.contains(where: { $0.id == id }) {
-                            Text(L10n.t("Unavailable display")).tag(DisplayPreference.display(id))
-                        }
-                    }
-
-                    Text(displayExplanation)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
 
             Section(L10n.t("Usage Limits")) {

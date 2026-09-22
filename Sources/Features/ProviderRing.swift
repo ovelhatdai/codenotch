@@ -265,6 +265,7 @@ private struct ActivityArc: View {
 }
 
 struct ProviderCell: View {
+    @AppStorage("resetTimeFormat") private var resetTimeFormat: ResetTimeFormat = .automatic
     @AppStorage(AccountNames.key) private var accountNames = Data()
     private var accountName: String {
         AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: accountNames, email: snapshot.accountEmail)
@@ -326,12 +327,31 @@ struct ProviderCell: View {
 
     var body: some View {
         Group {
-            if presentation == .minimal || snapshot.kind == .localRuntime { minimalBody }
+            if snapshot.id.hasPrefix(NotchGrouping.prefix) {
+                VStack(spacing: 2) {
+                    ProviderRing(usedFraction: nil, glyph: snapshot.glyph)
+                        .overlay(alignment: .topTrailing) {
+                            if snapshot.windows.contains(where: { $0.usedFraction == nil }) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .font(.system(size: 12)).foregroundStyle(.orange)
+                                    .help("Há conta sem leitura atual. Passe o mouse para identificar.")
+                            }
+                        }
+                    Text(snapshot.displayName).font(.system(size: 10, weight: .semibold))
+                    Text("\(snapshot.windows.count) \(snapshot.windows.count == 1 ? "conta" : "contas")").font(.system(size: 10))
+                }
+                .frame(width: presentation == .minimal ? NotchLayout.ringDiameter : presentation.width,
+                       height: presentation.height)
+                .accessibilityElement(children: .combine)
+                .help("Passe o mouse para ver cada conta. Clique para abrir o dashboard deste serviço.")
+            } else if presentation == .minimal || snapshot.kind == .localRuntime { minimalBody }
             else {
                 VStack(spacing: 3) {
                     ProviderRing(usedFraction: selectedReading.hasReading ? selectedReading.ringFraction : nil,
                         glyph: snapshot.glyph, isStale: snapshot.status.isStale || !snapshot.hasReading,
-                        isBlocked: snapshot.block != nil, isRefreshing: isRefreshing, displayMode: displayMode)
+                        isBlocked: snapshot.block != nil, isRefreshing: isRefreshing,
+                        weeklyFraction: selectedReading.weeklyFraction, weeklyRing: weeklyRing,
+                        bandOverride: selectedReading.bandOverride, displayMode: displayMode)
                     Text(accountName).font(.system(size: 11, weight: .semibold)).lineLimit(1)
                     Text("5h: " + displayMode.text(for: NotchQuota.session.reading(from: snapshot)))
                         .font(.system(size: 11).monospacedDigit())
@@ -358,8 +378,7 @@ struct ProviderCell: View {
     }
     private func resetText(_ date: Date?, now: Date) -> String {
         guard let date else { return "não informado" }
-        let minutes = max(0, Int(ceil(date.timeIntervalSince(now) / 60)))
-        return minutes >= 1440 ? "\(minutes / 1440)d \(minutes % 1440 / 60)h" : minutes >= 60 ? "\(minutes / 60)h \(minutes % 60)m" : "\(minutes)m"
+        return ResetCopy.text(for: date, now: now, format: resetTimeFormat)
     }
 
     /// Everything the cell says, as one sentence for VoiceOver and the tests.

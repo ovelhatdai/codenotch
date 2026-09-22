@@ -690,10 +690,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // what the vendor said. Paired with the preference so flipping the
             // toggle redraws at once, without a fetch.
             store.$notchSnapshots
-                .combineLatest(preferences.$claudeDailyPaceRing)
+                .combineLatest(preferences.$claudeDailyPaceRing, preferences.$notchGrouping, preferences.$notchQuota)
                 .receive(on: RunLoop.main)
-                .sink { [weak fleet] snapshots, paced in
-                    fleet?.setSnapshots(DailyPace.apply(to: snapshots, enabled: paced))
+                .sink { [weak fleet] snapshots, paced, grouping, quota in
+                    let readings = DailyPace.apply(to: snapshots, enabled: paced)
+                    fleet?.setSnapshots(grouping.apply(to: readings, quota: quota,
+                        names: UserDefaults.standard.data(forKey: AccountNames.key) ?? Data()))
                 }
                 .store(in: &cancellables)
 
@@ -711,6 +713,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             store.start()
             fleet.onRefresh = { [weak store] in store?.refreshNow() }
             fleet.onRefreshProvider = { [weak store] id in
+                if id.hasPrefix(NotchGrouping.prefix), let store {
+                    UserDefaults.standard.set(String(id.dropFirst(NotchGrouping.prefix.count)), forKey: "dashboardFilter")
+                    UsageDashboardController.shared.show(store: store, preferences: preferences)
+                    return
+                }
                 await store?.refresh(providerID: id)?.value
             }
             store.$refreshing

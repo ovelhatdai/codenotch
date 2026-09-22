@@ -6,6 +6,9 @@ import os
 /// What the user has chosen, kept in `UserDefaults`.
 @MainActor
 final class Preferences: ObservableObject {
+    @Published var notchGrouping: NotchGrouping {
+        didSet { defaults.set(notchGrouping.rawValue, forKey: NotchGrouping.key) }
+    }
     @Published var notchPresentation: NotchPresentation {
         didSet { defaults.set(notchPresentation.rawValue, forKey: NotchPresentation.key) }
     }
@@ -672,6 +675,7 @@ final class Preferences: ObservableObject {
     }
 
     init(defaults: UserDefaults = .standard) {
+        self.notchGrouping = defaults.string(forKey: NotchGrouping.key).flatMap(NotchGrouping.init(rawValue:)) ?? .accounts
         self.notchPresentation = defaults.string(forKey: NotchPresentation.key).flatMap(NotchPresentation.init(rawValue:)) ?? .minimal
         self.notchQuota = defaults.string(forKey: NotchQuota.key).flatMap(NotchQuota.init(rawValue:)) ?? .automatic
         self.usageDisplayMode = defaults.string(forKey: UsageDisplayMode.key).flatMap(UsageDisplayMode.init(rawValue:)) ?? .used

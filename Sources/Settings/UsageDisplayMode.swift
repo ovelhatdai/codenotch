@@ -67,7 +67,11 @@ enum NotchQuota: String, CaseIterable, Identifiable {
     }
     func reading(from snapshot: ProviderSnapshot) -> ProviderSnapshot {
         guard self != .automatic, snapshot.kind != .localRuntime else { return snapshot }
-        let weekly = snapshot.weeklyLimitWindow ?? snapshot.windows.first {
+        // Daily pace reuses weeklyID for the session's thin ring. An explicit
+        // weekly selection must keep referring to the real all-models week.
+        let claudeWeek = ClaudeProfile.isClaude(providerID: snapshot.providerID)
+            ? snapshot.windows.first { $0.id == "weekly_all" } : nil
+        let weekly = claudeWeek ?? snapshot.weeklyLimitWindow ?? snapshot.windows.first {
             $0.group == nil && abs(($0.duration ?? 0) - 7 * 24 * 3600) < 60
         }
         let window = self == .session ? snapshot.fiveHourWindow : weekly
