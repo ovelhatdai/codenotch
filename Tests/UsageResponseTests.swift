@@ -263,6 +263,30 @@ final class UsageArchiveTests: XCTestCase {
         XCTAssertEqual(restored.snapshot.status.staleSince, taken)
     }
 
+    func testOldNamedClaudeReadingsAreDiscardedButOtherAccountsRemain() throws {
+        let defaults = makeDefaults()
+        let archive = UsageArchive(defaults: defaults)
+        let named = ProviderSnapshot(id: "claude-linked-test", displayName: "Work", glyph: .claude,
+                                     fidelity: .official, status: .ok, windows: reading.windows)
+        archive.save([named.id: (named, Date()), reading.id: (reading, Date())])
+        let data = try XCTUnwrap(defaults.data(forKey: "lastGoodReadings"))
+        var entries = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [[String: Any]])
+        for index in entries.indices { entries[index].removeValue(forKey: "claudeProfileTokenRead") }
+        defaults.set(try JSONSerialization.data(withJSONObject: entries), forKey: "lastGoodReadings")
+        XCTAssertNil(archive.load()[named.id], "unverified Desktop readings must not return after upgrade")
+        XCTAssertNotNil(archive.load()[reading.id])
+    }
+
+    func testTokenScopedNamedClaudeReadingsStillSurviveRestart() throws {
+        let archive = UsageArchive(defaults: makeDefaults())
+        let named = ProviderSnapshot(id: "claude-linked-test", displayName: "Work", glyph: .claude,
+                                     fidelity: .official, status: .ok, windows: reading.windows)
+        archive.save([named.id: (named, Date())])
+        let restored = try XCTUnwrap(archive.load()[named.id]?.snapshot)
+        XCTAssertEqual(restored.windows, named.windows)
+        XCTAssertTrue(restored.status.isStale)
+    }
+
     func testEmptyArchiveIsNotAnError() {
         XCTAssertTrue(UsageArchive(defaults: makeDefaults()).load().isEmpty)
     }

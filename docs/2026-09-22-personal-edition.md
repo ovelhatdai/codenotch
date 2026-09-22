@@ -58,3 +58,10 @@ Credentials are created by the official CLI in the directory chosen at connectio
 
 - Closing the dashboard now releases the hosting view, window, display observer and UI animation/subscription state. The always-on-top callback captures the window weakly to avoid a window/view/closure retain cycle; saved placement survives the release. A regression test checks that the view is actually deallocated. All ten dashboard tests passed after this change (61 distinct targeted cases including the previous run).
 - A short sample of the installed background-query build with the bar open measured approximately 394 MiB RSS and 0.7% CPU after startup. This is neither a before/after memory reduction claim nor a long-duration leak test. Settings opened responsively after the full-screen fix.
+
+## Independent Claude usage isolation
+
+- Distinct Claude users can belong to the same organization. Matching the Desktop usage cache by organization UUID alone previously copied one user's quota into multiple named profiles.
+- Named profiles, including independently linked accounts, now read usage only with their own profile-scoped OAuth credential. They do not scan the global Desktop cache or spawn the CLI for usage, and authentication/rate-limit failures cannot fall back to another session. The legacy default profile retains its existing sources.
+- Pre-fix last-reading cache entries for named Claude profiles are not restored. New token-scoped readings remain restorable with their true age. Linked sessions, credentials and historical records are preserved; old historical observations have not been retroactively corrected.
+- Validation: the three new provider regression tests failed against the previous implementation. After correction, 55 provider/profile/account-source/archive tests passed, including two users in one organization with different tokens and two refresh cycles, rejection without a shared fallback, per-account backoff and archive migration/restoration.

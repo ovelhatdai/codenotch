@@ -370,6 +370,77 @@ final class ClaudeOAuthProviderTests: XCTestCase {
         XCTAssertEqual(snapshot.usedFraction, 0.30, "the cache was never looked at again")
     }
 
+    // MARK: - Independent accounts sharing an organization
+
+    func testNamedAccountsInOneOrganizationKeepTheirOwnUsageAcrossRefreshes() async throws {
+        let first = namedProfile(slug: "linked-first", email: "first@example.com")
+        let second = namedProfile(slug: "linked-second", email: "second@example.com")
+        XCTAssertEqual(first.organizationID(), second.organizationID())
+        let spawns = Counter()
+        let cli = Self.cli { spawns.increment(); return Self.cliUsage }
+        let cache = desktopCache(age: 0)
+        let one = makeProvider(source: CredentialSource(readable: true, token: "first-token"),
+                               cli: cli, profile: first, desktopCache: cache)
+        let two = makeProvider(source: CredentialSource(readable: true, token: "second-token"),
+                               cli: cli, profile: second, desktopCache: cache)
+        func answer(_ percent: Int, token: String) -> StubEndpoint.Answer {
+            .init(status: 200,
+                  body: Data("{\"limits\":[{\"kind\":\"session\",\"percent\":\(percent),\"resets_at\":\"2099-01-01T00:00:00Z\"}]}".utf8),
+                  expectedAuthorization: "Bearer \(token)")
+        }
+        StubEndpoint.reset([answer(12, token: "first-token"), answer(63, token: "second-token"),
+                            answer(17, token: "first-token"), answer(68, token: "second-token")])
+        for expected in [(0.12, 0.63), (0.17, 0.68)] {
+            let a = try await one.fetchSnapshot()
+            let b = try await two.fetchSnapshot()
+            XCTAssertEqual(a.id, first.id)
+            XCTAssertEqual(b.id, second.id)
+            XCTAssertEqual(a.usedFraction, expected.0)
+            XCTAssertEqual(b.usedFraction, expected.1)
+        }
+        XCTAssertEqual(StubEndpoint.requestCount, 4)
+        XCTAssertEqual(spawns.value, 0, "independent refreshes must not launch CLI processes")
+    }
+
+    func testNamedAccountWithRejectedTokenNeverBorrowsDesktopOrCLIUsage() async throws {
+        StubEndpoint.reset([.init(status: 401), .init(status: 401)])
+        let spawns = Counter()
+        let provider = makeProvider(source: CredentialSource(readable: true),
+            cli: Self.cli { spawns.increment(); return Self.cliUsage },
+            profile: namedProfile(slug: "work", email: "work@example.com"),
+            desktopCache: desktopCache(age: 0))
+        await assertNeedsAuth(from: provider)
+        XCTAssertEqual(StubEndpoint.requestCount, 2)
+        XCTAssertEqual(spawns.value, 0)
+    }
+
+    func testRateLimitOnOneNamedAccountDoesNotBlockAnother() async throws {
+        StubEndpoint.reset([.init(status: 429), .init(status: 200, body: Self.usagePayload)])
+        let cache = desktopCache(age: 0)
+        let first = makeProvider(source: CredentialSource(readable: true),
+            profile: namedProfile(slug: "first", email: "first@example.com"), desktopCache: cache)
+        let second = makeProvider(source: CredentialSource(readable: true),
+            profile: namedProfile(slug: "second", email: "second@example.com"), desktopCache: cache)
+        for _ in 0..<2 {
+            do {
+                _ = try await first.fetchSnapshot()
+                XCTFail("expected this account's rate limit")
+            } catch UsageProviderError.rateLimited { }
+        }
+        let snapshot = try await second.fetchSnapshot()
+        XCTAssertEqual(snapshot.usedFraction, 0.42)
+        XCTAssertEqual(StubEndpoint.requestCount, 2, "backoff must apply only to its account")
+    }
+
+    private func namedProfile(slug: String, email: String) -> ClaudeProfile {
+        let home = desktopProfile().configDirectory.deletingLastPathComponent()
+        let directory = home.appendingPathComponent(".claude-\(slug)")
+        try! FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let json = #"{"oauthAccount":{"emailAddress":"\#(email)","organizationUuid":"\#(ClaudeDesktopUsageCacheTests.organization)"}}"#
+        try! Data(json.utf8).write(to: directory.appendingPathComponent(".claude.json"))
+        return ClaudeProfile(slug: slug, configDirectory: directory)
+    }
+
     // MARK: - Desktop helpers
 
     /// A profile whose `.claude.json` records `organization`, so the provider has
@@ -485,7 +556,11 @@ private final class CredentialSource: @unchecked Sendable {
     private var readable: Bool
     private var readCount = 0
 
-    init(readable: Bool) { self.readable = readable }
+    private let token: String
+    init(readable: Bool, token: String = "token") {
+        self.readable = readable
+        self.token = token
+    }
 
     var reads: Int {
         lock.lock(); defer { lock.unlock() }
@@ -505,7 +580,7 @@ private final class CredentialSource: @unchecked Sendable {
         // The shape a dark-wake or not-found read takes by the time it leaves
         // `ClaudeCredentials.read()`.
         guard allowed else { throw UsageProviderError.needsAuth }
-        return ClaudeCredentials(accessToken: "token",
+        return ClaudeCredentials(accessToken: token,
                                  expiresAt: .distantFuture,
                                  subscriptionType: "max")
     }
@@ -518,6 +593,7 @@ private final class StubEndpoint: URLProtocol {
     struct Answer {
         let status: Int
         var body: Data = Data()
+        var expectedAuthorization: String?
     }
 
     private static let lock = NSLock()
@@ -552,6 +628,9 @@ private final class StubEndpoint: URLProtocol {
 
     override func startLoading() {
         let answer = Self.next()
+        if let expected = answer.expectedAuthorization {
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), expected)
+        }
         let response = HTTPURLResponse(url: request.url!,
                                        statusCode: answer.status,
                                        httpVersion: "HTTP/1.1",

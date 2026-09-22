@@ -4,7 +4,14 @@ import os
 /// One Claude account's limits, read from whichever source can answer without
 /// interrupting anyone.
 ///
-/// Three sources, in order. Claude Desktop's HTTP cache is read first, because
+/// Named profiles (including independently linked accounts) use only their own
+/// OAuth token. An organization UUID is not an account identity: multiple users
+/// can share it, so Desktop's organization-keyed cache cannot isolate them.
+/// Avoid the CLI too: inherited authentication can override its config directory,
+/// and spawning one process per account adds unnecessary memory pressure.
+///
+/// The legacy default profile retains three sources, in order.
+/// Claude Desktop's HTTP cache is read first, because
 /// it is the one that costs nothing and cannot be refused: no subprocess, no
 /// keychain, no network — see `ClaudeDesktopUsageCache`. It answers only while
 /// Desktop is running, and only for the account Desktop is signed into, so where
@@ -160,11 +167,13 @@ actor ClaudeOAuthProvider: UsageProvider {
         if keychain.isRefused {
             throw UsageProviderError.accessDenied
         }
-        // "Allow access…" was clicked: go straight to the keychain, so the
+        // Named accounts never borrow organization-wide Desktop readings or
+        // inherited CLI authentication, including when their own token fails.
+        // "Allow access…" also goes straight to the keychain, so the
         // dialogue the person asked for is the thing that answers — a cached
         // or CLI reading would satisfy the refresh and the question would
         // never be put.
-        if keychain.isAskingAgain {
+        if profile.slug != nil || keychain.isAskingAgain {
             return try await fetchFromKeychain()
         }
         // Ahead of both the CLI and the back-off check. This is the cheapest
