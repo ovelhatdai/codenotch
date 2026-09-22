@@ -25,6 +25,7 @@ struct CodexProfile: Equatable, Hashable {
             return CodexProfile(slug: slug, configDirectory: directory)
         }
         return [.default(home: home)] + extras.sorted { $0.slug! < $1.slug! }
+            + (home == homeDirectory ? LinkedAccount.load().filter { $0.service == .codex }.map(\.codexProfile) : [])
     }
 
     static func slug(fromDirectoryName name: String) -> String? {
@@ -53,7 +54,7 @@ struct CodexProfile: Equatable, Hashable {
     static func isCodex(providerID: String) -> Bool {
         providerID == defaultID || providerID.hasPrefix(defaultID + "-")
     }
-    var displayName: String { slug.map { "Codex (\($0))" } ?? "Codex" }
+    var displayName: String { LinkedAccount.load().first { $0.directory == configDirectory }?.name ?? (slug.map { "Codex (\($0))" } ?? "Codex") }
 
     static func slug(fromProviderID id: String) -> String? {
         let prefix = defaultID + "-"
@@ -72,7 +73,10 @@ struct CodexProfile: Equatable, Hashable {
         return path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path
     }
 
-    var sourceName: String { slug == nil ? "Codex" : "Codex in \(displayPath)" }
+    var sourceName: String {
+        if LinkedAccount.account(providerID: id) != nil { return "sessão independente do CodeNotch Pessoal" }
+        return slug == nil ? "Codex" : "Codex in \(displayPath)"
+    }
 
     var signInCommand: String {
         guard slug != nil else { return "codex login" }

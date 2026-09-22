@@ -29,6 +29,19 @@ final class ThresholdNotifierTests: XCTestCase {
         )
     }
 
+    func testChangingAccountDoesNotAnnounceConsumptionSpike() {
+        var first = snapshot("codex", "Codex", 0.1)
+        first.accountEmail = "first@example.invalid"
+        var second = snapshot("codex", "Codex", 0.9)
+        second.accountEmail = "second@example.invalid"
+        notifier.observe([first])
+        notifier.observe([second])
+        XCTAssertTrue(alerts.isEmpty)
+        second.windows = [LimitWindow(id: "session", label: "Current session", usedFraction: 1)]
+        notifier.observe([second])
+        XCTAssertEqual(alerts.map(\.threshold), [100])
+    }
+
     func testCrossingEightyAlertsOnce() {
         notifier.observe([snapshot("claude", "Claude", 0.5)])
         XCTAssertNil(alerts.first, "parked under the threshold is nobody's business")

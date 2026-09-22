@@ -15,6 +15,33 @@ final class ProviderDisconnectionTests: XCTestCase {
                            disconnected: disconnected, order: order), archive)
     }
 
+    func testAccountSwitchDuringRequestDiscardsResultAndArchive() async {
+        let started = expectation(description: "Request started")
+        let provider = Probe(id: "codex", started: started)
+        provider.email = "first@example.invalid"
+        let (store, archive) = makeStore([provider])
+        store.refreshNow()
+        await fulfillment(of: [started], timeout: 2)
+        provider.email = "second@example.invalid"
+        await finish(provider, in: store)
+        XCTAssertFalse(store.snapshots.contains { $0.hasReading })
+        XCTAssertNil(archive.load()[provider.id])
+        XCTAssertEqual(store.readingHealth[provider.id]?.state, .identityMismatch)
+    }
+
+    func testAccountSwitchThenFailureDoesNotReusePreviousBalance() async {
+        let provider = Probe(id: "codex")
+        provider.email = "first@example.invalid"
+        let (store, archive) = makeStore([provider])
+        await store.refresh()
+        XCTAssertTrue(store.snapshots.contains { $0.hasReading })
+        provider.email = "second@example.invalid"
+        provider.failNext = true
+        await store.refresh()
+        XCTAssertFalse(store.snapshots.contains { $0.hasReading })
+        XCTAssertNil(archive.load()[provider.id])
+    }
+
     func testSettingsDoesNotReadADisconnectedAccount() {
         let disabled = Probe(id: "disabled")
         let enabled = Probe(id: "enabled")
@@ -293,6 +320,16 @@ private final class Probe: UsageProvider, @unchecked Sendable {
     private var pending: CheckedContinuation<ProviderSnapshot, Error>?
     private var fetchCount = 0
     private var accountCount = 0
+    private var identity = "Test account"
+    private var fail = false
+    var email: String {
+        get { lock.withLock { identity } }
+        set { lock.withLock { identity = newValue } }
+    }
+    var failNext: Bool {
+        get { lock.withLock { fail } }
+        set { lock.withLock { fail = newValue } }
+    }
 
     init(id: String, started: XCTestExpectation? = nil) {
         self.id = id
@@ -304,10 +341,11 @@ private final class Probe: UsageProvider, @unchecked Sendable {
 
     func account() -> ProviderAccount? {
         lock.withLock { accountCount += 1 }
-        return ProviderAccount(label: "Test account", plan: nil, source: "Probe", manageURL: nil)
+        return ProviderAccount(label: email, plan: nil, source: "Probe", manageURL: nil)
     }
 
     func fetchSnapshot() async throws -> ProviderSnapshot {
+        if failNext { throw UsageProviderError.badResponse(status: 503) }
         let first = lock.withLock { fetchCount += 1; return fetchCount == 1 }
         if first, let started {
             return try await withCheckedThrowingContinuation { continuation in

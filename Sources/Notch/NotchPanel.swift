@@ -14,14 +14,29 @@ final class NotchPanel: NSPanel {
     var onClick: ((CGPoint) -> Void)?
     /// ⌥-drag on the chrome, reported as the raw pointer delta since the last
     /// event — not a cumulative offset, so the caller decides what "along the
-    /// edge" means for the current one. Chosen over a plain click-and-hold
-    /// threshold so an ordinary click never risks being read as a tiny nudge.
+    /// edge" means for the current one. Plain dragging uses a movement threshold;
+    /// Option dragging starts immediately.
     var onDragStart: (() -> Void)?
     var onDrag: ((CGFloat, CGFloat) -> Void)?
     /// The ⌥-drag ended. Where to persist the offset the drags above moved to.
     var onDragEnd: (() -> Void)?
+    var canStartPlainDrag: ((CGPoint) -> Bool)?
+    private var pendingClick: CGPoint?
+    private var plainDragDelta = CGPoint.zero
+    private var isPlainDragging = false
 
     override func sendEvent(_ event: NSEvent) {
+        // Route the gesture before SwiftUI's hosting subviews consume it.
+        if event.type == .leftMouseDown,
+           canStartPlainDrag?(event.locationInWindow) == true,
+           contentView?.hitTest(event.locationInWindow) != nil {
+            mouseDown(with: event)
+            return
+        }
+        if pendingClick != nil {
+            if event.type == .leftMouseDragged { mouseDragged(with: event); return }
+            if event.type == .leftMouseUp { mouseUp(with: event); return }
+        }
         guard event.type == .rightMouseDown,
               let menu = contextMenuProvider?(),
               let view = contentView,
@@ -36,12 +51,47 @@ final class NotchPanel: NSPanel {
         guard let view = contentView, view.hitTest(event.locationInWindow) != nil else {
             return super.mouseDown(with: event)
         }
-        guard event.modifierFlags.contains(.option), onDrag != nil else {
+        guard onDrag != nil else {
             onClick?(event.locationInWindow)
             return
         }
-        onDragStart?()
-        trackOptionDrag()
+        if event.modifierFlags.contains(.option) {
+            onDragStart?()
+            trackOptionDrag()
+        } else if canStartPlainDrag?(event.locationInWindow) == false {
+            onClick?(event.locationInWindow)
+        } else {
+            pendingClick = event.locationInWindow
+            plainDragDelta = .zero
+            isPlainDragging = false
+        }
+    }
+
+    /// A small movement tolerance keeps an ordinary click from moving the bar.
+    static func startsPlainDrag(dx: CGFloat, dy: CGFloat) -> Bool {
+        hypot(dx, dy) >= 5
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard pendingClick != nil else { return super.mouseDragged(with: event) }
+        if isPlainDragging {
+            onDrag?(event.deltaX, event.deltaY)
+        } else {
+            plainDragDelta.x += event.deltaX
+            plainDragDelta.y += event.deltaY
+            if Self.startsPlainDrag(dx: plainDragDelta.x, dy: plainDragDelta.y) {
+                isPlainDragging = true
+                onDragStart?()
+                onDrag?(plainDragDelta.x, plainDragDelta.y)
+            }
+        }
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard let click = pendingClick else { return super.mouseUp(with: event) }
+        pendingClick = nil
+        if isPlainDragging { onDragEnd?() } else { onClick?(click) }
+        isPlainDragging = false
     }
 
     /// Blocks on this window's own event stream until the button lifts, the

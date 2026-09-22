@@ -368,6 +368,9 @@ private extension AnyTransition {
 /// are the one section long enough on their own to want somewhere apart from
 /// everything else.
 struct SettingsView: View {
+    @State private var addingService: AccountService?
+    @State private var reconnectingAccount: LinkedAccount?
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
     @ObservedObject var preferences: Preferences
     let providers: () -> [ProviderSummary]
     var phoneLinkPairing: PhoneLinkPairing?
@@ -407,6 +410,7 @@ struct SettingsView: View {
     /// already be centred, in which case the action has no visible movement;
     /// the acknowledgement keeps the button from feeling inert.
     @State private var didRecentre = false
+    @State private var showsReleaseNotes = false
     /// Switching off has to reach the store's archive, not just the preference
     /// — see `UsageStore.signOut(providerID:)`.
     let signOut: (String) -> Void
@@ -699,6 +703,40 @@ struct SettingsView: View {
 
     private var accountsPane: some View {
         Form {
+            Section {
+                if let usageStore {
+                    Button("Abrir dashboard de consumo") {
+                        UsageDashboardController.shared.show(store: usageStore, preferences: preferences)
+                    }
+                }
+                ForEach(AccountService.allCases) { service in
+                    Button("Adicionar conta \(service.title)…") { reconnectingAccount = nil; addingService = service }
+                }
+                .sheet(item: $addingService) { service in
+                    AddLinkedAccountView(service: service, existing: providers(), reconnecting: reconnectingAccount) { account, replacedIDs in
+                        for id in replacedIDs { preferences.setConnected(false, for: id) }
+                        preferences.setConnected(true, for: account.providerID)
+                        usageStore?.registerLinkedAccount(account)
+                        accounts = providers()
+                    }
+                }
+            }
+
+            if !LinkedAccount.load().isEmpty {
+                Section("Sessões independentes") {
+                    ForEach(LinkedAccount.load()) { linked in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(linked.name) · \(linked.service.title)").font(.headline)
+                                Text(linked.email).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Reconectar") { reconnectingAccount = linked; addingService = linked.service }
+                        }
+                    }
+                }
+            }
+
             // Split in two, because ordering only means anything for the
             // first group: a provider switched off has no ring in the notch,
             // so dragging it was arranging something that is not on screen.
@@ -774,6 +812,26 @@ struct SettingsView: View {
     private var appearancePane: some View {
         Form {
             Section(L10n.t("Notch")) {
+                Picker("Formato da barra", selection: $preferences.notchPresentation) {
+                    ForEach(NotchPresentation.allCases) { Text($0.title).tag($0) }
+                }.pickerStyle(.segmented)
+                Text("Compacto mostra nome, 5h e 7d juntos. Completo inclui renovação e atualização.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Picker("Indicador na barra", selection: $preferences.notchQuota) {
+                    ForEach(NotchQuota.allCases) { Text($0.title).tag($0) }
+                }
+                Text("Semanal usa Todos os modelos no Claude e o limite semanal no Codex. Quando o serviço não informa o limite escolhido, aparece um traço.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker(L10n.t("Quota display"), selection: $preferences.usageDisplayMode) {
+                    ForEach(UsageDisplayMode.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text(L10n.t("Available counts down from 100% to 0%. Alerts still follow actual usage."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle(L10n.t("Claude icon in coral red"), isOn: $claudeCoralIcon)
+
                 Picker(L10n.t("Reset time"), selection: $preferences.resetTimeFormat) {
                     ForEach(ResetTimeFormat.allCases) { Text($0.title).tag($0) }
                 }
@@ -913,7 +971,7 @@ struct SettingsView: View {
                 // This is also the only way back from a nudge that went too
                 // far, short of dragging it out again.
                 HStack {
-                    Text(L10n.t("Hold ⌥ and drag the notch to slide it along its edge. Each edge remembers where you left it."))
+                    Text("Clique e arraste a barra para deslocá-la pela borda. A posição fica salva; use Recentralizar para voltar ao centro.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -1237,6 +1295,7 @@ struct SettingsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
+                if updater.supportsUpdates {
                 Toggle(L10n.t("Install updates automatically"), isOn: Binding(
                     get: { updater.automatic },
                     set: { updater.automatic = $0 }
@@ -1257,6 +1316,18 @@ struct SettingsView: View {
                     Button(L10n.t("Check now")) { updater.checkNow() }
                         .controlSize(.small)
                 }
+
+                } else {
+                    Text("CodeNotch Pessoal · versão local independente. Atualizações do aplicativo original não são instaladas nesta versão.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+
+                Button(L10n.t("What's New")) { showsReleaseNotes = true }
+                    .sheet(isPresented: $showsReleaseNotes) {
+                        if let note = ReleaseNotes.note(for: updater.currentVersion) {
+                            WhatsNewView(note: note) { showsReleaseNotes = false }
+                        }
+                    }
 
                 // Says what happened, where the user is already looking.
                 // Sparkle's own answer to a failed check is a modal reading
@@ -1611,6 +1682,14 @@ private struct SoundRow: View {
 }
 
 private struct AccountRow: View {
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
+    @AppStorage(AccountNames.key) private var accountNames = Data()
+    @State private var isRenaming = false
+    @State private var editedName = ""
+    private var displayName: String {
+        AccountNames.name(for: provider.id, fallback: provider.name, in: accountNames, email: provider.account?.label)
+    }
+
     let provider: ProviderSummary
     @ObservedObject var preferences: Preferences
     let signOut: (String) -> Void
@@ -1647,6 +1726,11 @@ private struct AccountRow: View {
     private var isConnected: Bool { preferences.isConnected(provider.id) }
     private var isMuted: Bool { preferences.isMutedAlerts(for: provider.id) }
 
+    private func saveName() {
+        accountNames = AccountNames.setting(editedName, for: provider.id, in: accountNames)
+        isRenaming = false
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Centred, not baseline-aligned. A glyph is a `Shape` and has no
@@ -1662,9 +1746,11 @@ private struct AccountRow: View {
                     if isOrderable { handle }
 
                     ProviderGlyphView(glyph: provider.glyph, customIconFilename: provider.customIconFilename, size: 16)
-                        .foregroundStyle(isConnected ? .primary : .tertiary)
+                        .foregroundStyle(provider.glyph == .claude && claudeCoralIcon
+                                         ? Color(red: 0.90, green: 0.36, blue: 0.28) : Palette.textPrimary)
+                        .opacity(isConnected ? 1 : 0.4)
 
-                    Text(provider.name)
+                    Text(displayName)
                         .foregroundStyle(isConnected ? .primary : .secondary)
                 }
                 // Without this only the drawn pixels are grabbable, and the
@@ -1688,7 +1774,7 @@ private struct AccountRow: View {
                     // up.
                     HStack(spacing: 6) {
                         ProviderGlyphView(glyph: provider.glyph, customIconFilename: provider.customIconFilename, size: 12)
-                        Text(provider.name)
+                        Text(displayName)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -1710,6 +1796,39 @@ private struct AccountRow: View {
                     if isOrderable {
                         GrabCursor(refreshToken: cursorRefresh)
                             .allowsHitTesting(false)
+                    }
+                }
+
+                if provider.localModel == nil {
+                    Button {
+                        editedName = displayName
+                        isRenaming = true
+                    } label: {
+                        Image(systemName: "pencil")
+                    }
+                    .buttonStyle(.plain)
+                    .help(L10n.t("Rename account"))
+                    .accessibilityLabel(L10n.t("Rename account"))
+                    .popover(isPresented: $isRenaming) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(L10n.t("Rename account")).font(.headline)
+                            Text(provider.name).font(.caption).foregroundStyle(.secondary)
+                            TextField(L10n.t("Account name"), text: $editedName)
+                                .textFieldStyle(.roundedBorder)
+                                .onSubmit { saveName() }
+                            HStack {
+                                Button(L10n.t("Restore original name")) {
+                                    accountNames = AccountNames.setting("", for: provider.id, in: accountNames)
+                                    isRenaming = false
+                                }
+                                Spacer()
+                                Button(L10n.t("Cancel")) { isRenaming = false }
+                                Button(L10n.t("Save")) { saveName() }
+                                    .keyboardShortcut(.defaultAction)
+                            }
+                        }
+                        .padding(16)
+                        .frame(width: 340)
                     }
                 }
 
@@ -2075,7 +2194,9 @@ private struct AccountRow: View {
                 }
                 // Says where the account actually lives, which is the whole
                 // answer to "how do I change it" — not here.
-                Text(provider.signIn.switchHint)
+                Text(LinkedAccount.account(providerID: provider.id) != nil
+                     ? "Sessão independente. Use Reconectar neste aplicativo quando necessário."
+                     : provider.signIn.switchHint)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }

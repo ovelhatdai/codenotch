@@ -10,6 +10,7 @@ struct UsageArchive {
     private struct Entry: Codable {
         let id: String
         let displayName: String
+        let accountEmail: String?
         let glyph: ProviderGlyph
         let fidelity: Fidelity
         let windows: [LimitWindow]
@@ -86,6 +87,7 @@ struct UsageArchive {
                 windows = entry.windows
             }
             let snapshot = ProviderSnapshot(
+                accountEmail: entry.accountEmail,
                 id: entry.id,
                 displayName: entry.displayName,
                 glyph: entry.id == "devin" && entry.glyph == .third ? .devin : entry.glyph,
@@ -114,6 +116,7 @@ struct UsageArchive {
             Entry(
                 id: $0.snapshot.id,
                 displayName: $0.snapshot.displayName,
+                accountEmail: $0.snapshot.accountEmail,
                 glyph: $0.snapshot.glyph,
                 fidelity: $0.snapshot.fidelity,
                 windows: $0.snapshot.windows,

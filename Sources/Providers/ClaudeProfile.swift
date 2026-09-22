@@ -66,14 +66,21 @@ struct ClaudeProfile: Equatable, Hashable {
             let directory = home.appendingPathComponent(name)
             guard isProfileDirectory(directory, fileManager: fileManager) else { return nil }
             let candidate = ClaudeProfile(slug: slug, configDirectory: directory)
-            guard hasCredential(candidate) else {
-                Log.usage.debug("ignoring \(candidate.displayPath, privacy: .public): looks like a profile but has no token under \(candidate.keychainService, privacy: .public)")
-                return nil
+            if hasCredential(candidate) { return candidate }
+            // A conventional profile name may link to a login managed elsewhere.
+            // Claude Code hashes the path used at sign-in, so use that same path
+            // for both keychain reads and CLI calls when only the target is signed in.
+            let resolved = directory.resolvingSymlinksInPath()
+            if resolved.path != directory.path {
+                let target = ClaudeProfile(slug: slug, configDirectory: resolved)
+                if hasCredential(target) { return target }
             }
-            return candidate
+            Log.usage.debug("ignoring \(candidate.displayPath, privacy: .public): looks like a profile but has no credential for its path or resolved target")
+            return nil
         }
         return [ClaudeProfile.default(home: home)]
             + extras.sorted { $0.slug! < $1.slug! }
+            + (home == homeDirectory ? LinkedAccount.load().filter { $0.service == .claude }.map(\.profile) : [])
     }
 
     /// Whether Claude Code has ever filed a token for this profile's directory.
@@ -123,7 +130,7 @@ struct ClaudeProfile: Equatable, Hashable {
 
     /// `Claude`, or `Claude (work)`. The cell draws the same glyph for every
     /// profile; this is what tells them apart in the tooltip and in Settings.
-    var displayName: String { slug.map { "Claude (\($0))" } ?? "Claude" }
+    var displayName: String { LinkedClaudeAccount.load().first { $0.directory == configDirectory }?.name ?? (slug.map { "Claude (\($0))" } ?? "Claude") }
 
     /// Whether a provider id names a Claude profile, default or otherwise.
     static func isClaude(providerID: String) -> Bool {
@@ -256,7 +263,8 @@ struct ClaudeProfile: Equatable, Hashable {
     /// Which tool the credential is borrowed from, said so that two Claude rows
     /// in Settings can be told apart.
     var sourceName: String {
-        slug == nil ? "Claude Code" : "Claude Code in \(displayPath)"
+        if LinkedAccount.account(providerID: id) != nil { return "sessão independente do CodeNotch Pessoal" }
+        return slug == nil ? "Claude Code" : "Claude Code in \(displayPath)"
     }
 
     /// The command that signs this profile in, for the row that has no button.

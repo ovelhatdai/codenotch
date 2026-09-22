@@ -73,6 +73,7 @@ extension UsageProvider {
 }
 
 enum UsageProviderError: Error {
+    case identityMismatch
     /// No usable credential — the user has to sign in again.
     case needsAuth
     /// The credential is there, and macOS refused to hand it over — the

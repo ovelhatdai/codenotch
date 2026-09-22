@@ -6,6 +6,16 @@ import os
 /// What the user has chosen, kept in `UserDefaults`.
 @MainActor
 final class Preferences: ObservableObject {
+    @Published var notchPresentation: NotchPresentation {
+        didSet { defaults.set(notchPresentation.rawValue, forKey: NotchPresentation.key) }
+    }
+    @Published var notchQuota: NotchQuota {
+        didSet { defaults.set(notchQuota.rawValue, forKey: NotchQuota.key) }
+    }
+    @Published var usageDisplayMode: UsageDisplayMode {
+        didSet { defaults.set(usageDisplayMode.rawValue, forKey: UsageDisplayMode.key) }
+    }
+
     static let showUsagePaceKey = "showUsagePace"
 
     /// Provider IDs that currently have a ring. Stored as the ones that are
@@ -182,6 +192,20 @@ final class Preferences: ObservableObject {
 
     func setOffset(_ offset: CGFloat, for edge: NotchEdge) {
         defaults.set(Double(offset), forKey: Self.offsetKey(for: edge))
+    }
+
+    func screenOffset(id: String, edge: NotchEdge) -> CGFloat? {
+        let offsets = defaults.dictionary(forKey: "notchOffsetsByDisplay") as? [String: Double] ?? [:]
+        return offsets[id + ":" + edge.rawValue].map(CGFloat.init)
+    }
+    func setScreenOffset(_ value: CGFloat, id: String, edge: NotchEdge) {
+        var offsets = defaults.dictionary(forKey: "notchOffsetsByDisplay") as? [String: Double] ?? [:]
+        offsets[id + ":" + edge.rawValue] = Double(value)
+        defaults.set(offsets, forKey: "notchOffsetsByDisplay")
+    }
+    func clearScreenOffsets(edge: NotchEdge) {
+        let offsets = defaults.dictionary(forKey: "notchOffsetsByDisplay") as? [String: Double] ?? [:]
+        defaults.set(offsets.filter { !$0.key.hasSuffix(":" + edge.rawValue) }, forKey: "notchOffsetsByDisplay")
     }
 
     private static func offsetKey(for edge: NotchEdge) -> String { "notchOffset.\(edge.rawValue)" }
@@ -648,6 +672,9 @@ final class Preferences: ObservableObject {
     }
 
     init(defaults: UserDefaults = .standard) {
+        self.notchPresentation = defaults.string(forKey: NotchPresentation.key).flatMap(NotchPresentation.init(rawValue:)) ?? .minimal
+        self.notchQuota = defaults.string(forKey: NotchQuota.key).flatMap(NotchQuota.init(rawValue:)) ?? .automatic
+        self.usageDisplayMode = defaults.string(forKey: UsageDisplayMode.key).flatMap(UsageDisplayMode.init(rawValue:)) ?? .used
         self.defaults = defaults
         self.isFirstLaunch = !defaults.bool(forKey: Keys.hasLaunched)
         defaults.set(true, forKey: Keys.hasLaunched)

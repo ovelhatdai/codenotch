@@ -52,9 +52,12 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     /// Mirrors the preference, so switching it off really does stop the checks
     /// rather than only hiding them.
+    var supportsUpdates: Bool { !PersonalEdition.isEnabled }
+
     var automatic: Bool {
-        get { controller.updater.automaticallyChecksForUpdates }
+        get { supportsUpdates && controller.updater.automaticallyChecksForUpdates }
         set {
+            guard supportsUpdates else { return }
             controller.updater.automaticallyChecksForUpdates = newValue
             controller.updater.automaticallyDownloadsUpdates = newValue
         }
@@ -64,16 +67,17 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
     }
 
-    var lastChecked: Date? { controller.updater.lastUpdateCheckDate }
+    var lastChecked: Date? { supportsUpdates ? controller.updater.lastUpdateCheckDate : nil }
 
     /// Starts the scheduled checks. Deliberately not in `init`: the controller
     /// is lazy so that `self` exists before it is handed over as the delegate.
-    func start() { _ = controller }
+    func start() { if supportsUpdates { _ = controller } }
 
     /// The manual path, for someone who does not want to wait for the schedule.
     /// This one *does* show UI — it was asked for, so silence would read as a
     /// broken button.
     func checkNow() {
+        guard supportsUpdates else { return }
         outcome = .checking
         controller.updater.checkForUpdates()
         // Never left on "Checking…". Sparkle reports every ending it knows

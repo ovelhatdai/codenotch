@@ -108,7 +108,15 @@ enum Percent {
 
 /// One metered window a provider exposes — Claude has two (the rolling session
 /// and the longer all-models window), others have one.
+enum ConsumptionUnit: String, Codable {
+    case tokens, credits, signatures, requests
+    var title: String {
+        switch self { case .tokens: return "tokens"; case .credits: return "créditos"; case .signatures: return "assinaturas"; case .requests: return "requisições" }
+    }
+}
+
 struct LimitWindow: Identifiable, Codable, Equatable {
+    var unit: ConsumptionUnit? = nil
     let id: String
     let group: String?
     let label: String
@@ -140,7 +148,7 @@ struct LimitWindow: Identifiable, Codable, Equatable {
          remaining: Int? = nil, used: Int? = nil, usedText: String? = nil, detail: String? = nil,
          money: UsageMoneyBreakdown? = nil, resetsAt: Date? = nil,
          duration: TimeInterval? = nil, bandOverride: UsageBand? = nil,
-         prefersUsedText: Bool = false) {
+         prefersUsedText: Bool = false, unit: ConsumptionUnit? = nil) {
         self.id = id
         self.group = group
         self.label = label
@@ -153,11 +161,12 @@ struct LimitWindow: Identifiable, Codable, Equatable {
         self.resetsAt = resetsAt
         self.duration = duration
         self.bandOverride = bandOverride
+        self.unit = unit
         self.prefersUsedText = prefersUsedText
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, group, label, usedFraction, remaining, used, detail, money, usedText, resetsAt, duration, bandOverride, prefersUsedText
+        case id, group, label, usedFraction, remaining, used, detail, money, usedText, resetsAt, duration, bandOverride, prefersUsedText, unit
     }
 
     init(from decoder: Decoder) throws {
@@ -173,6 +182,7 @@ struct LimitWindow: Identifiable, Codable, Equatable {
         self.usedText = try container.decodeIfPresent(String.self, forKey: .usedText)
         self.resetsAt = try container.decodeIfPresent(Date.self, forKey: .resetsAt)
         self.duration = try container.decodeIfPresent(TimeInterval.self, forKey: .duration)
+        self.unit = try container.decodeIfPresent(ConsumptionUnit.self, forKey: .unit)
         self.bandOverride = try container.decodeIfPresent(UsageBand.self, forKey: .bandOverride)
         self.prefersUsedText = try container.decodeIfPresent(Bool.self, forKey: .prefersUsedText) ?? false
     }
@@ -190,6 +200,7 @@ struct LimitWindow: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(usedText, forKey: .usedText)
         try container.encodeIfPresent(resetsAt, forKey: .resetsAt)
         try container.encodeIfPresent(duration, forKey: .duration)
+        try container.encodeIfPresent(unit, forKey: .unit)
         try container.encodeIfPresent(bandOverride, forKey: .bandOverride)
         if prefersUsedText {
             try container.encode(prefersUsedText, forKey: .prefersUsedText)
@@ -278,6 +289,8 @@ struct UsageBlock: Equatable {
 }
 
 struct ProviderSnapshot: Identifiable, Equatable {
+    var sourceUpdatedAt: Date? = nil
+    var accountEmail: String? = nil
     let id: String
     let displayName: String
     let glyph: ProviderGlyph

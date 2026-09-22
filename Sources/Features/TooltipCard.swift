@@ -556,6 +556,12 @@ private struct MoneyStat: View {
 }
 
 private struct ProviderTooltip: View {
+    @AppStorage("claudeCoralIcon") private var claudeCoralIcon = true
+    @AppStorage(AccountNames.key) private var accountNames = Data()
+    private var accountName: String {
+        AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: accountNames, email: snapshot.accountEmail)
+    }
+
     /// What a local model is doing right now, for the header's note.
     var activityNote: String?
     let snapshot: ProviderSnapshot
@@ -595,11 +601,12 @@ private struct ProviderTooltip: View {
         VStack(alignment: .leading, spacing: 0) {
             TooltipHeader(title: snapshot.kind == .localRuntime
                           ? L10n.t("\(snapshot.localModel?.brand?.displayName ?? snapshot.displayName) · Local")
-                          : L10n.t("\(snapshot.displayName) Usage"),
+                          : L10n.t("\(accountName) Usage"),
                           subtitle: snapshot.plan,
                           note: activityNote ?? (snapshot.localModel?.brand != nil ? snapshot.displayName : readingAge)) {
                 ProviderGlyphView(glyph: snapshot.glyph, customIconFilename: snapshot.customIconFilename)
-                    .foregroundStyle(Palette.textPrimary)
+                    .foregroundStyle(snapshot.glyph == .claude && claudeCoralIcon
+                                     ? Color(red: 0.90, green: 0.36, blue: 0.28) : Palette.textPrimary)
             }
 
             if let block = snapshot.block {

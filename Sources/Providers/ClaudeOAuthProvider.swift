@@ -86,6 +86,7 @@ actor ClaudeOAuthProvider: UsageProvider {
     /// reason `lastCLIAttempt` exists. A working source never sees this: every
     /// successful read scans (the scan is cheap and always accurate; see
     /// `ClaudeDesktopUsageCache.read`), and only a miss ever sets it.
+    private var lastDesktopCapturedAt: Date?
     private var lastDesktopMiss: Date?
     /// How long a miss suppresses the next scan.
     private let desktopRescanInterval: TimeInterval
@@ -148,6 +149,10 @@ actor ClaudeOAuthProvider: UsageProvider {
     }
 
     func fetchSnapshot() async throws -> ProviderSnapshot {
+        if let linked = LinkedAccount.account(providerID: id),
+           profile.signedInAddress()?.lowercased() != linked.email.lowercased() {
+            throw UsageProviderError.identityMismatch
+        }
         // A Deny is honoured by every source, not only the keychain (#98).
         // Claude Desktop's cache and the CLI never needed this app's keychain
         // access, which is exactly why they used to keep the ring filled after
@@ -166,14 +171,18 @@ actor ClaudeOAuthProvider: UsageProvider {
         // source and the only one that can never interrupt anyone: it reads a
         // file Claude Desktop has already written.
         if let windows = await desktopWindows() {
-            return snapshot(windows: windows)
+            var result = snapshot(windows: windows)
+            result.sourceUpdatedAt = lastDesktopCapturedAt
+            return result
         }
         // Ahead of the back-off check on purpose. That deadline is the
         // endpoint's, and the CLI does not share the endpoint's rate limit —
         // there is no reason for a 429 on one to darken a ring the other can
         // still fill.
         if let windows = await cliWindows() {
-            return snapshot(windows: windows, plan: lastCLIPlan)
+            var result = snapshot(windows: windows, plan: lastCLIPlan)
+            result.sourceUpdatedAt = lastCLIWindows?.at
+            return result
         }
         return try await fetchFromKeychain()
     }
@@ -290,6 +299,7 @@ actor ClaudeOAuthProvider: UsageProvider {
             return nil
         }
         lastDesktopMiss = nil
+        lastDesktopCapturedAt = reading.capturedAt
         Log.usage.debug("\(self.id, privacy: .public): read \(reading.windows.count) windows from the claude desktop cache entry \(reading.entry.lastPathComponent, privacy: .public)")
         return reading.windows
     }

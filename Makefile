@@ -90,7 +90,6 @@ run: build
 	@APP=$$(xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
 		-configuration Debug -showBuildSettings 2>/dev/null \
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2; exit}')/Codenotch.app; \
-	pkill -x Codenotch 2>/dev/null; sleep 0.5; \
 	open "$$APP"
 
 # Build a Release .app, sign it with whatever identity is available (Developer
@@ -107,9 +106,16 @@ install: gen
 	@APP=$$(xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
 		-configuration Release -showBuildSettings 2>/dev/null \
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2; exit}')/Codenotch.app; \
-	pkill -x Codenotch || true; \
-	cp -R "$$APP" /Applications/; \
-	open /Applications/Codenotch.app
+	test "$$('/usr/libexec/PlistBuddy' -c 'Print CFBundleIdentifier' "$$APP/Contents/Info.plist")" = "com.vinicius.codenotch.personal" || exit 1; \
+	codesign --verify --deep --strict "$$APP" || exit 1; \
+	STAGING=$$(mktemp -d /tmp/codenotch-personal-XXXXXX); \
+	ditto "$$APP" "$$STAGING/CodeNotch Pessoal.app" || exit 1; \
+	if test -e '/Applications/CodeNotch Pessoal.app'; then mv '/Applications/CodeNotch Pessoal.app' "$$STAGING/Previous.app" || exit 1; fi; \
+	if mv "$$STAGING/CodeNotch Pessoal.app" '/Applications/CodeNotch Pessoal.app'; then \
+	  echo "Installed /Applications/CodeNotch Pessoal.app; previous copy, if any: $$STAGING/Previous.app"; \
+	else \
+	  test ! -e "$$STAGING/Previous.app" || mv "$$STAGING/Previous.app" '/Applications/CodeNotch Pessoal.app'; exit 1; \
+	fi
 
 clean:
 	rm -rf build DerivedData $(PROJECT)

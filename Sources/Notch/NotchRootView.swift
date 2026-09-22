@@ -138,6 +138,10 @@ struct NotchRootView: View {
             colorScheme: colorScheme,
             reduceTransparency: reduceTransparency
         ))
+        .environment(\.usageDisplayMode, model.usageDisplayMode)
+        .environment(\.notchQuota, model.notchQuota)
+        .environment(\.notchPresentation, model.presentation)
+        .environment(\.readingHealth, model.readingHealth)
         .environment(\.weeklyRingDashed, model.weeklyRingDashed)
         .environment(\.usageWatchLimit, model.watchLimit)
         .environment(\.usageCriticalLimit, model.criticalLimit)
@@ -319,7 +323,7 @@ struct NotchRootView: View {
                 // the hover bands and the tooltip tails. Across a horizontal
                 // edge that is the ring alone — the label sits below it, in the
                 // notch's depth, and claims nothing here.
-                .frame(width: model.edge.isVertical ? nil : NotchLayout.cellAlong(for: model.edge))
+                .frame(width: model.edge.isVertical ? nil : NotchLayout.cellAlong(for: model.edge, presentation: model.presentation))
                 .opacity(model.isExpanded ? 1 : 0)
                 // A short slide toward the edge, no scaling: the clip is
                 // already doing the concealing, and scaling on top of it
@@ -341,11 +345,11 @@ struct NotchRootView: View {
                     .padding(.top, leadIn)
                     // The contents keep the expanded layout while folding, so
                     // the stack does not reflow on its way out; the shape clips it.
-                    .frame(width: NotchLayout.bodyDepth(for: model.edge))
+                    .frame(width: NotchLayout.bodyDepth(for: model.edge, presentation: model.presentation))
             } else {
                 HStack(spacing: model.cellSpacing) { stack }
                     .padding(.leading, leadIn)
-                    .frame(height: NotchLayout.bodyDepth(for: model.edge))
+                    .frame(height: NotchLayout.bodyDepth(for: model.edge, presentation: model.presentation))
             }
         }
         .allowsHitTesting(model.isExpanded)
