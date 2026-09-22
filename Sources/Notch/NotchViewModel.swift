@@ -85,6 +85,24 @@ final class NotchViewModel: ObservableObject {
 
     /// Active usage reset notification event to present beside the notch.
     @Published var activeResetAlert: UsageResetEvent?
+    private var dashboardAlertGeneration = UUID()
+
+    /// Receives the same permitted events as the bar, even when it is hidden.
+    /// A generation prevents an older timeout from dismissing a newer repeat.
+    func showDashboardAlert(_ event: UsageResetEvent, duration: TimeInterval) {
+        let generation = UUID()
+        dashboardAlertGeneration = generation
+        activeResetAlert = event
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0, duration)) { [weak self] in
+            guard let self, self.dashboardAlertGeneration == generation else { return }
+            self.dismissDashboardAlert()
+        }
+    }
+
+    func dismissDashboardAlert() {
+        dashboardAlertGeneration = UUID()
+        activeResetAlert = nil
+    }
 
     func resetAlertIndex(for event: UsageResetEvent) -> Int? {
         snapshots.firstIndex { $0.id == event.providerID }

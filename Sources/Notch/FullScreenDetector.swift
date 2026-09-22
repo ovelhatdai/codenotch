@@ -3,6 +3,61 @@ import CoreGraphics
 
 /// Detects whether a full-screen application window is active on a given display.
 enum FullScreenDetector {
+    typealias Window = (pid: pid_t, layer: Int, bounds: CGRect)
+    @MainActor private static let windowCache = WindowCache()
+
+    /// One bounded background request shared by all monitors. A stalled
+    /// WindowServer must neither block AppKit nor accumulate queued work.
+    @MainActor
+    final class WindowCache {
+        private let query: @Sendable () -> [Window]?
+        private let queue = DispatchQueue(label: "codenotch.full-screen", qos: .utility)
+        private var windows: [Window]?
+        private var requestedAt: Date?
+        private var receivedAt: Date?
+        private(set) var isQueryInFlight = false
+        static let refreshInterval: TimeInterval = 2
+        static let maximumAge: TimeInterval = 5
+
+        init(query: @escaping @Sendable () -> [Window]? = FullScreenDetector.queryWindows) {
+            self.query = query
+        }
+
+        func reading(now: Date = Date()) -> [Window]? {
+            if !isQueryInFlight && now.timeIntervalSince(requestedAt ?? .distantPast) >= Self.refreshInterval {
+                isQueryInFlight = true
+                requestedAt = now
+                let started = Date()
+                let query = self.query
+                queue.async { [weak self] in
+                    let result = query()
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        self.isQueryInFlight = false
+                        let finished = Date()
+                        // A delayed reply describes an old desktop. Leave the
+                        // bar visible instead of folding it from stale data.
+                        self.windows = finished.timeIntervalSince(started) <= Self.maximumAge ? result : nil
+                        self.receivedAt = finished
+                    }
+                }
+            }
+            guard let receivedAt, now.timeIntervalSince(receivedAt) <= Self.maximumAge else { return nil }
+            return windows
+        }
+    }
+
+    private static func queryWindows() -> [Window]? {
+        guard let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return nil }
+        return list.compactMap { info in
+            guard let pid = info[kCGWindowOwnerPID as String] as? pid_t,
+                  let layer = info[kCGWindowLayer as String] as? Int,
+                  let dictionary = info[kCGWindowBounds as String] as? NSDictionary,
+                  let bounds = CGRect(dictionaryRepresentation: dictionary as CFDictionary) else { return nil }
+            return (pid, layer, bounds)
+        }
+    }
+
     /// Pure function checking whether any layer 0 window belonging to `frontmostPID`
     /// matches or spans the `screenBounds`.
     static func isFullScreen(
@@ -43,8 +98,9 @@ enum FullScreenDetector {
         return false
     }
 
-    /// Queries WindowServer and NSWorkspace to determine if the frontmost app
-    /// is occupying the entire `screen`.
+    /// Uses a shared background WindowServer snapshot and main-thread AppKit
+    /// metadata. It never waits for the window list on the UI thread.
+    @MainActor
     static func isFullScreenAppFrontmost(on screen: NSScreen? = NSScreen.main) -> Bool {
         guard let screen = screen ?? NSScreen.main else { return false }
         guard let frontApp = NSWorkspace.shared.frontmostApplication else { return false }
@@ -69,17 +125,7 @@ enum FullScreenDetector {
             safeTop = 0
         }
 
-        if let windowInfoList = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] {
-            var extractedWindows: [(pid: pid_t, layer: Int, bounds: CGRect)] = []
-            for info in windowInfoList {
-                guard let pid = info[kCGWindowOwnerPID as String] as? pid_t,
-                      let layer = info[kCGWindowLayer as String] as? Int,
-                      let boundsDict = info[kCGWindowBounds as String] as? NSDictionary,
-                      let bounds = CGRect(dictionaryRepresentation: boundsDict as CFDictionary)
-                else { continue }
-                extractedWindows.append((pid: pid, layer: layer, bounds: bounds))
-            }
-
+        if let extractedWindows = windowCache.reading() {
             if isFullScreen(
                 screenBounds: cgScreenBounds,
                 frontmostPID: frontApp.processIdentifier,

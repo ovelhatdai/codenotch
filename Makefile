@@ -13,6 +13,8 @@ SCHEME  := Codenotch
 RESOLVED_PACKAGES := $(PROJECT)/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 ARCH    ?= $(shell uname -m)
 DEST    ?= platform=macOS,arch=$(ARCH)
+# Keep local compilation bounded while the desktop is in use. CI may override.
+BUILD_JOBS ?= 2
 
 # Debug signs itself when the maintainer's Developer ID certificate isn't in
 # the keychain, which is every machine but the maintainer's — so a contributor
@@ -63,18 +65,18 @@ gen:
 
 build: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug $(DEV_SIGN) build
+		-configuration Debug -jobs $(BUILD_JOBS) $(DEV_SIGN) build
 
 test: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug $(DEV_SIGN) test
+		-configuration Debug -jobs $(BUILD_JOBS) -parallel-testing-enabled NO $(DEV_SIGN) test
 
 # Continuous integration: no Developer ID identity exists on a CI runner, and
 # unit tests need none — override the manual signing with plain unsigned
 # builds rather than asking every contributor to hold a certificate.
 test-ci: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Debug test \
+		-configuration Debug -jobs $(BUILD_JOBS) -parallel-testing-enabled NO test \
 		CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
 verify-deps:
@@ -102,7 +104,7 @@ run: build
 # identity rather than left unsigned.
 install: gen
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-configuration Release $(DEV_SIGN) build
+		-configuration Release -jobs $(BUILD_JOBS) $(DEV_SIGN) build
 	@APP=$$(xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
 		-configuration Release -showBuildSettings 2>/dev/null \
 		| awk -F' = ' '/ BUILT_PRODUCTS_DIR/ {print $$2; exit}')/Codenotch.app; \

@@ -41,3 +41,17 @@ Credentials are created by the official CLI in the directory chosen at connectio
 - Opening Dashboard from Settings brings it onto the Settings window monitor. Ring-panel/list and grouping choices use segmented controls under the organization button; the portrait shortcut still moves the standalone window afterward.
 
 - The dashboard ring panel reuses ProviderRing and TooltipCard: enlarged rings, numeric transitions, native glass cards, hover emphasis, and hover/click details. It follows the selected bar quota and percentage mode. Controls are collapsible, while filters, history and monitor selection remain accessible. Reduced-motion settings suppress card scaling. The portrait shortcut retains this panel instead of forcing a plain list.
+
+## Dashboard parity: activity, alerts and daily pace
+
+- The dashboard observes the fleet menu model directly. Live activity stays scoped to the provider/profile ID and feeds the same ProviderRing and TooltipCard activity inputs used by the bar, including working/waiting/completion states and session details. No separate activity poller or inferred account attribution is introduced.
+- Permitted reset, session-limit and weekly-limit events fan out to the dashboard through the existing fleet alert method. It renders UsageResetCard, respects the existing notification/mute/sound decisions, and offers dismiss/automatic expiry without generating an extra sound. Alerts can appear with the bar hidden; macOS fallback behavior is preserved. Generation checks prevent an old timeout from clearing a newer repeated event.
+- The dashboard applies DailyPace to the source snapshots with the same calculation as the bar. An explicit session/week choice still takes precedence for the large ring, and the real weekly quota remains in the account details. Disabling daily pace returns to the original source readings; stored history is not transformed.
+- Validation: 43 targeted activity-coordinator, dashboard, daily-pace and usage-alert tests passed. Coverage includes profile isolation, all three alert kinds without a visible notch, replacement/expiry, daily-pace parity, and explicit week/session choices.
+
+## Responsiveness during configuration
+
+- Full-screen detection no longer waits on `CGWindowListCopyWindowInfo` on the main thread. One utility queue services a shared cache across monitors, with at most one request in flight, a two-second refresh interval and five-second stale-data expiry. A delayed reply is discarded. If WindowServer stalls, no additional requests accumulate and the bar stays available instead of folding on expired data.
+- Local Makefile builds default to two concurrent jobs (`BUILD_JOBS` can override); test targets disable parallel test runners. The targeted validation was also run at reduced process priority.
+- Validation: 60 targeted tests passed with no failures, including a blocked-query test that keeps the main queue responsive through 100 repeated reads, cache reuse/expiry, existing full-screen fold behavior, and the 43 dashboard/activity/alert tests above.
+- The measured memory pressure after the incident did not establish memory exhaustion (64 GiB installed; the system reported 90% free). This is a point-in-time measurement, not evidence of the earlier peak or a guarantee that other applications cannot stall.

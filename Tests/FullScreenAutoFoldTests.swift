@@ -6,6 +6,45 @@ import XCTest
 
 @MainActor
 final class FullScreenAutoFoldTests: XCTestCase {
+    func testSlowWindowServerDoesNotBlockMainThreadOrQueueMoreRequests() async {
+        let started = expectation(description: "Background query started")
+        let release = DispatchSemaphore(value: 0)
+        let cache = FullScreenDetector.WindowCache {
+            XCTAssertFalse(Thread.isMainThread)
+            started.fulfill()
+            _ = release.wait(timeout: .now() + 3)
+            return []
+        }
+        defer { release.signal() }
+        XCTAssertNil(cache.reading())
+        await fulfillment(of: [started], timeout: 1)
+        // Simulate repeated mouse events on four monitors while the system
+        // query is blocked. The UI remains able to service all of them.
+        for _ in 0..<100 {
+            XCTAssertNil(cache.reading(now: Date().addingTimeInterval(10)))
+        }
+        XCTAssertTrue(cache.isQueryInFlight)
+        let mainResponsive = expectation(description: "Main run loop remains responsive")
+        DispatchQueue.main.async { mainResponsive.fulfill() }
+        await fulfillment(of: [mainResponsive], timeout: 1)
+    }
+
+    func testWindowSnapshotIsReusedAndExpiredRatherThanBlocking() async {
+        let expected: [FullScreenDetector.Window] = [(123, 0, CGRect(x: 0, y: 0, width: 800, height: 600))]
+        let cache = FullScreenDetector.WindowCache { expected }
+        XCTAssertNil(cache.reading())
+        let deadline = Date().addingTimeInterval(1)
+        while cache.isQueryInFlight && Date() < deadline {
+            await Task.yield()
+        }
+        XCTAssertFalse(cache.isQueryInFlight)
+        XCTAssertEqual(cache.reading()?.first?.pid, 123)
+        XCTAssertEqual(cache.reading()?.first?.bounds, expected[0].bounds)
+        XCTAssertFalse(cache.isQueryInFlight, "Fresh reads must reuse the shared snapshot")
+        XCTAssertNil(cache.reading(now: Date().addingTimeInterval(6)), "Expired data must not fold a window")
+        XCTAssertTrue(cache.isQueryInFlight)
+    }
+
     func testDetectorFindsFullScreenWindowMatchingScreenBounds() {
         let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
         let pid: pid_t = 12345

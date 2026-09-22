@@ -8,6 +8,8 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
     private let defaults = UserDefaults.standard
     private var lastScreenID: String?
 
+    var liveModel: NotchViewModel?
+
     static func visibleFrame(_ proposed: NSRect, on screen: NSRect) -> NSRect {
         let width = min(proposed.width, screen.width), height = min(proposed.height, screen.height)
         return NSRect(x: min(max(proposed.minX, screen.minX), screen.maxX - width),
@@ -57,6 +59,7 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
             NSApp.activate(ignoringOtherApps: true)
             return
         }
+        guard let liveModel else { return }
         let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1280, height: 800),
                              styleMask: [.titled, .closable, .miniaturizable, .resizable],
                              backing: .buffered, defer: false)
@@ -68,7 +71,7 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
         panel.minSize = NSSize(width: 380, height: 420)
         panel.isReleasedWhenClosed = false
         panel.setFrameAutosaveName("usageDashboardFrame")
-        panel.contentView = NSHostingView(rootView: UsageDashboard(store: store, preferences: preferences,
+        panel.contentView = NSHostingView(rootView: UsageDashboard(store: store, preferences: preferences, liveModel: liveModel,
             moveTo: { [weak self] screen in self?.move(to: screen)
             }, stayOnTop: { panel.level = $0 ? .floating : .normal }))
         window = panel
@@ -90,6 +93,8 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
 struct UsageDashboard: View {
     @ObservedObject var store: UsageStore
     @ObservedObject var preferences: Preferences
+    @ObservedObject var liveModel: NotchViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let moveTo: (NSScreen) -> Void
     let stayOnTop: (Bool) -> Void
     @AppStorage("dashboardFloating") private var floating = false
@@ -101,7 +106,10 @@ struct UsageDashboard: View {
     @State private var showsControls = false
     @State private var contentWidth: CGFloat = 800
     private var visible: [ProviderSnapshot] {
-        store.notchSnapshots.filter { filter == "all" || (filter == "claude" ? $0.glyph == .claude : $0.glyph == .openai) }
+        Self.readings(store.notchSnapshots, dailyPace: preferences.claudeDailyPaceRing).filter { filter == "all" || (filter == "claude" ? $0.glyph == .claude : $0.glyph == .openai) }
+    }
+    static func readings(_ snapshots: [ProviderSnapshot], dailyPace: Bool, now: Date = Date()) -> [ProviderSnapshot] {
+        DailyPace.apply(to: snapshots, enabled: dailyPace, now: now)
     }
     static func columnCount(width: CGFloat) -> Int { width >= 1162 ? 4 : width >= 574 ? 2 : 1 }
     private var groups: [(String, [ProviderSnapshot])] {
@@ -134,7 +142,7 @@ struct UsageDashboard: View {
                             let enabled = accounts.filter { account in visible.contains { $0.providerID == account.id } }
                             return LinkedAccount.matches(email: email, service: service, summaries: enabled).count > 1
                         } ?? false
-                        DashboardAccountCard(snapshot: snapshot, identity: email, duplicated: duplicated,
+                        DashboardAccountCard(snapshot: snapshot, activity: liveModel.activity(for: snapshot), identity: email, duplicated: duplicated,
                                              refreshing: store.refreshing.contains(snapshot.providerID),
                                              preferences: preferences, compact: layout == "list",
                                              health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
@@ -188,6 +196,15 @@ struct UsageDashboard: View {
                 .onChange(of: geometry.size.width) { _, value in contentWidth = value }
             }
         }
+        .overlay(alignment: .topTrailing) {
+            if let event = liveModel.activeResetAlert {
+                UsageResetCard(event: event, direction: .down, onDismiss: { liveModel.dismissDashboardAlert() })
+                    .padding(18)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .accessibilityLabel("Aviso de consumo no dashboard")
+            }
+        }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: liveModel.activeResetAlert)
         .padding(24)
         .onChange(of: floating) { _, value in stayOnTop(value) }
         .onAppear { stayOnTop(floating) }
@@ -200,6 +217,7 @@ struct UsageDashboard: View {
         .environment(\.usageCriticalLimit, preferences.criticalLimit)
         .environment(\.usageDisplayMode, preferences.usageDisplayMode)
         .environment(\.weeklyRingDashed, preferences.weeklyRingDashed)
+        .environment(\.notchSurfaceStyle, preferences.notchSurfaceStyle)
         .preferredColorScheme(.dark)
     }
     private var filterPicker: some View {
@@ -235,6 +253,7 @@ struct UsageDashboard: View {
 
 private struct DashboardAccountCard: View {
     let snapshot: ProviderSnapshot
+    var activity: ActivitySummary?
     let identity: String?
     let duplicated: Bool
     let refreshing: Bool
@@ -251,7 +270,10 @@ private struct DashboardAccountCard: View {
     @State private var ringHovered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var summaryWindows: [LimitWindow] {
-        let selected = [snapshot.headline, snapshot.weeklyWindow].compactMap { $0 }
+        var seen = Set<String>()
+        let selected = [snapshot.headline, snapshot.fiveHourWindow, snapshot.weeklyLimitWindow,
+                        snapshot.windows.first { $0.id == "weekly_all" }]
+            .compactMap { $0 }.filter { seen.insert($0.id).inserted }
         return selected.isEmpty ? Array(snapshot.windows.prefix(2)) : selected
     }
     private var accountKey: String { ConsumptionHistory.accountKey(providerID: snapshot.providerID, email: identity) }
@@ -273,7 +295,7 @@ private struct DashboardAccountCard: View {
                 ProviderRing(usedFraction: reading.hasReading ? reading.ringFraction : nil,
                              glyph: snapshot.glyph, customIconFilename: snapshot.customIconFilename,
                              isStale: snapshot.status.isStale || !reading.hasReading,
-                             isBlocked: snapshot.block != nil, isRefreshing: refreshing,
+                             isBlocked: snapshot.block != nil, activity: activity, isRefreshing: refreshing,
                              weeklyFraction: reading.hasReading ? reading.weeklyFraction : nil,
                              weeklyRing: preferences.weeklyRing, bandOverride: reading.bandOverride,
                              displayMode: mode)
@@ -324,6 +346,14 @@ private struct DashboardAccountCard: View {
                     }
                 }
             }.frame(maxWidth: .infinity, minHeight: 94, alignment: .topLeading)
+            if let activity, activity.state != .idle {
+                HStack(spacing: 6) {
+                    Circle().fill(activity.color).frame(width: 6, height: 6)
+                    Text(activity.label).font(.caption)
+                    Spacer()
+                    Text("\(activity.sessions.count) sessão(ões)").font(.caption2).foregroundStyle(.white.opacity(0.62))
+                }
+            }
             Divider().opacity(0.5)
             resetCreditsRow.foregroundStyle(.white.opacity(0.62))
             HStack {
@@ -428,7 +458,7 @@ private struct DashboardAccountCard: View {
                 name: AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: names, email: snapshot.accountEmail), records: records)
         }
         .popover(isPresented: Binding(get: { pinnedDetails || ringHovered }, set: { if !$0 { ringHovered = false; pinnedDetails = false } })) {
-            TooltipCard(snapshot: snapshot, now: Date(), direction: .down,
+            TooltipCard(snapshot: snapshot, activity: activity, now: Date(), direction: .down,
                         resetTimeFormat: preferences.resetTimeFormat)
                 .padding(12)
         }

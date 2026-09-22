@@ -328,6 +328,7 @@ final class NotchFleet {
     /// every notch hidden the alert would otherwise vanish without a trace.
     @discardableResult
     func showResetAlert(_ event: UsageResetEvent, duration: TimeInterval = 5.0) -> Bool {
+        menuModel.showDashboardAlert(event, duration: duration)
         var shown = false
         for controller in controllers.values {
             shown = controller.showResetAlert(event, duration: duration) || shown
