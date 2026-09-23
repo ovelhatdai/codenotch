@@ -562,7 +562,7 @@ final class NotchWindowController {
             // Runs for every mouse event on the screen. AppKit does not skip an
             // unchanged value: each assignment re-sends the window's event mask
             // and tags to WindowServer and flushes a layout pass.
-            let ignores = !rects.contains { $0.contains(localCursor(in: panel.frame)) }
+            let ignores = !isOptionDragging && !rects.contains { $0.contains(localCursor(in: panel.frame)) }
             if panel.ignoresMouseEvents != ignores {
                 panel.ignoresMouseEvents = ignores
             }

@@ -12,17 +12,17 @@ final class NotchPanel: NSPanel {
     /// A left click on the visible chrome. Handled here for the same reason the
     /// menu is: the hit test lands on a SwiftUI subview that may consume it.
     var onClick: ((CGPoint) -> Void)?
-    /// ⌥-drag on the chrome, reported as the raw pointer delta since the last
-    /// event — not a cumulative offset, so the caller decides what "along the
-    /// edge" means for the current one. Plain dragging uses a movement threshold;
-    /// Option dragging starts immediately.
+    /// Displacement between pointer positions in screen coordinates, with
+    /// positive dy downward. Raw event deltas can be zero for remote or
+    /// accessibility input. Plain dragging has a threshold; Option starts immediately.
     var onDragStart: (() -> Void)?
     var onDrag: ((CGFloat, CGFloat) -> Void)?
     /// The ⌥-drag ended. Where to persist the offset the drags above moved to.
     var onDragEnd: (() -> Void)?
     var canStartPlainDrag: ((CGPoint) -> Bool)?
     private var pendingClick: CGPoint?
-    private var plainDragDelta = CGPoint.zero
+    private var dragStartScreen = CGPoint.zero
+    private var lastDragScreen = CGPoint.zero
     private var isPlainDragging = false
 
     override func sendEvent(_ event: NSEvent) {
@@ -55,6 +55,8 @@ final class NotchPanel: NSPanel {
             onClick?(event.locationInWindow)
             return
         }
+        dragStartScreen = convertPoint(toScreen: event.locationInWindow)
+        lastDragScreen = dragStartScreen
         if event.modifierFlags.contains(.option) {
             onDragStart?()
             trackOptionDrag()
@@ -62,7 +64,6 @@ final class NotchPanel: NSPanel {
             onClick?(event.locationInWindow)
         } else {
             pendingClick = event.locationInWindow
-            plainDragDelta = .zero
             isPlainDragging = false
         }
     }
@@ -74,17 +75,21 @@ final class NotchPanel: NSPanel {
 
     override func mouseDragged(with event: NSEvent) {
         guard pendingClick != nil else { return super.mouseDragged(with: event) }
+        let point = convertPoint(toScreen: event.locationInWindow)
         if isPlainDragging {
-            onDrag?(event.deltaX, event.deltaY)
-        } else {
-            plainDragDelta.x += event.deltaX
-            plainDragDelta.y += event.deltaY
-            if Self.startsPlainDrag(dx: plainDragDelta.x, dy: plainDragDelta.y) {
-                isPlainDragging = true
-                onDragStart?()
-                onDrag?(plainDragDelta.x, plainDragDelta.y)
-            }
+            reportDrag(to: point)
+        } else if Self.startsPlainDrag(dx: point.x - dragStartScreen.x, dy: point.y - dragStartScreen.y) {
+            isPlainDragging = true
+            onDragStart?()
+            reportDrag(to: point)
         }
+    }
+
+    private func reportDrag(to point: CGPoint) {
+        let dx = point.x - lastDragScreen.x
+        let dy = lastDragScreen.y - point.y
+        lastDragScreen = point
+        onDrag?(dx, dy)
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -103,7 +108,7 @@ final class NotchPanel: NSPanel {
         while let event = nextEvent(matching: [.leftMouseDragged, .leftMouseUp]) {
             switch event.type {
             case .leftMouseDragged:
-                onDrag?(event.deltaX, event.deltaY)
+                reportDrag(to: convertPoint(toScreen: event.locationInWindow))
             case .leftMouseUp:
                 onDragEnd?()
                 return

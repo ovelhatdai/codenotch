@@ -1568,3 +1568,56 @@ final class NotchSizeTests: XCTestCase {
                        notchShare * 0.25, accuracy: 0.001)
     }
 }
+
+@MainActor
+final class NotchPointerGestureTests: XCTestCase {
+    func testDragUsesScreenDisplacementWhenEventDeltasAreZero() throws {
+        let panel = NotchPanel(contentRect: CGRect(x: -800, y: 100, width: 300, height: 200))
+        panel.contentView = NSView(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
+        panel.canStartPlainDrag = { _ in true }
+        var starts = 0
+        var ends = 0
+        var clicks = 0
+        panel.onDragStart = { starts += 1 }
+        panel.onDragEnd = { ends += 1 }
+        panel.onClick = { _ in clicks += 1 }
+        panel.onDrag = { dx, dy in
+            panel.setFrameOrigin(CGPoint(x: panel.frame.minX + dx, y: panel.frame.minY - dy))
+        }
+        func send(_ type: NSEvent.EventType, at screen: CGPoint) throws {
+            let event = try XCTUnwrap(NSEvent.mouseEvent(with: type,
+                location: panel.convertPoint(fromScreen: screen), modifierFlags: [], timestamp: 0,
+                windowNumber: panel.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
+            XCTAssertEqual(event.deltaX, 0)
+            XCTAssertEqual(event.deltaY, 0)
+            panel.sendEvent(event)
+        }
+        try send(.leftMouseDown, at: CGPoint(x: -750, y: 150))
+        try send(.leftMouseDragged, at: CGPoint(x: -550, y: 350))
+        try send(.leftMouseDragged, at: CGPoint(x: 250, y: 400))
+        try send(.leftMouseUp, at: CGPoint(x: 250, y: 400))
+        XCTAssertEqual(starts, 1)
+        XCTAssertEqual(ends, 1)
+        XCTAssertEqual(clicks, 0)
+        XCTAssertEqual(panel.frame.origin, CGPoint(x: 200, y: 350))
+        panel.close()
+    }
+
+    func testSmallPointerMovementStillClicks() throws {
+        let panel = NotchPanel(contentRect: CGRect(x: 100, y: 100, width: 300, height: 200))
+        panel.contentView = NSView(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
+        panel.canStartPlainDrag = { _ in true }
+        var clicks = 0
+        panel.onClick = { _ in clicks += 1 }
+        panel.onDrag = { _, _ in XCTFail("Small click must not drag") }
+        for (type, point) in [(NSEvent.EventType.leftMouseDown, CGPoint(x: 50, y: 50)),
+                              (.leftMouseDragged, CGPoint(x: 52, y: 52)),
+                              (.leftMouseUp, CGPoint(x: 52, y: 52))] {
+            let event = try XCTUnwrap(NSEvent.mouseEvent(with: type, location: point, modifierFlags: [],
+                timestamp: 0, windowNumber: panel.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
+            panel.sendEvent(event)
+        }
+        XCTAssertEqual(clicks, 1)
+        panel.close()
+    }
+}
