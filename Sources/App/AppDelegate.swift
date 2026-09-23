@@ -544,6 +544,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 preferences?.displayPreference = .display(id)
                 preferences?.notchScope = .mainDisplay
             }
+            fleet.savedFloatingPosition = { [weak preferences] id in preferences?.floatingPosition(id: id) }
+            fleet.onSaveFloatingPosition = { [weak preferences] id, point in preferences?.setFloatingPosition(point, id: id) }
             fleet.screenOffset = { [weak preferences] id, edge in preferences?.screenOffset(id: id, edge: edge) }
             fleet.onScreenReposition = { [weak preferences] id, edge, offset in preferences?.setScreenOffset(offset, id: id, edge: edge) }
             fleet.onReposition = { [weak preferences] offset in

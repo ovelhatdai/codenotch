@@ -31,6 +31,9 @@ final class NotchWindowController {
     /// Preferences' job, the same division `apply(edge:)` already keeps.
     var onReposition: ((CGFloat) -> Void)?
     var onMoveToScreen: ((NSScreen, CGFloat?) -> Void)?
+    var floatingPosition: CGPoint?
+    var onFloat: ((NSScreen, CGPoint) -> Void)?
+    var onDock: (() -> Void)?
     var onSelectMonitor: ((NSScreen) -> Void)?
     /// A move settled on a new edge. The fleet owns writing that to
     /// preferences, for the same reason it owns `onReposition`.
@@ -299,13 +302,20 @@ final class NotchWindowController {
         guard let screen = currentScreen() else { return }
         model.adopt(screen: screen)
         let size = model.panelSize(cellCount: cellCount ?? model.snapshots.count)
-        let frame = NotchGeometry.panelFrame(
+        var frame = NotchGeometry.panelFrame(
             for: screen, panelSize: size, edge: model.edge,
             alongOffset: model.alongOffset, slack: model.slack,
             trailingExtent: model.trailingExtent,
             leadingExtent: model.leadingExtent
         )
 
+        if let floatingPosition {
+            let bar = NotchPlacement(edge: model.edge, panelSize: frame.size).rect(
+                along: model.slack, across: 0,
+                length: model.shapeLength * model.sizeScale, depth: model.notchDepth * model.sizeScale)
+            frame = NotchGeometry.floatingFrame(panelSize: frame.size, bar: bar,
+                                               position: floatingPosition, visible: screen.visibleFrame)
+        }
         if let panel {
             panel.setFrame(frame, display: true)
         } else {
@@ -325,8 +335,9 @@ final class NotchWindowController {
             panel.onDrag = { [weak self] dx, dy in self?.dragged(dx: dx, dy: dy) }
             panel.onDragEnd = { [weak self] in
                 guard let self else { return }
-                self.endOptionDrag()
+                self.isOptionDragging = false
                 self.finishDrag(at: NSEvent.mouseLocation)
+                self.cursorMoved()
             }
 
             // The hosting view goes *inside* a plain container rather than
@@ -378,7 +389,7 @@ final class NotchWindowController {
     private func dragged(dx: CGFloat, dy: CGFloat) {
         guard let panel else { return }
         // Move the existing window, without rebuilding its SwiftUI tree on
-        // every mouse event. Snap to the chosen edge only on release.
+        // every mouse event. Save its free position only on release.
         panel.setFrameOrigin(CGPoint(x: panel.frame.minX + dx, y: panel.frame.minY - dy))
     }
 
@@ -389,12 +400,12 @@ final class NotchWindowController {
     private func finishDrag(at point: CGPoint) {
         guard let target = NSScreen.screens.first(where: { $0.frame.contains(point) }) else { relocate(); return }
         let center = panel.map { CGPoint(x: $0.frame.minX + notchRect.midX, y: $0.frame.maxY - notchRect.midY) } ?? point
-        let offset = Self.dragOffset(at: center, screen: target.frame, edge: model.edge)
-        if target.displayIdentifier != assignedScreen?.displayIdentifier, let onMoveToScreen {
-            onMoveToScreen(target, offset)
+        let position = NotchGeometry.normalizedCenter(center, in: target.visibleFrame)
+        if let onFloat {
+            onFloat(target, position)
         } else {
-            model.alongOffset = offset
-            onReposition?(offset)
+            assignedScreen = target
+            floatingPosition = position
         }
         relocate()
     }
@@ -411,12 +422,6 @@ final class NotchWindowController {
         model.isHoveringMove = false
         setPointing(false)
         updateInteractiveRects()
-    }
-
-    private func endOptionDrag() {
-        guard isOptionDragging else { return }
-        isOptionDragging = false
-        cursorMoved()
     }
 
     // MARK: - Hit regions
@@ -1254,6 +1259,10 @@ final class NotchWindowController {
         keepOpen.isEnabled = true
         menu.addItem(keepOpen)
         menu.addItem(.separator())
+        let dock = NSMenuItem(title: "Fixar na borda", action: #selector(MenuActions.dockToEdge(_:)), keyEquivalent: "")
+        dock.target = menuActions
+        dock.isEnabled = floatingPosition != nil
+        menu.addItem(dock)
         let displays = NSMenu()
         displays.autoenablesItems = false
         for (index, screen) in NSScreen.screens.enumerated() {
@@ -1302,6 +1311,11 @@ final class NotchWindowController {
         refresh: { [weak self] in self?.onRefresh?() },
         signIn: { [weak self] index in self?.signInItems[safe: index]?.action() },
         togglePinned: { [weak self] in self?.togglePinned() },
+        dock: { [weak self] in
+            self?.floatingPosition = nil
+            self?.onDock?()
+            self?.relocate()
+        },
         selectScreen: { [weak self] id in
             guard let screen = NSScreen.screens.first(where: { $0.displayIdentifier == id }) else { return }
             self?.onSelectMonitor?(screen)
@@ -1317,19 +1331,23 @@ final class MenuActions: NSObject {
     private let signIn: (Int) -> Void
     private let pin: () -> Void
     private let screen: (String) -> Void
+    private let dock: () -> Void
 
     init(
         refresh: @escaping () -> Void,
         signIn: @escaping (Int) -> Void,
         togglePinned: @escaping () -> Void,
+        dock: @escaping () -> Void = {},
         selectScreen: @escaping (String) -> Void = { _ in }
     ) {
         self.refresh = refresh
         self.signIn = signIn
         self.pin = togglePinned
         self.screen = selectScreen
+        self.dock = dock
     }
 
+    @objc func dockToEdge(_ sender: Any?) { dock() }
     @objc func selectScreen(_ sender: NSMenuItem) {
         if let id = sender.representedObject as? String { screen(id) }
     }

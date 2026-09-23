@@ -27,14 +27,15 @@ Compilação e testes em série, no máximo dois jobs. Validação física e con
 - `cedar_ember=1` na mesma leitura OAuth já feita por perfil, sem segundo pedido nem subprocesso.
 - Oferta indisponível/recusada/malformada continua desconhecida, nunca vira zero. Créditos expirados, futuros e pausados não contam como disponíveis.
 - Dashboard inicia em ajuste à janela: 1, 2 ou 4 colunas, páginas em janelas menores, detalhes no anel, controles de organização em popover, botão de tela cheia. Histórico e exibição detalhada mantêm rolagem quando necessária.
-- Escolha explícita de monitor no menu da barra seleciona uma tela; arraste no modo todas as telas preserva uma barra por tela. Alça acompanha o monitor de destino. Arraste simples move a janela existente e só recalcula a geometria ao soltar.
+- Escolha explícita de monitor no menu da barra seleciona uma tela; arraste no modo todas as telas preserva uma barra por tela. Alça acompanha o monitor de destino. Arraste simples move a janela existente livremente, inclusive para o centro de outro monitor. A posição é salva por monitor, preservada nas atualizações e limitada pela área visível. Menu de botão direito oferece “Fixar na borda”; o modo todas as telas mantém uma barra por tela. Não há consulta de rede, timer ou reconstrução de views em cada movimento.
 - Cartões com superfície sólida e transição curta de borda no hover, sem pilha de desfoques ou escala/sombra animada. Nenhum loop de animação ou timer novo.
 
 ## Validação realizada
 - Build Debug macOS arm64 e 54 testes direcionados aprovados, em série, com dois jobs e prioridade reduzida.
 - Inclui contrato HTTP GET, mesma credencial/resposta, restrição de superfície, validade, dados ausentes, separação entre contas, geometrias vertical/horizontal/pequena, monitores negativos, seleção de tela e preservação do modo todas as telas.
 - Prévia nativa do dashboard com oito contas fictícias, sem autenticação ou rede.
-- Nenhum reset resgatado; aplicativo instalado não substituído.
+- Mais 20 testes aprovados após o arraste livre: persistência por monitor, retorno à borda, posição durante atualizações e mudanças de espaço dos detalhes, coordenadas negativas e preservação de barras em todas as telas.
+- Nenhum reset resgatado.
 
 ## Pendências reais
 - A API retornou `surface` na consulta autenticada verificada: o PR não promete revelar contagens que o serviço não forneceu. O link oficial depende da conta conectada no navegador; conferir a identidade.
