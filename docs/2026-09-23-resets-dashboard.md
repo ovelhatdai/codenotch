@@ -44,10 +44,11 @@ O arraste passa a usar deslocamento entre posições globais do ponteiro. Evento
 - Build Release arm64 assinado, instalado e aberto em `/Applications/CodeNotch Pessoal.app`; executável instalado tem o mesmo SHA-256 do build.
 - Oito indicadores presentes. Hashes de contas vinculadas e nomes iguais antes/depois; nenhum reset resgatado.
 - Menu nativo confirmou “Fixar na borda” e quatro monitores. Automação por coordenadas não confirmou o gesto físico; validação com o usuário permanece pendente.
+- Na versão instalada, seleção do dashboard no monitor horizontal e retorno ao vertical confirmados por interface e preferência persistida. Após instalar o ajuste de orientação, “Usar tela vertical” exibiu as oito contas reais em duas colunas, sem rolagem nem paginação nessa janela. Janela menor mostrou seis cartões e paginação, preservando as oito contas.
 - Amostra curta após abertura: aproximadamente 106 MB de RSS; não prova consumo prolongado nem resolução dos travamentos.
 
 ## Pendências reais
 - A API retornou `surface` na consulta autenticada verificada: o PR não promete revelar contagens que o serviço não forneceu. O link oficial depende da conta conectada no navegador; conferir a identidade.
 - Caminho legado de leitura por cache/CLI permanece sem metadados de resets; as sessões OAuth independentes usam a nova consulta.
-- Validar manualmente arraste físico, tela cheia e troca de monitor, desconexão de monitor e consumo prolongado no Mac. Testes de geometria e renderização não substituem essa validação e não comprovam a resolução dos travamentos relatados.
+- Validar manualmente arraste físico da barra entre os quatro monitores, tela cheia, desconexão de monitor e consumo prolongado no Mac. A troca do dashboard pelo seletor e pelo atalho vertical foi verificada; isso não comprova o gesto físico da barra nem a resolução dos travamentos relatados.
 - PR complementar depende do PR #1 ainda aberto. Não houve merge ou publicação de instalador.
