@@ -278,7 +278,7 @@ struct UsageDashboard: View {
                     DashboardAccountCard(snapshot: snapshot, activity: liveModel.activity(for: snapshot),
                         identity: snapshot.accountEmail, duplicated: false,
                         refreshing: store.refreshing.contains(snapshot.providerID), preferences: preferences,
-                        compact: false, fitted: true, roomy: plan.cardHeight >= 300, health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
+                        compact: false, fitted: true, roomy: plan.cardHeight >= 300, fittedScale: plan.contentScale, health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
                         .help(snapshot.accountEmail ?? snapshot.displayName)
                         .frame(height: plan.cardHeight)
                 }
@@ -342,6 +342,7 @@ private struct DashboardAccountCard: View {
     var compact: Bool
     var fitted: Bool = false
     var roomy: Bool = false
+    var fittedScale: CGFloat = 1
     var health: ReadingHealth?
     var history: ConsumptionHistory?
     @State private var showsBudget = false
@@ -523,33 +524,33 @@ private struct DashboardAccountCard: View {
         }
     }
     private var fittedBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 8 * fittedScale) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: names, email: snapshot.accountEmail))
-                        .font(.headline).lineLimit(1)
+                        .font(.system(size: 13 * fittedScale, weight: .semibold)).lineLimit(1)
                     Text(snapshot.glyph == .claude ? "Claude Code" : "Codex / OpenAI")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.system(size: 11 * fittedScale)).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
                 Button { pinnedDetails = true } label: { Image(systemName: "arrow.up.right") }
                     .buttonStyle(.plain).help("Todos os dados, renovação e atividade desta conta")
             }
-            HStack(spacing: 14) {
+            HStack(spacing: 14 * fittedScale) {
                 ProviderRing(usedFraction: reading.hasReading ? reading.ringFraction : nil,
                     glyph: snapshot.glyph, isStale: snapshot.status.isStale || !reading.hasReading,
                     isBlocked: snapshot.block != nil, activity: activity, isRefreshing: refreshing,
                     weeklyFraction: reading.hasReading ? reading.weeklyFraction : nil,
                     weeklyRing: preferences.weeklyRing, bandOverride: reading.bandOverride, displayMode: mode)
-                    .scaleEffect(1.3).frame(width: 58, height: 58)
+                    .scaleEffect(1.3 * fittedScale).frame(width: 58 * fittedScale, height: 58 * fittedScale)
                     .onHover { ringHovered = $0 }.onTapGesture { pinnedDetails = true }
                 VStack(alignment: .leading) {
-                    Text(mode.text(for: reading)).font(.system(size: 30, weight: .medium, design: .rounded)).monospacedDigit()
-                    Text(mode.title + " · " + (reading.headline?.label ?? "Sem leitura")).font(.caption2).lineLimit(1)
+                    Text(mode.text(for: reading)).font(.system(size: 30 * fittedScale, weight: .medium, design: .rounded)).monospacedDigit()
+                    Text(mode.title + " · " + (reading.headline?.label ?? "Sem leitura")).font(.system(size: 10 * fittedScale)).lineLimit(1)
                 }
             }
             if roomy {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 8 * fittedScale) {
                     ForEach(summaryWindows.prefix(2)) { window in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -558,7 +559,7 @@ private struct DashboardAccountCard: View {
                                 if let fraction = window.usedFraction {
                                     Text((mode == .available ? Percent.halves(for: fraction).left : Percent.text(for: fraction)) + "%").monospacedDigit()
                                 }
-                            }.font(.caption)
+                            }.font(.system(size: 11 * fittedScale))
                             if let fraction = window.usedFraction {
                                 GeometryReader { proxy in
                                     Capsule().fill(.white.opacity(0.1)).overlay(alignment: .leading) {
@@ -569,7 +570,7 @@ private struct DashboardAccountCard: View {
                             }
                             if let reset = window.resetsAt {
                                 Text(ResetCopy.text(for: reset, now: Date(), format: preferences.resetTimeFormat))
-                                    .font(.caption2).foregroundStyle(.secondary)
+                                    .font(.system(size: 10 * fittedScale)).foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -579,19 +580,19 @@ private struct DashboardAccountCard: View {
             }
             Spacer(minLength: 0)
             HStack {
-                Label("Resets extras", systemImage: "arrow.counterclockwise").font(.caption)
+                Label("Resets extras", systemImage: "arrow.counterclockwise").font(.system(size: 11 * fittedScale))
                 Spacer()
-                Text(snapshot.resetCredits.map { String($0.availableCount) } ?? "Consultar").font(.caption).bold()
+                Text(snapshot.resetCredits.map { String($0.availableCount) } ?? "Consultar").font(.system(size: 11 * fittedScale)).bold()
             }.help(snapshot.resetCreditsMessage ?? "Redefinições extras; veja a validade nos detalhes da conta")
             if snapshot.resetCredits == nil, snapshot.glyph == .claude {
-                Link("Ver oferta no Claude", destination: URL(string: "https://claude.ai/settings/usage")!).font(.caption2)
+                Link("Ver oferta no Claude", destination: URL(string: "https://claude.ai/settings/usage")!).font(.system(size: 10 * fittedScale))
                     .help("O site usa a conta conectada no navegador; confira o e-mail antes de consultar")
             } else if let expiry = snapshot.resetCredits?.nextExpiry {
-                Text("Expira \(expiry.formatted(date: .abbreviated, time: .omitted))").font(.caption2).foregroundStyle(.secondary)
+                Text("Expira \(expiry.formatted(date: .abbreviated, time: .omitted))").font(.system(size: 10 * fittedScale)).foregroundStyle(.secondary)
             }
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
                 Text(health?.at(timeline.date).title ?? "Aguardando leitura")
-                    .font(.caption2).foregroundStyle(health?.at(timeline.date).state == .current ? .secondary : Color.orange)
+                    .font(.system(size: 10 * fittedScale)).foregroundStyle(health?.at(timeline.date).state == .current ? .secondary : Color.orange)
             }
         }
     }

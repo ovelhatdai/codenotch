@@ -22,18 +22,18 @@ final class DashboardFitLayoutTests: XCTestCase {
         let model = NotchViewModel()
         let view = UsageDashboard(store: store, preferences: preferences, liveModel: model, moveTo: { _ in }, stayOnTop: { _ in })
             .defaultAppStorage(defaults)
-            .frame(width: 1000, height: 1600)
+            .frame(width: 1440, height: 2400)
         let hosting = NSHostingView(rootView: view.environment(\.colorScheme, .dark))
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1000, height: 1600), styleMask: [.borderless], backing: .buffered, defer: false)
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 2400), styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.appearance = NSAppearance(named: .darkAqua)
         window.contentView = hosting
         defer { window.contentView = nil; window.close() }
-        hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 1600)
+        hosting.frame = NSRect(x: 0, y: 0, width: 1440, height: 2400)
         hosting.layoutSubtreeIfNeeded()
         let bitmap = try XCTUnwrap(hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds))
         hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
-        XCTAssertEqual(hosting.bounds.size, CGSize(width: 1000, height: 1600))
+        XCTAssertEqual(hosting.bounds.size, CGSize(width: 1440, height: 2400))
         if let path = ProcessInfo.processInfo.environment["DASHBOARD_RENDER_PATH"] {
             try XCTUnwrap(bitmap.representation(using: .png, properties: [:])).write(to: URL(fileURLWithPath: path))
         }
@@ -46,6 +46,27 @@ final class DashboardFitLayoutTests: XCTestCase {
             XCTAssertEqual(plan.range(page: 0, count: 8), 0..<8)
         }
     }
+    func testWidePortraitUsesFourReadableRowsAndScalesContent() {
+        let plan = DashboardFitLayout(size: CGSize(width: 1440, height: 2400), count: 8)
+        XCTAssertEqual(plan.columns, 2)
+        XCTAssertEqual(plan.capacity, 8)
+        XCTAssertEqual(plan.pageCount, 1)
+        XCTAssertGreaterThan(plan.cardHeight * 4, 2200)
+        XCTAssertGreaterThan(plan.contentScale, 1)
+        XCTAssertLessThanOrEqual(plan.cardHeight * 4 + 3 * 12 + 36, 2400)
+        let landscape = DashboardFitLayout(size: CGSize(width: 1440, height: 800), count: 8)
+        XCTAssertEqual(landscape.columns, 4)
+        XCTAssertEqual(landscape.pageCount, 1)
+    }
+
+    func testPortraitToLandscapeResizingPreservesEveryAccount() {
+        for size in [CGSize(width: 1080, height: 1700), CGSize(width: 1440, height: 2400),
+                     CGSize(width: 1400, height: 700), CGSize(width: 800, height: 900)] {
+            let plan = DashboardFitLayout(size: size, count: 8)
+            XCTAssertEqual((0..<plan.pageCount).flatMap { Array(plan.range(page: $0, count: 8)) }, Array(0..<8))
+        }
+    }
+
     func testSmallWindowsPaginateWithoutDroppingOrRepeatingAccounts() {
         let plan = DashboardFitLayout(size: CGSize(width: 340, height: 290), count: 8)
         XCTAssertEqual(plan.columns, 1)
