@@ -35,7 +35,10 @@ Compilação e testes em série, no máximo dois jobs. Validação física e con
 - Inclui contrato HTTP GET, mesma credencial/resposta, restrição de superfície, validade, dados ausentes, separação entre contas, geometrias vertical/horizontal/pequena, monitores negativos, seleção de tela e preservação do modo todas as telas.
 - Prévia nativa do dashboard com oito contas fictícias, sem autenticação ou rede.
 - Mais 20 testes aprovados após o arraste livre: persistência por monitor, retorno à borda, posição durante atualizações e mudanças de espaço dos detalhes, coordenadas negativas e preservação de barras em todas as telas.
-- Nenhum reset resgatado.
+- Build Release arm64 assinado, instalado e aberto em `/Applications/CodeNotch Pessoal.app`; executável instalado tem o mesmo SHA-256 do build.
+- Oito indicadores presentes. Hashes de contas vinculadas e nomes iguais antes/depois; nenhum reset resgatado.
+- Menu nativo confirmou “Fixar na borda” e quatro monitores. Automação por coordenadas não confirmou o gesto físico; validação com o usuário permanece pendente.
+- Amostra curta após abertura: aproximadamente 106 MB de RSS; não prova consumo prolongado nem resolução dos travamentos.
 
 ## Pendências reais
 - A API retornou `surface` na consulta autenticada verificada: o PR não promete revelar contagens que o serviço não forneceu. O link oficial depende da conta conectada no navegador; conferir a identidade.
