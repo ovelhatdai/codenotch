@@ -84,6 +84,7 @@ final class NotchFleet {
     /// An ⌥-drag on any one panel settled at a new offset. Persisting it is
     /// Preferences' job, same division `apply(edge:)` already keeps.
     var onReposition: ((CGFloat) -> Void)?
+    var onSelectScreen: ((String) -> Void)?
     var screenOffset: ((String, NotchEdge) -> CGFloat?)?
     var onScreenReposition: ((String, NotchEdge, CGFloat) -> Void)?
     /// A move handle carried a notch to another edge. Persisting it is
@@ -471,6 +472,27 @@ final class NotchFleet {
             if let id = controller?.assignedScreen?.displayIdentifier, let save = self.onScreenReposition {
                 save(id, self.edge, offset)
             } else { self.onReposition?(offset) }
+        }
+        controller.onSelectMonitor = { [weak self] screen in
+            guard let self, let id = screen.displayIdentifier else { return }
+            self.onSelectScreen?(id)
+            self.apply(displayPreference: .display(id))
+            self.apply(scope: .mainDisplay)
+        }
+        controller.onMoveToScreen = { [weak self] screen, offset in
+            guard let self, let id = screen.displayIdentifier else { return }
+            if let offset { self.onScreenReposition?(id, self.edge, offset) }
+            if self.scope == .allDisplays {
+                // Every display already owns a bar. Reposition the destination
+                // without removing the source or creating a duplicate window.
+                if let target = self.controllers[Self.key(for: screen)] {
+                    if let offset { target.model.alongOffset = offset }
+                    target.relocate()
+                }
+            } else {
+                self.onSelectScreen?(id)
+                self.apply(displayPreference: .display(id))
+            }
         }
         controller.onMoveToEdge = onMoveToEdge
         controller.signInItems = signInItems

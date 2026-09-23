@@ -38,7 +38,7 @@ actor ClaudeOAuthProvider: UsageProvider {
     /// This profile's token, behind its own cache — see `ClaudeKeychain`.
     nonisolated private let keychain: ClaudeKeychain
 
-    private let endpoint = URL(string: "https://api.anthropic.com/api/oauth/usage")!
+    private let endpoint = URL(string: "https://api.anthropic.com/api/oauth/usage?cedar_ember=1")!
     private let session: URLSession
     /// Held between refreshes so the keychain is read once per token, not once
     /// per minute — a keychain read can put a prompt in front of the user.
@@ -412,7 +412,11 @@ actor ClaudeOAuthProvider: UsageProvider {
                 L10n.t("Claude answered, but listed no usage limits for this account. Some Enterprise and team plans don't report them.")
             )
         }
-        return snapshot(windows: windows, plan: credentials?.subscriptionType)
+        var result = snapshot(windows: windows, plan: credentials?.subscriptionType)
+        let resets = ClaudeResetAvailability.read(data)
+        result.resetCredits = resets.credits
+        result.resetCreditsMessage = resets.explanation
+        return result
     }
 
     private func currentToken() throws -> String {

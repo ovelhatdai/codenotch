@@ -7,6 +7,7 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
     private var isRestoring = false
     private let defaults: UserDefaults
     private var lastScreenID: String?
+    private var pendingMonitorID: String?
 
     var liveModel: NotchViewModel?
 
@@ -42,6 +43,11 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
     }
     private func move(to screen: NSScreen) {
         guard let window else { return }
+        if window.styleMask.contains(.fullScreen) {
+            pendingMonitorID = screen.displayIdentifier
+            window.toggleFullScreen(nil)
+            return
+        }
         savePlacement()
         isRestoring = true
         let frames = defaults.dictionary(forKey: "dashboardFramesByMonitor") as? [String: String] ?? [:]
@@ -52,6 +58,12 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
         window.setFrame(Self.visibleFrame(remembered ?? fallback, on: screen.visibleFrame), display: true)
         isRestoring = false
         savePlacement()
+    }
+    func windowDidExitFullScreen(_ notification: Notification) {
+        guard let id = pendingMonitorID else { return }
+        pendingMonitorID = nil
+        if let screen = NSScreen.screens.first(where: { $0.displayIdentifier == id }) { move(to: screen) }
+        else { recoverVisibleWindow() }
     }
     private func recoverVisibleWindow() {
         guard let window, let fallback = NSScreen.main ?? NSScreen.screens.first else { return }
@@ -82,12 +94,15 @@ final class UsageDashboardController: NSWindowController, NSWindowDelegate {
         panel.appearance = NSAppearance(named: .darkAqua)
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        panel.minSize = NSSize(width: 380, height: 420)
+        panel.minSize = NSSize(width: 380, height: 580)
+        panel.collectionBehavior.insert(.fullScreenPrimary)
         panel.isReleasedWhenClosed = false
         panel.setFrameAutosaveName("usageDashboardFrame")
         panel.contentView = NSHostingView(rootView: UsageDashboard(store: store, preferences: preferences, liveModel: liveModel,
             moveTo: { [weak self] screen in self?.move(to: screen)
-            }, stayOnTop: { [weak panel] in panel?.level = $0 ? .floating : .normal }))
+            }, stayOnTop: { [weak panel] in panel?.level = $0 ? .floating : .normal },
+            fullScreen: { [weak panel] in panel?.toggleFullScreen(nil) },
+            currentMonitor: { [weak panel] in panel?.screen?.displayIdentifier }))
         window = panel
         panel.delegate = self
         if !panel.setFrameUsingName("usageDashboardFrame") { panel.center() }
@@ -111,6 +126,12 @@ struct UsageDashboard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let moveTo: (NSScreen) -> Void
     let stayOnTop: (Bool) -> Void
+    var fullScreen: () -> Void = {}
+    var currentMonitor: () -> String? = { nil }
+    @AppStorage("dashboardFitWindow") private var fitWindow = true
+    @State private var fitPage = 0
+    @State private var screens = NSScreen.screens
+    @State private var selectedMonitor: String?
     @AppStorage("dashboardFloating") private var floating = false
     @AppStorage("dashboardFilter") private var filter = "all"
     @AppStorage("dashboardGrouping") private var grouping = "service"
@@ -178,24 +199,28 @@ struct UsageDashboard: View {
                 Button { withAnimation(.easeInOut(duration: 0.2)) { showsControls.toggle() } } label: {
                     Image(systemName: "slider.horizontal.3")
                 }.help("Organização e exibição")
+                .popover(isPresented: $showsControls) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        organizationControls
+                        Toggle("Manter sobre as outras janelas", isOn: $floating)
+                    }.padding(18).frame(width: 340)
+                }
+                Button(action: fullScreen) { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                    .help("Entrar ou sair da tela cheia")
             }
             ViewThatFits(in: .horizontal) {
               HStack { filterPicker; Spacer(); monitorMenu }
               VStack(alignment: .leading) { filterPicker; monitorMenu }
             }
-            if showsControls {
-                VStack(alignment: .leading, spacing: 12) {
-                    ViewThatFits(in: .horizontal) {
-                        HStack { organizationControls }
-                        VStack(alignment: .leading) { organizationControls }
-                    }
-                    Toggle("Manter sobre as outras janelas", isOn: $floating)
-                }.padding(14).background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-            }
             Picker("Página", selection: $page) {
                 Text("Contas").tag("accounts"); Text("Histórico").tag("history")
             }.pickerStyle(.segmented).frame(maxWidth: 230)
+            Toggle("Ajustar cartões à janela", isOn: $fitWindow)
+                .help("Mantém os anéis legíveis e divide em páginas quando não cabe tudo, sem rolagem lateral")
             GeometryReader { geometry in
+                if page == "accounts", fitWindow {
+                    fittedAccounts(size: geometry.size)
+                } else {
                 ScrollView {
                     if page == "history", let history = store.consumptionHistory {
                         ConsumptionHistoryView(history: history, snapshots: visible, summaries: store.providerSummaries)
@@ -208,6 +233,7 @@ struct UsageDashboard: View {
                 }
                 .onAppear { contentWidth = geometry.size.width }
                 .onChange(of: geometry.size.width) { _, value in contentWidth = value }
+                }
             }
         }
         .overlay(alignment: .topTrailing) {
@@ -221,10 +247,17 @@ struct UsageDashboard: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: liveModel.activeResetAlert)
         .padding(24)
         .onChange(of: floating) { _, value in stayOnTop(value) }
-        .onAppear { stayOnTop(floating) }
-        .frame(minWidth: 340, minHeight: 380)
+        .onAppear { stayOnTop(floating); selectedMonitor = currentMonitor() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) { _ in
+            screens = NSScreen.screens; selectedMonitor = currentMonitor()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didMoveNotification)) { _ in
+            selectedMonitor = currentMonitor()
+        }
+        .onChange(of: filter) { _, _ in fitPage = 0 }
+        .onChange(of: grouping) { _, _ in fitPage = 0 }
+        .frame(minWidth: 340, minHeight: 540)
         .background(.black.opacity(0.82))
-        .background(.ultraThinMaterial)
         .foregroundStyle(.white)
         .environment(\.codenotchAccentColor, preferences.accentColor.color)
         .environment(\.usageWatchLimit, preferences.watchLimit)
@@ -233,6 +266,36 @@ struct UsageDashboard: View {
         .environment(\.weeklyRingDashed, preferences.weeklyRingDashed)
         .environment(\.notchSurfaceStyle, preferences.notchSurfaceStyle)
         .preferredColorScheme(.dark)
+    }
+    private func fittedAccounts(size: CGSize) -> some View {
+        let ordered = groups.flatMap { $0.1 }
+        let plan = DashboardFitLayout(size: size, count: ordered.count)
+        let current = min(fitPage, plan.pageCount - 1)
+        let items = Array(ordered[plan.range(page: current, count: ordered.count)])
+        return VStack(spacing: 10) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: plan.columns), spacing: 12) {
+                ForEach(items) { snapshot in
+                    DashboardAccountCard(snapshot: snapshot, activity: liveModel.activity(for: snapshot),
+                        identity: snapshot.accountEmail, duplicated: false,
+                        refreshing: store.refreshing.contains(snapshot.providerID), preferences: preferences,
+                        compact: false, fitted: true, roomy: plan.cardHeight >= 300, health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
+                        .help(snapshot.accountEmail ?? snapshot.displayName)
+                        .frame(height: plan.cardHeight)
+                }
+            }
+            if ordered.isEmpty { Text("Ative uma conta nos ajustes para acompanhar o consumo.") }
+            Spacer(minLength: 0)
+            HStack {
+                Text("\(ordered.count) contas · agrupadas \(grouping == "service" ? "por serviço" : "por conta")")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                if plan.pageCount > 1 {
+                    Button { fitPage = current - 1 } label: { Image(systemName: "chevron.left") }.disabled(current == 0)
+                    Text("\(current + 1) / \(plan.pageCount)").monospacedDigit()
+                    Button { fitPage = current + 1 } label: { Image(systemName: "chevron.right") }.disabled(current + 1 == plan.pageCount)
+                }
+            }.frame(height: 26)
+        }
     }
     private var filterPicker: some View {
                 Picker("Perfis", selection: $filter) {
@@ -243,14 +306,18 @@ struct UsageDashboard: View {
     }
     private var monitorMenu: some View {
         HStack {
-            if let portrait = NSScreen.screens.first(where: { $0.frame.height > $0.frame.width }) {
+            if let portrait = screens.first(where: { $0.frame.height > $0.frame.width }) {
                 Button("Usar tela vertical") {
-                    moveTo(portrait)
+                    moveTo(portrait); selectedMonitor = portrait.displayIdentifier
                 }.help("Move esta janela para o monitor vertical; os cartões se adaptam à largura")
             }
             Menu("Monitor") {
-                ForEach(Array(NSScreen.screens.enumerated()), id: \.offset) { index, screen in
-                    Button("\(index + 1) · \(screen.localizedName) · \(screen.frame.height > screen.frame.width ? "vertical" : "horizontal")") { moveTo(screen) }
+                ForEach(Array(screens.enumerated()), id: \.offset) { index, screen in
+                    Button {
+                        moveTo(screen); selectedMonitor = screen.displayIdentifier
+                    } label: {
+                        Text("\(selectedMonitor == screen.displayIdentifier ? "✓ " : "")\(index + 1) · \(screen.localizedName) · \(screen.frame.height > screen.frame.width ? "vertical" : "horizontal")")
+                    }
                 }
             }.fixedSize()
         }
@@ -273,6 +340,8 @@ private struct DashboardAccountCard: View {
     let refreshing: Bool
     @ObservedObject var preferences: Preferences
     var compact: Bool
+    var fitted: Bool = false
+    var roomy: Bool = false
     var health: ReadingHealth?
     var history: ConsumptionHistory?
     @State private var showsBudget = false
@@ -401,12 +470,16 @@ private struct DashboardAccountCard: View {
                 HStack {
                     Label("Resets extras disponíveis", systemImage: "arrow.counterclockwise")
                     Spacer()
-                    Text(snapshot.resetCredits.map { String($0.availableCount) } ?? "Não informado")
+                    Text(snapshot.resetCredits.map { String($0.availableCount) } ?? (snapshot.resetCreditsMessage == nil ? "Não informado" : "Consulte no Claude"))
                         .fontWeight(.semibold).monospacedDigit()
                 }
                 if let credits = snapshot.resetCredits, credits.availableCount > 0, let expiry = credits.nextExpiry {
                     Text("Próximo vencimento: \(expiry.formatted(date: .abbreviated, time: .shortened))")
                         .foregroundStyle(.white.opacity(0.62))
+                }
+                if let explanation = snapshot.resetCreditsMessage {
+                    Text(explanation).font(.caption2).fixedSize(horizontal: false, vertical: true)
+                    Link("Ver redefinições no Claude", destination: URL(string: "https://claude.ai/settings/usage")!)
                 }
             }.font(.caption)
             .help("Créditos de renovação extra informados pelo serviço. São diferentes da renovação automática da sessão ou da semana. Consultar este número não consome um reset.")
@@ -449,23 +522,88 @@ private struct DashboardAccountCard: View {
             }.font(.caption)
         }
     }
-    var body: some View {
-        Group { if compact { compactBody } else { cardBody } }
-        .padding(compact ? 18 : 22)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .frame(minHeight: compact ? nil : 360, alignment: .topLeading)
-        .background {
-            if #available(macOS 26.0, *) {
-                RoundedRectangle(cornerRadius: 26).fill(.clear)
-                    .glassEffect(.regular.tint(.black.opacity(0.22)), in: RoundedRectangle(cornerRadius: 26))
+    private var fittedBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: names, email: snapshot.accountEmail))
+                        .font(.headline).lineLimit(1)
+                    Text(snapshot.glyph == .claude ? "Claude Code" : "Codex / OpenAI")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                Button { pinnedDetails = true } label: { Image(systemName: "arrow.up.right") }
+                    .buttonStyle(.plain).help("Todos os dados, renovação e atividade desta conta")
+            }
+            HStack(spacing: 14) {
+                ProviderRing(usedFraction: reading.hasReading ? reading.ringFraction : nil,
+                    glyph: snapshot.glyph, isStale: snapshot.status.isStale || !reading.hasReading,
+                    isBlocked: snapshot.block != nil, activity: activity, isRefreshing: refreshing,
+                    weeklyFraction: reading.hasReading ? reading.weeklyFraction : nil,
+                    weeklyRing: preferences.weeklyRing, bandOverride: reading.bandOverride, displayMode: mode)
+                    .scaleEffect(1.3).frame(width: 58, height: 58)
+                    .onHover { ringHovered = $0 }.onTapGesture { pinnedDetails = true }
+                VStack(alignment: .leading) {
+                    Text(mode.text(for: reading)).font(.system(size: 30, weight: .medium, design: .rounded)).monospacedDigit()
+                    Text(mode.title + " · " + (reading.headline?.label ?? "Sem leitura")).font(.caption2).lineLimit(1)
+                }
+            }
+            if roomy {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(summaryWindows.prefix(2)) { window in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(window.label)
+                                Spacer()
+                                if let fraction = window.usedFraction {
+                                    Text((mode == .available ? Percent.halves(for: fraction).left : Percent.text(for: fraction)) + "%").monospacedDigit()
+                                }
+                            }.font(.caption)
+                            if let fraction = window.usedFraction {
+                                GeometryReader { proxy in
+                                    Capsule().fill(.white.opacity(0.1)).overlay(alignment: .leading) {
+                                        Capsule().fill(UsageBand.band(for: fraction, watchLimit: preferences.watchLimit, criticalLimit: preferences.criticalLimit).color(accent: preferences.accentColor.color))
+                                            .frame(width: max(0, proxy.size.width * mode.fraction(for: fraction)))
+                                    }
+                                }.frame(height: 4)
+                            }
+                            if let reset = window.resetsAt {
+                                Text(ResetCopy.text(for: reset, now: Date(), format: preferences.resetTimeFormat))
+                                    .font(.caption2).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
             } else {
-                RoundedRectangle(cornerRadius: 26).fill(.ultraThinMaterial)
+                VStack(alignment: .leading, spacing: 3) { compactLimits }
+            }
+            Spacer(minLength: 0)
+            HStack {
+                Label("Resets extras", systemImage: "arrow.counterclockwise").font(.caption)
+                Spacer()
+                Text(snapshot.resetCredits.map { String($0.availableCount) } ?? "Consultar").font(.caption).bold()
+            }.help(snapshot.resetCreditsMessage ?? "Redefinições extras; veja a validade nos detalhes da conta")
+            if snapshot.resetCredits == nil, snapshot.glyph == .claude {
+                Link("Ver oferta no Claude", destination: URL(string: "https://claude.ai/settings/usage")!).font(.caption2)
+                    .help("O site usa a conta conectada no navegador; confira o e-mail antes de consultar")
+            } else if let expiry = snapshot.resetCredits?.nextExpiry {
+                Text("Expira \(expiry.formatted(date: .abbreviated, time: .omitted))").font(.caption2).foregroundStyle(.secondary)
+            }
+            TimelineView(.periodic(from: .now, by: 60)) { timeline in
+                Text(health?.at(timeline.date).title ?? "Aguardando leitura")
+                    .font(.caption2).foregroundStyle(health?.at(timeline.date).state == .current ? .secondary : Color.orange)
             }
         }
-        .overlay(RoundedRectangle(cornerRadius: 26).stroke(.white.opacity(hovered ? 0.24 : 0.08)))
-        .scaleEffect(hovered && !reduceMotion ? 1.012 : 1)
-        .shadow(color: .black.opacity(hovered ? 0.18 : 0.06), radius: hovered ? 16 : 6, y: 6)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: hovered)
+    }
+    var body: some View {
+        Group { if fitted { fittedBody } else if compact { compactBody } else { cardBody } }
+        .padding(fitted ? 14 : compact ? 18 : 22)
+        .frame(maxWidth: .infinity, maxHeight: fitted ? .infinity : nil, alignment: .topLeading)
+        .frame(minHeight: fitted || compact ? nil : 360, alignment: .topLeading)
+        // One solid surface avoids multiplying live blur layers across monitors.
+        .background(Color(white: 0.12), in: RoundedRectangle(cornerRadius: fitted ? 20 : 26))
+        .overlay(RoundedRectangle(cornerRadius: fitted ? 20 : 26).stroke(.white.opacity(hovered ? 0.28 : 0.08)))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: hovered)
         .onHover { hovered = $0 }
         .sheet(isPresented: $showsBudget) {
             SpendingBudgetView(accountKey: accountKey,

@@ -540,6 +540,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .sink { [weak fleet] in fleet?.apply(displayPreference: $0) }
                 .store(in: &cancellables)
 
+            fleet.onSelectScreen = { [weak preferences] id in
+                preferences?.displayPreference = .display(id)
+                preferences?.notchScope = .mainDisplay
+            }
             fleet.screenOffset = { [weak preferences] id, edge in preferences?.screenOffset(id: id, edge: edge) }
             fleet.onScreenReposition = { [weak preferences] id, edge, offset in preferences?.setScreenOffset(offset, id: id, edge: edge) }
             fleet.onReposition = { [weak preferences] offset in

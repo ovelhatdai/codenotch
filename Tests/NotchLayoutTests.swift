@@ -1038,6 +1038,33 @@ final class NotchFleetReconcileTests: XCTestCase {
 /// is the count follows the scope, not a fixed number.
 @MainActor
 final class NotchFleetScopeTests: XCTestCase {
+    func testChoosingMonitorFromMenuLeavesOneBarOnThatDisplay() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .allDisplays, edge: .top)
+        var selected: String?
+        fleet.onSelectScreen = { selected = $0 }
+        fleet.show()
+        defer { fleet.stop() }
+        let controller = try XCTUnwrap(fleet.controllersForTesting.first)
+        controller.onSelectMonitor?(screen)
+        XCTAssertEqual(fleet.scope, .mainDisplay)
+        XCTAssertEqual(fleet.controllersForTesting.count, 1)
+        XCTAssertEqual(fleet.controllersForTesting.first?.assignedScreen?.displayIdentifier, screen.displayIdentifier)
+        XCTAssertEqual(selected, screen.displayIdentifier)
+    }
+
+    func testDraggingInAllDisplaysModeKeepsOneBarPerScreen() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .allDisplays, edge: .top)
+        fleet.show()
+        defer { fleet.stop() }
+        let controller = try XCTUnwrap(fleet.controllersForTesting.first)
+        controller.onMoveToScreen?(screen, 120)
+        XCTAssertEqual(fleet.scope, .allDisplays)
+        XCTAssertEqual(fleet.controllersForTesting.count, NSScreen.screens.count)
+        XCTAssertEqual(fleet.controllersForTesting.first(where: { $0.assignedScreen?.displayIdentifier == screen.displayIdentifier })?.model.alongOffset, 120)
+    }
+
     func testMainDisplayKeepsASingleNotch() {
         let fleet = NotchFleet(scope: .mainDisplay, edge: .right)
         fleet.show()

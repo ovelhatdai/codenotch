@@ -104,6 +104,25 @@ final class ClaudeOAuthProviderTests: XCTestCase {
                        "the provider stopped asking after the first failure")
     }
 
+    func testResetsUseSameAuthenticatedResponseWithoutAnExtraRequest() async throws {
+        let payload = Data(#"{"limits":[{"kind":"session","percent":42,"resets_at":"2099-01-01T00:00:00Z"}],"cedar_ember":{"eligible":true,"grants":[{"id":"offer","resets_left":2,"ends_at":"2099-01-01T00:00:00Z"}]}}"#.utf8)
+        StubEndpoint.reset([.init(status: 200, body: payload, expectedAuthorization: "Bearer token")])
+        let provider = makeProvider(source: CredentialSource(readable: true))
+        let snapshot = try await provider.fetchSnapshot()
+        XCTAssertEqual(snapshot.resetCredits?.availableCount, 2)
+        XCTAssertEqual(snapshot.windows.first?.usedFraction, 0.42)
+        XCTAssertEqual(StubEndpoint.requestCount, 1)
+    }
+
+    func testRestrictedResetOfferDoesNotBreakUsageOrBecomeZero() async throws {
+        let payload = Data(#"{"limits":[{"kind":"session","percent":42,"resets_at":"2099-01-01T00:00:00Z"}],"cedar_ember":{"eligible":false,"ineligible_reason":"surface","grants":[]}}"#.utf8)
+        StubEndpoint.reset([.init(status: 200, body: payload)])
+        let snapshot = try await makeProvider(source: CredentialSource(readable: true)).fetchSnapshot()
+        XCTAssertNil(snapshot.resetCredits)
+        XCTAssertNotNil(snapshot.resetCreditsMessage)
+        XCTAssertEqual(snapshot.windows.first?.usedFraction, 0.42)
+    }
+
     // MARK: - Helpers
 
     private static let usagePayload = Data("""
@@ -628,6 +647,8 @@ private final class StubEndpoint: URLProtocol {
 
     override func startLoading() {
         let answer = Self.next()
+        XCTAssertEqual(request.httpMethod, "GET", "Reset availability must never redeem a credit")
+        XCTAssertEqual(URLComponents(url: request.url!, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "cedar_ember" })?.value, "1")
         if let expected = answer.expectedAuthorization {
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), expected)
         }
