@@ -46,17 +46,30 @@ final class DashboardFitLayoutTests: XCTestCase {
             XCTAssertEqual(plan.range(page: 0, count: 8), 0..<8)
         }
     }
-    func testWidePortraitUsesFourReadableRowsAndScalesContent() {
+    func testWidePortraitUsesFourReadableRowsWithoutOversizedCards() {
         let plan = DashboardFitLayout(size: CGSize(width: 1440, height: 2400), count: 8)
         XCTAssertEqual(plan.columns, 2)
         XCTAssertEqual(plan.capacity, 8)
         XCTAssertEqual(plan.pageCount, 1)
-        XCTAssertGreaterThan(plan.cardHeight * 4, 2200)
-        XCTAssertGreaterThan(plan.contentScale, 1)
+        XCTAssertEqual(plan.cardHeight, 340)
+        XCTAssertEqual(plan.contentScale, 1)
         XCTAssertLessThanOrEqual(plan.cardHeight * 4 + 3 * 12 + 36, 2400)
         let landscape = DashboardFitLayout(size: CGSize(width: 1440, height: 800), count: 8)
         XCTAssertEqual(landscape.columns, 4)
         XCTAssertEqual(landscape.pageCount, 1)
+    }
+    func testCompactListPaginatesWithoutLosingAccounts() {
+        for size in [CGSize(width: 1080, height: 1700), CGSize(width: 380, height: 580)] {
+            let plan = DashboardFitLayout(size: size, count: 8, compact: true)
+            XCTAssertEqual(plan.columns, 1)
+            XCTAssertLessThanOrEqual(plan.cardHeight, 136)
+            XCTAssertEqual((0..<plan.pageCount).flatMap { Array(plan.range(page: $0, count: 8)) }, Array(0..<8))
+        }
+    }
+    func testAlmostSquareWindowKeepsTwoReadableColumns() {
+        let plan = DashboardFitLayout(size: CGSize(width: 1080, height: 1000), count: 8)
+        XCTAssertEqual(plan.columns, 2)
+        XCTAssertEqual((0..<plan.pageCount).flatMap { Array(plan.range(page: $0, count: 8)) }, Array(0..<8))
     }
 
     func testPortraitToLandscapeResizingPreservesEveryAccount() {

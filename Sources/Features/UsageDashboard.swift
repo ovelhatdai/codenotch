@@ -215,8 +215,10 @@ struct UsageDashboard: View {
             Picker("Página", selection: $page) {
                 Text("Contas").tag("accounts"); Text("Histórico").tag("history")
             }.pickerStyle(.segmented).frame(maxWidth: 230)
-            Toggle("Ajustar cartões à janela", isOn: $fitWindow)
-                .help("Mantém os anéis legíveis e divide em páginas quando não cabe tudo, sem rolagem lateral")
+            if page == "accounts" {
+                Toggle("Ajustar cartões à janela", isOn: $fitWindow)
+                    .help("Mantém os anéis legíveis e divide em páginas quando não cabe tudo, sem rolagem lateral")
+            }
             GeometryReader { geometry in
                 if page == "accounts", fitWindow {
                     fittedAccounts(size: geometry.size)
@@ -256,6 +258,7 @@ struct UsageDashboard: View {
         }
         .onChange(of: filter) { _, _ in fitPage = 0 }
         .onChange(of: grouping) { _, _ in fitPage = 0 }
+        .onChange(of: layout) { _, _ in fitPage = 0 }
         .frame(minWidth: 340, minHeight: 540)
         .background(.black.opacity(0.82))
         .foregroundStyle(.white)
@@ -269,7 +272,8 @@ struct UsageDashboard: View {
     }
     private func fittedAccounts(size: CGSize) -> some View {
         let ordered = groups.flatMap { $0.1 }
-        let plan = DashboardFitLayout(size: size, count: ordered.count)
+        let compact = layout == "list"
+        let plan = DashboardFitLayout(size: size, count: ordered.count, compact: compact)
         let current = min(fitPage, plan.pageCount - 1)
         let items = Array(ordered[plan.range(page: current, count: ordered.count)])
         return VStack(spacing: 10) {
@@ -278,7 +282,7 @@ struct UsageDashboard: View {
                     DashboardAccountCard(snapshot: snapshot, activity: liveModel.activity(for: snapshot),
                         identity: snapshot.accountEmail, duplicated: false,
                         refreshing: store.refreshing.contains(snapshot.providerID), preferences: preferences,
-                        compact: false, fitted: true, roomy: plan.cardHeight >= 300, fittedScale: plan.contentScale, health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
+                        compact: compact, fitted: true, roomy: plan.cardHeight >= 300, fittedScale: plan.contentScale, health: store.readingHealth[snapshot.providerID], history: store.consumptionHistory)
                         .help(snapshot.accountEmail ?? snapshot.displayName)
                         .frame(height: plan.cardHeight)
                 }
@@ -596,8 +600,60 @@ private struct DashboardAccountCard: View {
             }
         }
     }
+    private var fittedCompactBody: some View {
+        let primary = reading.headline ?? summaryWindows.first
+        return VStack(alignment: .leading, spacing: 9) {
+            HStack(spacing: 12) {
+                ProviderRing(usedFraction: reading.hasReading ? reading.ringFraction : nil,
+                    glyph: snapshot.glyph, isStale: snapshot.status.isStale || !reading.hasReading,
+                    isBlocked: snapshot.block != nil, activity: activity, isRefreshing: refreshing,
+                    weeklyFraction: reading.hasReading ? reading.weeklyFraction : nil,
+                    weeklyRing: preferences.weeklyRing, bandOverride: reading.bandOverride, displayMode: mode)
+                    .scaleEffect(1.05).frame(width: 44, height: 44)
+                    .onHover { ringHovered = $0 }.onTapGesture { pinnedDetails = true }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AccountNames.name(for: snapshot.id, fallback: snapshot.displayName, in: names, email: snapshot.accountEmail))
+                        .font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                    Text(snapshot.glyph == .claude ? "Claude Code" : "Codex / OpenAI")
+                        .font(.caption2).foregroundStyle(.secondary)
+                    Text(identity ?? "Identidade não confirmada")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                }
+                Spacer(minLength: 4)
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text(mode.text(for: reading)).font(.system(size: 25, weight: .medium, design: .rounded)).monospacedDigit()
+                    Text(mode.title.lowercased()).font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            HStack {
+                Text(primary?.label ?? "Sem leitura")
+                Spacer()
+                if let used = primary?.usedFraction {
+                    Text((mode == .available ? Percent.halves(for: used).left : Percent.text(for: used)) + "%").monospacedDigit()
+                }
+            }.font(.caption2)
+            GeometryReader { proxy in
+                Capsule().fill(.white.opacity(0.1)).overlay(alignment: .leading) {
+                    if let used = primary?.usedFraction {
+                        Capsule().fill(UsageBand.band(for: used, watchLimit: preferences.watchLimit,
+                            criticalLimit: preferences.criticalLimit).color(accent: preferences.accentColor.color))
+                            .frame(width: max(0, proxy.size.width * mode.fraction(for: used)))
+                    }
+                }
+            }.frame(height: 4)
+            HStack(spacing: 6) {
+                if let reset = primary?.resetsAt {
+                    Text(ResetCopy.text(for: reset, now: Date(), format: preferences.resetTimeFormat))
+                } else {
+                    Text(snapshot.statusMessage ?? "Sem data de renovação")
+                }
+                Spacer(minLength: 4)
+                Text("Resets extras: " + (snapshot.resetCredits.map { String($0.availableCount) } ?? "Consultar"))
+            }.font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+        }
+    }
     var body: some View {
-        Group { if fitted { fittedBody } else if compact { compactBody } else { cardBody } }
+        Group { if fitted && compact { fittedCompactBody } else if fitted { fittedBody } else if compact { compactBody } else { cardBody } }
         .padding(fitted ? 14 : compact ? 18 : 22)
         .frame(maxWidth: .infinity, maxHeight: fitted ? .infinity : nil, alignment: .topLeading)
         .frame(minHeight: fitted || compact ? nil : 360, alignment: .topLeading)
