@@ -84,6 +84,23 @@ final class NotchRenderTests: XCTestCase {
         }
     }
 
+    func testFloatingBarPaintsItsOwnRoundedEndsInsteadOfBezelFlares() throws {
+        let floating = model(edge: .top)
+        floating.isFloating = true
+        let rep = try XCTUnwrap(render(floating))
+        let bar = NotchPlacement(edge: .top, panelSize: floating.panelSize).rect(
+            along: floating.slack, across: 0,
+            length: floating.shapeLength * floating.sizeScale,
+            depth: floating.notchDepth * floating.sizeScale
+        )
+        let middleOfEnd = try XCTUnwrap(rep.colorAt(x: Int(bar.minX + 2), y: Int(bar.midY)))
+        let outsideCorner = try XCTUnwrap(rep.colorAt(x: Int(bar.minX + 2), y: Int(bar.minY + 2)))
+        XCTAssertGreaterThan(middleOfEnd.alphaComponent, 0.9,
+                             "the floating capsule did not close at its end")
+        XCTAssertLessThan(outsideCorner.alphaComponent, 0.5,
+                          "a bezel flare still connects the floating bar to an invisible edge")
+    }
+
     /// The weekly ring has to actually appear, and only when asked for.
     ///
     /// Counted by colour rather than by ink: the arcs are drawn on top of the

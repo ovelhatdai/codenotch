@@ -257,7 +257,7 @@ final class NotchWindowController {
     }
 
     private func applyPanelAppearance(_ style: NotchSurfaceStyle) {
-        panel?.appearance = style.panelAppearance(
+        panel?.appearance = model.isFloating ? NSAppearance(named: .darkAqua) : style.panelAppearance(
             reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
         )
     }
@@ -300,6 +300,11 @@ final class NotchWindowController {
     func relocate(cellCount: Int? = nil) {
         guard !isOptionDragging else { return }
         guard let screen = currentScreen() else { return }
+        let floating = floatingPosition != nil
+        if model.isFloating != floating {
+            model.isFloating = floating
+            applyPanelAppearance(model.surfaceStyle)
+        }
         model.adopt(screen: screen)
         let size = model.panelSize(cellCount: cellCount ?? model.snapshots.count)
         var frame = NotchGeometry.panelFrame(
@@ -320,16 +325,18 @@ final class NotchWindowController {
             panel.setFrame(frame, display: true)
         } else {
             let panel = NotchPanel(contentRect: frame)
-            panel.appearance = model.surfaceStyle.panelAppearance(
-                reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
-            )
+            panel.appearance = model.isFloating ? NSAppearance(named: .darkAqua)
+                : model.surfaceStyle.panelAppearance(
+                    reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+                )
             let hosting = NotchHostingView(rootView: NotchRootView(model: model))
             panel.contextMenuProvider = { [weak self] in self?.contextMenu() }
             panel.onClick = { [weak self] point in self?.handleClick(at: point) }
             panel.canStartPlainDrag = { [weak self, weak panel] point in
                 guard let self, let panel else { return false }
                 let local = CGPoint(x: point.x, y: panel.frame.height - point.y)
-                return self.notchRect.contains(local) && !self.isOverHandle(local) && !self.isOverMoveHandle(local)
+                return self.notchRect.contains(local)
+                    && (self.model.isFloating || (!self.isOverHandle(local) && !self.isOverMoveHandle(local)))
             }
             panel.onDragStart = { [weak self] in self?.beginOptionDrag() }
             panel.onDrag = { [weak self] dx, dy in self?.dragged(dx: dx, dy: dy) }
@@ -494,6 +501,7 @@ final class NotchWindowController {
     /// folding away is to stop being in the way.
     private var liveRect: CGRect {
         guard model.isExpanded else { return pillRect }
+        if model.isFloating { return notchRect }
         // The orb hangs below the shape, so the live region is both together.
         return notchRect.union(handleRect)
     }
