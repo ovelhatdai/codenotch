@@ -1,17 +1,32 @@
 import Foundation
 import Security
 
+/// Passed only to Claude Code's official `auth login` command. Codenotch never
+/// sends this token itself or writes the owning CLI's keychain item.
+struct ClaudeRenewalCredential {
+    let refreshToken: String
+    let scopes: [String]
+}
+
 /// The OAuth token Claude Code keeps in the login keychain.
 ///
-/// Codenotch only ever *reads* this item. Refreshing is deliberately left to
-/// Claude Code: minting a new token would mean writing a credential this app
-/// does not own, so when the token expires the notch says `needsAuth` and waits
-/// for Claude Code to refresh it in the ordinary course of being used.
+/// Codenotch only ever *reads* this item. Claude Code owns any renewal and
+/// writes the replacement; the refresh token is passed to its official
+/// `auth login` command only when renewal is due.
 struct ClaudeCredentials {
     let accessToken: String
     let expiresAt: Date
     /// "pro", "max", and so on — enough to show which plan the readings are for.
     let subscriptionType: String?
+    let renewal: ClaudeRenewalCredential?
+
+    init(accessToken: String, expiresAt: Date, subscriptionType: String?,
+         renewal: ClaudeRenewalCredential? = nil) {
+        self.accessToken = accessToken
+        self.expiresAt = expiresAt
+        self.subscriptionType = subscriptionType
+        self.renewal = renewal
+    }
 
     var isExpired: Bool { expiresAt <= Date() }
 
@@ -102,6 +117,8 @@ struct ClaudeCredentials {
                 /// Milliseconds since the epoch.
                 let expiresAt: Double
                 let subscriptionType: String?
+                let refreshToken: String?
+                let scopes: [String]?
             }
             let claudeAiOauth: OAuth
         }
@@ -126,7 +143,12 @@ struct ClaudeCredentials {
         return ClaudeCredentials(
             accessToken: payload.claudeAiOauth.accessToken,
             expiresAt: Date(timeIntervalSince1970: payload.claudeAiOauth.expiresAt / 1000),
-            subscriptionType: payload.claudeAiOauth.subscriptionType
+            subscriptionType: payload.claudeAiOauth.subscriptionType,
+            renewal: {
+                guard let token = payload.claudeAiOauth.refreshToken, !token.isEmpty,
+                      let scopes = payload.claudeAiOauth.scopes, !scopes.isEmpty else { return nil }
+                return ClaudeRenewalCredential(refreshToken: token, scopes: scopes)
+            }()
         )
     }
 

@@ -496,6 +496,12 @@ actor ClaudeOAuthProvider: UsageProvider {
         return fresh.expiresAt
     }
 
+    /// The owning CLI's refresh token, obtained only when a renewal is due.
+    /// An expired access token can still carry a valid refresh token.
+    func renewalCredential() -> ClaudeRenewalCredential? {
+        (try? loadCredentials())?.renewal
+    }
+
     nonisolated func account() -> ProviderAccount? {
         let manageURL = URL(string: "https://claude.ai/settings/usage")
 
