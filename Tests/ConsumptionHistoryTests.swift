@@ -3,6 +3,15 @@ import XCTest
 
 @MainActor
 final class ConsumptionHistoryTests: XCTestCase {
+    func testLegacyDuplicateFableLimitIsShownOnceWithoutChangingHistory() {
+        let fable = ConsumptionHistory.Quota(label: "Fable", minimum: 0, maximum: 0, latest: 0, resetsAt: Date())
+        var day = ConsumptionHistory.Day(accountKey: "a", providerID: "claude", day: "2026-09-22", observedAt: Date(),
+            quotas: ["weekly_scoped": fable, "weekly_fable": fable])
+        XCTAssertEqual(day.displayQuotaIDs, ["weekly_fable"])
+        XCTAssertEqual(day.quotas.count, 2)
+        day.quotas["weekly_scoped"]?.maximum = 0.2
+        XCTAssertEqual(day.displayQuotaIDs, ["weekly_fable", "weekly_scoped"])
+    }
     func testDailyTokensReplaceInsteadOfAccumulatingAndSurviveRestart() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: dir) }

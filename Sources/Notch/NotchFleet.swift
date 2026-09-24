@@ -84,6 +84,14 @@ final class NotchFleet {
     /// An ⌥-drag on any one panel settled at a new offset. Persisting it is
     /// Preferences' job, same division `apply(edge:)` already keeps.
     var onReposition: ((CGFloat) -> Void)?
+    var onSelectScreen: ((String) -> Void)?
+    var savedFloatingPosition: ((String) -> CGPoint?)?
+    var onSaveFloatingPosition: ((String, CGPoint?) -> Void)?
+    private var floatingPositions: [String: CGPoint] = [:]
+    private func floatingPosition(on screen: NSScreen) -> CGPoint? {
+        guard let id = screen.displayIdentifier else { return nil }
+        return floatingPositions[id] ?? savedFloatingPosition?(id)
+    }
     var screenOffset: ((String, NotchEdge) -> CGFloat?)?
     var onScreenReposition: ((String, NotchEdge, CGFloat) -> Void)?
     /// A move handle carried a notch to another edge. Persisting it is
@@ -419,6 +427,7 @@ final class NotchFleet {
         if scope == .mainDisplay, controllers.count == 1,
            let screen = desired.first, let controller = controllers.values.first {
             controller.assignedScreen = screen
+            controller.floatingPosition = floatingPosition(on: screen)
             controller.model.alongOffset = screen.displayIdentifier.flatMap { screenOffset?($0, edge) } ?? alongOffset
             controller.relocate()
             return
@@ -439,6 +448,7 @@ final class NotchFleet {
     private func makeController(on screen: NSScreen) -> NotchWindowController {
         let controller = NotchWindowController()
         controller.assignedScreen = screen
+        controller.floatingPosition = floatingPosition(on: screen)
         controller.displayPreference = displayPreference
         controller.foldsForFullScreen = foldsForFullScreen
         controller.model.edge = edge
@@ -471,6 +481,51 @@ final class NotchFleet {
             if let id = controller?.assignedScreen?.displayIdentifier, let save = self.onScreenReposition {
                 save(id, self.edge, offset)
             } else { self.onReposition?(offset) }
+        }
+        controller.onDock = { [weak self, weak controller] in
+            guard let self, let controller, let id = controller.assignedScreen?.displayIdentifier else { return }
+            self.floatingPositions[id] = nil
+            self.onSaveFloatingPosition?(id, nil)
+            controller.floatingPosition = nil
+            controller.relocate()
+        }
+        controller.onFloat = { [weak self] screen, position in
+            guard let self, let id = screen.displayIdentifier else { return }
+            self.floatingPositions[id] = position
+            self.onSaveFloatingPosition?(id, position)
+            if self.scope == .allDisplays {
+                if let target = self.controllers[Self.key(for: screen)] {
+                    target.floatingPosition = position
+                    target.relocate()
+                }
+            } else {
+                self.onSelectScreen?(id)
+                self.apply(displayPreference: .display(id))
+            }
+        }
+        controller.onSelectMonitor = { [weak self] screen in
+            guard let self, let id = screen.displayIdentifier else { return }
+            self.onSelectScreen?(id)
+            self.apply(displayPreference: .display(id))
+            self.apply(scope: .mainDisplay)
+        }
+        controller.onMoveToScreen = { [weak self] screen, offset in
+            guard let self, let id = screen.displayIdentifier else { return }
+            self.floatingPositions[id] = nil
+            self.onSaveFloatingPosition?(id, nil)
+            if let offset { self.onScreenReposition?(id, self.edge, offset) }
+            if self.scope == .allDisplays {
+                // Every display already owns a bar. Reposition the destination
+                // without removing the source or creating a duplicate window.
+                if let target = self.controllers[Self.key(for: screen)] {
+                    target.floatingPosition = nil
+                    if let offset { target.model.alongOffset = offset }
+                    target.relocate()
+                }
+            } else {
+                self.onSelectScreen?(id)
+                self.apply(displayPreference: .display(id))
+            }
         }
         controller.onMoveToEdge = onMoveToEdge
         controller.signInItems = signInItems

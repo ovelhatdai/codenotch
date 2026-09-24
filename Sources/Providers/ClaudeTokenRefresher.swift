@@ -1,5 +1,23 @@
 import Foundation
 
+/// A CLI renewal can briefly use substantial memory. Keep separate accounts
+/// from starting Claude Code at the same time when several tokens age out.
+actor ClaudeRenewalGate {
+    static let shared = ClaudeRenewalGate()
+    private var occupied = false
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func acquire() async {
+        if !occupied { occupied = true; return }
+        await withCheckedContinuation { waiters.append($0) }
+    }
+
+    func release() {
+        if waiters.isEmpty { occupied = false }
+        else { waiters.removeFirst().resume() }
+    }
+}
+
 /// Keeps the Claude OAuth token in the login keychain from ageing out.
 ///
 /// Codenotch reads that item; only the standalone Claude Code command ever
@@ -8,22 +26,15 @@ import Foundation
 /// own copy elsewhere — and eight hours later every usage reading stops, with
 /// nothing the user can do from inside Codenotch. That is the hole this fills.
 ///
-/// **How it renews, and why that is a compatibility mechanism rather than an
-/// interface.** Running `claude -p` with an empty stdin makes the command go
-/// through its whole start-up — which is where it checks the token's age and
-/// renews it — and then exit non-zero with "Input must be provided…", because
-/// no prompt ever arrives. Verified on a real machine: the keychain item's
-/// modification date moves, the expiry advances by eight hours, no transcript
-/// is written, no conversation is created, and the debug log shows no call to
-/// the messages endpoint.
+/// When the saved item has a refresh token and scopes, Claude Code's official
+/// `auth login` exchange renews it without a browser or an inference request.
+/// With an older item that lacks those fields, the legacy empty-input launch
+/// remains as a fallback. Both paths are checked against the keychain's new
+/// expiry rather than trusted based on the command's exit status.
 ///
-/// None of that is promised by anyone. A future release could stop renewing at
-/// start-up, or stop rejecting an empty prompt. Both are handled by judging the
-/// *outcome* instead of trusting the command: unless the expiry actually moved,
-/// this reports failure and stops trying. And because it never supplies a
-/// prompt, a version that started accepting empty input could not be talked
-/// into answering one by accident — the failure mode is a wasted launch, never
-/// an invented conversation.
+/// The fallback is a compatibility mechanism, not a promised interface. A
+/// failed exchange or a changed CLI reports failure and stops trying the same
+/// token; no prompt is supplied and no conversation is created.
 @MainActor
 final class ClaudeTokenRefresher: ObservableObject {
     enum Outcome: Equatable {
@@ -37,7 +48,7 @@ final class ClaudeTokenRefresher: ObservableObject {
     /// A started command: its pid, known synchronously so the session monitor
     /// can be told to ignore it before it can ever be scanned, and a way to
     /// wait for it.
-    typealias Launcher = @MainActor (URL, TimeInterval) throws
+    typealias Launcher = @MainActor (URL, TimeInterval, URL?, ClaudeRenewalCredential?) throws
         -> (pid: Int32, exit: () async -> Int32?)
 
     @Published private(set) var outcome: Outcome = .idle
@@ -59,12 +70,14 @@ final class ClaudeTokenRefresher: ObservableObject {
     private let interval: TimeInterval
 
     private let cli: URL?
+    private let configDirectory: URL?
     private let launcher: Launcher
     /// The token's expiry as the usage provider last read it. Cheap: it is the
     /// value already in hand, so asking costs no keychain traffic and no prompt.
     private let expiry: @MainActor () async -> Date?
     /// Drop the held copy and read the keychain again — the after-check.
     private let reload: @MainActor () async -> Date?
+    private let renewal: @MainActor () async -> ClaudeRenewalCredential?
 
     private var timer: Timer?
     private var isRunning = false
@@ -81,7 +94,9 @@ final class ClaudeTokenRefresher: ObservableObject {
     init(
         expiry: @escaping @MainActor () async -> Date?,
         reload: @escaping @MainActor () async -> Date?,
+        renewal: @escaping @MainActor () async -> ClaudeRenewalCredential? = { nil },
         cli: URL? = ClaudeCLI.standalone(),
+        configDirectory: URL? = nil,
         margin: TimeInterval = 4 * 60,
         cooldown: TimeInterval = 10 * 60,
         timeout: TimeInterval = 30,
@@ -90,7 +105,9 @@ final class ClaudeTokenRefresher: ObservableObject {
     ) {
         self.expiry = expiry
         self.reload = reload
+        self.renewal = renewal
         self.cli = cli
+        self.configDirectory = configDirectory
         self.margin = margin
         self.cooldown = cooldown
         self.timeout = timeout
@@ -171,11 +188,14 @@ final class ClaudeTokenRefresher: ObservableObject {
                + "isn't installed to renew it. Run Claude Code once to sign in again.")
             return
         }
+        await ClaudeRenewalGate.shared.acquire()
+        defer { Task { await ClaudeRenewalGate.shared.release() } }
+        let renewalCredential = await renewal()
         Log.usage.notice("claude token expires in \(remaining, format: .fixed(precision: 0))s; renewing via \(cli.path, privacy: .public)")
 
         let status: Int32?
         do {
-            let (pid, exit) = try launcher(cli, timeout)
+            let (pid, exit) = try launcher(cli, timeout, configDirectory, renewalCredential)
             launchedPID = pid          // synchronously, before it can be scanned
             status = await exit()
         } catch {
@@ -215,18 +235,23 @@ final class ClaudeTokenRefresher: ObservableObject {
     /// volumes to the user as Codenotch asking for access.
     static let arguments = ["-p", "--no-session-persistence", "--strict-mcp-config"]
 
-    static func run(_ cli: URL, timeout: TimeInterval) throws
+    static func run(_ cli: URL, timeout: TimeInterval, configDirectory: URL? = nil,
+                    renewal: ClaudeRenewalCredential? = nil) throws
         -> (pid: Int32, exit: () async -> Int32?) {
         let process = Process()
         process.executableURL = cli
-        process.arguments = Self.arguments
+        process.arguments = renewal == nil ? Self.arguments : ["auth", "login", "--claudeai"]
+        var environment = Self.environment(configDirectory: configDirectory)
+        if let renewal {
+            environment["CLAUDE_CODE_OAUTH_REFRESH_TOKEN"] = renewal.refreshToken
+            environment["CLAUDE_CODE_OAUTH_SCOPES"] = renewal.scopes.joined(separator: " ")
+        }
         // The same fixed directory `/usage` runs from, never the app's own.
         if let scratch = try? ClaudeUsageCLI.scratchDirectory() {
             process.currentDirectoryURL = scratch
-            var environment = ProcessInfo.processInfo.environment
             environment["PWD"] = scratch.path
-            process.environment = environment
         }
+        process.environment = environment
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
@@ -261,5 +286,15 @@ final class ClaudeTokenRefresher: ObservableObject {
             return process.terminationStatus
         }
         return (process.processIdentifier, wait)
+    }
+
+    /// A linked account must renew against its own Claude Code directory.
+    /// Never inherit the launcher shell's account into the default profile.
+    static func environment(configDirectory: URL?, inherited: [String: String] = ProcessInfo.processInfo.environment) -> [String: String] {
+        var environment = inherited
+        environment["CLAUDE_CONFIG_DIR"] = configDirectory?.path
+        environment.removeValue(forKey: "CLAUDE_CODE_OAUTH_REFRESH_TOKEN")
+        environment.removeValue(forKey: "CLAUDE_CODE_OAUTH_SCOPES")
+        return environment
     }
 }

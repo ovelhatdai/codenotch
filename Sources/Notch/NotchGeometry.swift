@@ -124,6 +124,25 @@ enum NotchGeometry {
         )
     }
 
+    /// Persist the visible bar center relative to its monitor, not the large
+    /// transparent window reserved for hover details.
+    static func normalizedCenter(_ center: CGPoint, in screen: CGRect) -> CGPoint {
+        CGPoint(x: (center.x - screen.minX) / max(1, screen.width),
+                y: (center.y - screen.minY) / max(1, screen.height))
+    }
+
+    static func floatingFrame(panelSize: CGSize, bar: CGRect, position: CGPoint, visible: CGRect) -> CGRect {
+        let x = clamp(visible.minX + position.x * visible.width,
+                      min: visible.minX + min(bar.width, visible.width) / 2,
+                      max: visible.maxX - min(bar.width, visible.width) / 2)
+        let y = clamp(visible.minY + position.y * visible.height,
+                      min: visible.minY + min(bar.height, visible.height) / 2,
+                      max: visible.maxY - min(bar.height, visible.height) / 2)
+        return CGRect(x: (x - bar.midX).rounded(),
+                      y: (y - panelSize.height + bar.midY).rounded(),
+                      width: panelSize.width, height: panelSize.height)
+    }
+
     static func preferredScreen(
         from screens: [NSScreen],
         preference: DisplayPreference = .followActiveWindow

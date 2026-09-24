@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     /// Keeps the Claude keychain token from ageing out on a Mac where the CLI
     /// is never run by hand. See `ClaudeTokenRefresher`.
-    private var tokenRefresher: ClaudeTokenRefresher?
+    private var tokenRefreshers: [ClaudeTokenRefresher] = []
     private var cancellables = Set<AnyCancellable>()
     /// Turns the monitors' running commentary into the one event worth
     /// interrupting for: an agent that has just stopped working.
@@ -540,6 +540,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .sink { [weak fleet] in fleet?.apply(displayPreference: $0) }
                 .store(in: &cancellables)
 
+            fleet.onSelectScreen = { [weak preferences] id in
+                preferences?.displayPreference = .display(id)
+                preferences?.notchScope = .mainDisplay
+            }
+            fleet.savedFloatingPosition = { [weak preferences] id in preferences?.floatingPosition(id: id) }
+            fleet.onSaveFloatingPosition = { [weak preferences] id, point in preferences?.setFloatingPosition(point, id: id) }
             fleet.screenOffset = { [weak preferences] id, edge in preferences?.screenOffset(id: id, edge: edge) }
             fleet.onScreenReposition = { [weak preferences] id, edge, offset in preferences?.setScreenOffset(offset, id: id, edge: edge) }
             fleet.onReposition = { [weak preferences] offset in
@@ -770,35 +776,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // step over that pid, so it never reaches the notch and never counts as
         // work in progress.
         //
-        // Only the default profile is renewed. The command writes whichever
-        // directory `CLAUDE_CONFIG_DIR` names, so a second profile would need
-        // that passed through — behaviour nobody has been able to try on a Mac
-        // with two of them, and an unverified guess is worse here than a ring
-        // that ages the way it already does.
-        if let defaultProvider = claudeProviders.first(where: { $0.profile.slug == nil }) {
+        // Each linked account has its own token and config directory. Renew
+        // them independently; ClaudeRenewalGate keeps CLI launches serial.
+        for provider in claudeProviders {
             let refresher = ClaudeTokenRefresher(
-                expiry: { await defaultProvider.tokenExpiry },
-                reload: { await defaultProvider.reloadTokenExpiry() }
+                expiry: {
+                    guard preferences.isConnected(provider.id) else { return nil }
+                    return await provider.tokenExpiry
+                },
+                reload: { await provider.reloadTokenExpiry() },
+                renewal: { await provider.renewalCredential() },
+                configDirectory: provider.profile.slug == nil ? nil : provider.profile.configDirectory
             )
-            for monitor in claudeMonitors {
-                monitor.ignoredPIDs = { [weak refresher] in
-                    guard let pid = refresher?.launchedPID else { return [] }
-                    return [pid]
-                }
-            }
-            // The one place the failure becomes visible. The store carries the
-            // fact; nothing here retries, and the warning clears itself the
-            // moment a reading comes back.
             refresher.$outcome
                 .receive(on: RunLoop.main)
                 .sink { [weak self] outcome in
-                    guard case .failed = outcome else { return }
-                    self?.store?.reportRenewalFailed(providerID: defaultProvider.id)
+                    switch outcome {
+                    case .failed:
+                        self?.store?.reportRenewalFailed(providerID: provider.id)
+                    case .refreshed:
+                        self?.store?.refresh(providerID: provider.id)
+                    case .idle:
+                        break
+                    }
                 }
                 .store(in: &cancellables)
-
             refresher.start()
-            tokenRefresher = refresher
+            tokenRefreshers.append(refresher)
+        }
+        for monitor in claudeMonitors {
+            monitor.ignoredPIDs = { [weak self] in
+                Set(self?.tokenRefreshers.compactMap(\.launchedPID) ?? [])
+            }
         }
         let activity = ActivityCoordinator(monitors: monitors) { [weak self, weak fleet] id, sessions in
             guard let fleet else { return }
@@ -1031,7 +1040,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         ollamaRelay?.configure(enabled: false, endpoint: OllamaEndpoint.defaultAddress)
         lmstudioMetrics?.stop()
-        tokenRefresher?.stop()
+        tokenRefreshers.forEach { $0.stop() }
         store?.stop()
         activityCoordinator?.stop()
         notchFleet?.stop()

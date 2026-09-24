@@ -22,6 +22,13 @@ final class ConsumptionHistory: ObservableObject {
         var inputTokens: Int?
         var outputTokens: Int?
         var costs: [String: Double] = [:]
+        var displayQuotaIDs: [String] {
+            quotas.keys.sorted().filter { id in
+                // Older Claude readings stored the same Fable limit under both
+                // names. Keep the archive intact and show one line when equal.
+                id != "weekly_scoped" || quotas[id] != quotas["weekly_fable"]
+            }
+        }
     }
     struct Summary {
         let observedDays: Int

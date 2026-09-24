@@ -22,7 +22,8 @@ struct NotchRootView: View {
                 // Outside the notch and outside its clip: the orb hangs past
                 // the end of the shape, tucked into the corner the far flare
                 // makes.
-                SettingsOrb(isHovered: model.isHoveringSettings, edge: model.edge,
+                if !model.isFloating {
+                    SettingsOrb(isHovered: model.isHoveringSettings, edge: model.edge,
                                     convex: model.orbHugsCorner,
                                     arcRadius: model.orbArcRadius,
                                     arcOffset: model.orbArcOffset,
@@ -59,11 +60,12 @@ struct NotchRootView: View {
                         // sees the arc leave by.
                         .opacity(model.isExpanded ? 1 : 0)
                         .animation(motion(orbMotion), value: model.isExpanded)
+                }
 
                 // The move handle, mirroring the settings orb at the other end
                 // of the stack. Same construction, same reasons — see the
                 // comments on the orb above; only the placement differs.
-                if model.showsMoveHandle {
+                if model.showsMoveHandle && !model.isFloating {
                     MoveHandle(isHovered: model.isHoveringMove || model.isMoving,
                                isArmed: model.isMoving,
                                edge: model.edge,
@@ -132,9 +134,9 @@ struct NotchRootView: View {
         .animation(motion(NotchMotion.unfold), value: model.isExpanded)
         .tint(model.accentColor.color)
         .environment(\.codenotchAccentColor, model.accentColor.color)
-        .environment(\.notchSurfaceStyle, model.surfaceStyle)
+        .environment(\.notchSurfaceStyle, model.isFloating ? .solid : model.surfaceStyle)
         .environment(\.tooltipSecondaryInk, TooltipGlassContrast.secondaryInk(
-            surfaceStyle: model.surfaceStyle,
+            surfaceStyle: model.isFloating ? .solid : model.surfaceStyle,
             colorScheme: colorScheme,
             reduceTransparency: reduceTransparency
         ))
@@ -157,7 +159,61 @@ struct NotchRootView: View {
             : NotchMotion.merge
     }
 
+    @ViewBuilder
     private func notch(_ place: NotchPlacement) -> some View {
+        if model.isFloating {
+            floatingNotch(place)
+        } else {
+            edgeNotch(place)
+        }
+    }
+
+    /// A bar away from the bezel is a separate control, not a cutout growing
+    /// out of the screen edge. Keep its readings and drag geometry, but give
+    /// it a bounded, opaque surface and controls inside that bound.
+    private func floatingNotch(_ place: NotchPlacement) -> some View {
+        let size = model.notchSize
+        let shape = RoundedRectangle(cornerRadius: min(size.width, size.height) / 2,
+                                     style: .continuous)
+        let inside = NotchPlacement(edge: model.edge, panelSize: size)
+        return shape
+            .fill(Color(hex: 0x1B1D21))
+            .overlay { shape.strokeBorder(Color.white.opacity(0.28), lineWidth: 1) }
+            .overlay(alignment: contentAlignment) {
+                cells.padding(bezelSide, model.contentInset)
+            }
+            .overlay {
+                if model.isExpanded {
+                    ZStack {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: Design.px(28), weight: .medium))
+                            .rotationEffect(.degrees(model.edge.isVertical ? 90 : 0))
+                            .foregroundStyle(Color.white.opacity(0.55))
+                            .position(inside.point(along: NotchViewModel.floatingControlInset,
+                                                   across: model.notchDepth / 2))
+
+                        Image(systemName: "gearshape")
+                            .font(.system(size: Design.px(35), weight: .medium))
+                            .foregroundStyle(Color.white.opacity(model.isHoveringSettings ? 1 : 0.70))
+                            .position(inside.point(along: model.shapeLength - NotchViewModel.floatingControlInset,
+                                                   across: model.notchDepth / 2))
+                            .accessibilityLabel("Configurações")
+                            .accessibilityAddTraits(.isButton)
+                    }
+                }
+            }
+            .clipShape(shape)
+            .shadow(color: .black.opacity(0.60), radius: 14, x: 0, y: 7)
+            .frame(width: size.width, height: size.height)
+            .scaleEffect(model.sizeScale, anchor: bezelAnchor)
+            .position(place.point(
+                along: (model.edge.isVertical ? place.panelSize.height
+                                              : place.panelSize.width) / 2,
+                across: model.notchDepth / 2
+            ))
+    }
+
+    private func edgeNotch(_ place: NotchPlacement) -> some View {
         let shape = SideNotchShape(edge: model.edge, joining: model.joinedNotch)
         // Glass is for the open notch only. Folded, the pill has to read as
         // part of the bezel — and as the hardware notch itself on a MacBook —

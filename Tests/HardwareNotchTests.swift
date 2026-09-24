@@ -86,6 +86,20 @@ final class MergedTopNotchTests: XCTestCase {
         )
     }
 
+    func testFloatingTopBarStopsJoiningTheHardwareNotch() throws {
+        let model = model(cells: 4)
+        model.isFloating = true
+
+        XCTAssertNil(model.joinedNotch)
+        XCTAssertEqual(model.contentInset, 0)
+        XCTAssertFalse(model.isFlushWithHardware)
+        XCTAssertTrue(model.moveHandlePoints.isEmpty)
+
+        let gear = try XCTUnwrap(model.orbHandlePoints.first)
+        XCTAssertLessThan(gear.x, model.shapeLength)
+        XCTAssertTrue(model.isOnOrbHandle(along: gear.x, across: gear.y))
+    }
+
     /// The shape gets deeper by that band plus the gap below it, so the
     /// readings sit where they always did relative to the black around them.
     func testTheShapeGrowsByTheBandItHasToClear() {

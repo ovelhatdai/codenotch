@@ -60,7 +60,7 @@ struct ConsumptionHistoryView: View {
                                 ForEach(day.costs.keys.sorted(), id: \.self) { currency in
                                     Text("Custo informado: \(day.costs[currency]!, format: .currency(code: currency))")
                                 }
-                                ForEach(day.quotas.keys.sorted(), id: \.self) { id in
+                                ForEach(day.displayQuotaIDs, id: \.self) { id in
                                     let quota = day.quotas[id]!
                                     Text("\(quota.label): pico observado de \(Percent.text(for: quota.maximum))% usado")
                                         .foregroundStyle(.secondary)

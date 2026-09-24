@@ -354,6 +354,7 @@ struct ProviderSnapshot: Identifiable, Equatable {
     /// Unused rate-limit resets on this Codex account, listed by the same
     /// backend as usage.
     var resetCredits: CodexResetCredits? = nil
+    var resetCreditsMessage: String? = nil
 
     /// Whether the Codex tooltip has a reset-credit section to draw.
     ///

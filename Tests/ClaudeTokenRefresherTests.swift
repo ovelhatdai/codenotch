@@ -170,7 +170,7 @@ final class ClaudeTokenRefresherTests: XCTestCase {
             expiry: wrapExpiry({ before }),
             reload: { after },
             cli: cli,
-            launcher: { _, _ in
+            launcher: { _, _, _, _ in
                 spy.launches += 1
                 if spy.throwsOnLaunch { throw Boom() }
                 return (4242, {
@@ -195,6 +195,98 @@ final class ClaudeTokenRefresherTests: XCTestCase {
 
         XCTAssertEqual(spy.launches, 1)
         XCTAssertEqual(refresher.outcome, .refreshed(until: after))
+    }
+
+    func testLinkedAccountUsesItsOwnConfigDirectory() async {
+        let directory = URL(fileURLWithPath: "/tmp/claude-linked-test")
+        var launchedWith: URL?
+        let refresher = ClaudeTokenRefresher(
+            expiry: { self.inSeconds(60) },
+            reload: { self.inSeconds(8 * 3600) },
+            cli: URL(fileURLWithPath: "/opt/homebrew/bin/claude"),
+            configDirectory: directory,
+            launcher: { _, _, configDirectory, _ in
+                launchedWith = configDirectory
+                return (4242, { 1 })
+            }
+        )
+
+        await refresher.considerRenewing(now: now)
+
+        XCTAssertEqual(launchedWith, directory)
+        XCTAssertEqual(refresher.outcome, .refreshed(until: inSeconds(8 * 3600)))
+    }
+
+    func testDefaultAccountDoesNotInheritAnotherAccountsConfig() {
+        let inherited = ["CLAUDE_CONFIG_DIR": "/tmp/another-account", "PATH": "/usr/bin",
+                         "CLAUDE_CODE_OAUTH_REFRESH_TOKEN": "another-secret",
+                         "CLAUDE_CODE_OAUTH_SCOPES": "another-scope"]
+        let defaultEnvironment = ClaudeTokenRefresher.environment(configDirectory: nil, inherited: inherited)
+        XCTAssertNil(defaultEnvironment["CLAUDE_CONFIG_DIR"])
+        XCTAssertNil(defaultEnvironment["CLAUDE_CODE_OAUTH_REFRESH_TOKEN"])
+        XCTAssertNil(defaultEnvironment["CLAUDE_CODE_OAUTH_SCOPES"])
+        XCTAssertEqual(defaultEnvironment["PATH"], "/usr/bin")
+
+        let directory = URL(fileURLWithPath: "/tmp/linked-account")
+        let linkedEnvironment = ClaudeTokenRefresher.environment(configDirectory: directory, inherited: inherited)
+        XCTAssertEqual(linkedEnvironment["CLAUDE_CONFIG_DIR"], directory.path)
+    }
+
+    func testRenewalCredentialGoesOnlyToTheSelectedAccount() async {
+        let directory = URL(fileURLWithPath: "/tmp/linked-account")
+        let credential = ClaudeRenewalCredential(refreshToken: "fake-refresh", scopes: ["user:profile"])
+        var receivedDirectory: URL?
+        var receivedCredential: ClaudeRenewalCredential?
+        let refresher = ClaudeTokenRefresher(
+            expiry: { self.inSeconds(60) },
+            reload: { self.inSeconds(8 * 3600) },
+            renewal: { credential },
+            cli: URL(fileURLWithPath: "/opt/homebrew/bin/claude"),
+            configDirectory: directory,
+            launcher: { _, _, path, token in
+                receivedDirectory = path
+                receivedCredential = token
+                return (4242, { 1 })
+            }
+        )
+
+        await refresher.considerRenewing(now: now)
+
+        XCTAssertEqual(receivedDirectory, directory)
+        XCTAssertEqual(receivedCredential?.refreshToken, "fake-refresh")
+        XCTAssertEqual(receivedCredential?.scopes, ["user:profile"])
+    }
+
+    func testSeveralAccountsRenewOneCLIAttime() async {
+        var active = 0
+        var peak = 0
+        var launches = 0
+        func makeRefresher() -> ClaudeTokenRefresher {
+            ClaudeTokenRefresher(
+                expiry: { self.inSeconds(60) },
+                reload: { self.inSeconds(8 * 3600) },
+                cli: URL(fileURLWithPath: "/opt/homebrew/bin/claude"),
+                launcher: { _, _, _, _ in
+                    launches += 1
+                    active += 1
+                    peak = max(peak, active)
+                    return (Int32(launches), {
+                        try? await Task.sleep(nanoseconds: 50_000_000)
+                        await MainActor.run { active -= 1 }
+                        return 1
+                    })
+                }
+            )
+        }
+        let first = makeRefresher()
+        let second = makeRefresher()
+
+        async let a: Void = first.considerRenewing(now: now)
+        async let b: Void = second.considerRenewing(now: now)
+        _ = await (a, b)
+
+        XCTAssertEqual(launches, 2)
+        XCTAssertEqual(peak, 1, "CLI renewals must not overlap on a busy Mac")
     }
 
     /// Judged on the outcome, never on the exit status. Refusing an empty

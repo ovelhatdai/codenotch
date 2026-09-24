@@ -197,6 +197,18 @@ final class Preferences: ObservableObject {
         defaults.set(Double(offset), forKey: Self.offsetKey(for: edge))
     }
 
+    func floatingPosition(id: String) -> CGPoint? {
+        guard let positions = defaults.dictionary(forKey: "notchFloatingPositionsByMonitor") as? [String: [String: Double]],
+              let point = positions[id], let x = point["x"], let y = point["y"], x.isFinite, y.isFinite else { return nil }
+        return CGPoint(x: x, y: y)
+    }
+
+    func setFloatingPosition(_ point: CGPoint?, id: String) {
+        var positions = defaults.dictionary(forKey: "notchFloatingPositionsByMonitor") as? [String: [String: Double]] ?? [:]
+        positions[id] = point.map { ["x": Double($0.x), "y": Double($0.y)] }
+        defaults.set(positions, forKey: "notchFloatingPositionsByMonitor")
+    }
+
     func screenOffset(id: String, edge: NotchEdge) -> CGFloat? {
         let offsets = defaults.dictionary(forKey: "notchOffsetsByDisplay") as? [String: Double] ?? [:]
         return offsets[id + ":" + edge.rawValue].map(CGFloat.init)

@@ -1038,6 +1038,104 @@ final class NotchFleetReconcileTests: XCTestCase {
 /// is the count follows the scope, not a fixed number.
 @MainActor
 final class NotchFleetScopeTests: XCTestCase {
+    func testFreePositionSurvivesRefreshAndCanDockAgain() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .mainDisplay, edge: .left)
+        fleet.show()
+        defer { fleet.stop() }
+        let controller = try XCTUnwrap(fleet.controllersForTesting.first)
+        let position = CGPoint(x: 0.5, y: 0.5)
+        controller.onFloat?(screen, position)
+        let moved = try XCTUnwrap(controller.panelFrameForTesting)
+        XCTAssertEqual(controller.assignedScreen?.displayIdentifier, screen.displayIdentifier)
+        XCTAssertEqual(controller.floatingPosition, position)
+        controller.relocate()
+        XCTAssertEqual(controller.panelFrameForTesting, moved)
+        XCTAssertGreaterThan(moved.minX, screen.visibleFrame.minX)
+        controller.onDock?()
+        XCTAssertNil(controller.floatingPosition)
+        XCTAssertEqual(controller.panelFrameForTesting?.minX, screen.frame.minX)
+    }
+
+    func testFreeDragInAllScreensPreservesBarsAndSourcePosition() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .allDisplays, edge: .top)
+        fleet.show()
+        defer { fleet.stop() }
+        let source = try XCTUnwrap(fleet.controllersForTesting.first)
+        let old = source.floatingPosition
+        source.onFloat?(screen, CGPoint(x: 0.3, y: 0.4))
+        XCTAssertEqual(fleet.controllersForTesting.count, NSScreen.screens.count)
+        let target = try XCTUnwrap(fleet.controllersForTesting.first { $0.assignedScreen?.displayIdentifier == screen.displayIdentifier })
+        XCTAssertEqual(target.floatingPosition, CGPoint(x: 0.3, y: 0.4))
+        if source !== target { XCTAssertEqual(source.floatingPosition, old) }
+    }
+
+    func testFloatingPositionPersistenceIsPerMonitorAndCanBeRemoved() throws {
+        let name = "NotchFloatingTests-" + UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        let preferences = Preferences(defaults: defaults)
+        preferences.setFloatingPosition(CGPoint(x: 0.2, y: 0.8), id: "portrait")
+        preferences.setFloatingPosition(CGPoint(x: 0.7, y: 0.3), id: "landscape")
+        let reopened = Preferences(defaults: defaults)
+        XCTAssertEqual(reopened.floatingPosition(id: "portrait"), CGPoint(x: 0.2, y: 0.8))
+        reopened.setFloatingPosition(nil, id: "portrait")
+        XCTAssertNil(reopened.floatingPosition(id: "portrait"))
+        XCTAssertEqual(reopened.floatingPosition(id: "landscape"), CGPoint(x: 0.7, y: 0.3))
+    }
+
+    func testFloatingGeometryKeepsVisibleBarOnNegativeOriginMonitor() {
+        let screen = CGRect(x: -1080, y: -400, width: 1080, height: 1900)
+        let size = CGSize(width: 450, height: 1400)
+        let bar = CGRect(x: 0, y: 300, width: 70, height: 800)
+        let frame = NotchGeometry.floatingFrame(panelSize: size, bar: bar,
+            position: CGPoint(x: -0.1, y: 1.1), visible: screen)
+        let actualBar = CGRect(x: frame.minX + bar.minX, y: frame.maxY - bar.maxY, width: bar.width, height: bar.height)
+        XCTAssertTrue(screen.contains(actualBar))
+        XCTAssertEqual(actualBar.minX, screen.minX)
+        XCTAssertEqual(actualBar.maxY, screen.maxY)
+    }
+
+    func testFloatingCenterDoesNotJumpWhenTooltipPaddingChanges() {
+        let screen = CGRect(x: 1920, y: 0, width: 1920, height: 1080)
+        for padding: CGFloat in [100, 300, 450] {
+            let bar = CGRect(x: 0, y: padding, width: 70, height: 160)
+            let size = CGSize(width: 500, height: padding * 2 + bar.height)
+            let frame = NotchGeometry.floatingFrame(panelSize: size, bar: bar,
+                position: CGPoint(x: 0.5, y: 0.5), visible: screen)
+            XCTAssertEqual(frame.minX + bar.midX, screen.midX)
+            XCTAssertEqual(frame.maxY - bar.midY, screen.midY)
+        }
+    }
+
+    func testChoosingMonitorFromMenuLeavesOneBarOnThatDisplay() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .allDisplays, edge: .top)
+        var selected: String?
+        fleet.onSelectScreen = { selected = $0 }
+        fleet.show()
+        defer { fleet.stop() }
+        let controller = try XCTUnwrap(fleet.controllersForTesting.first)
+        controller.onSelectMonitor?(screen)
+        XCTAssertEqual(fleet.scope, .mainDisplay)
+        XCTAssertEqual(fleet.controllersForTesting.count, 1)
+        XCTAssertEqual(fleet.controllersForTesting.first?.assignedScreen?.displayIdentifier, screen.displayIdentifier)
+        XCTAssertEqual(selected, screen.displayIdentifier)
+    }
+
+    func testDraggingInAllDisplaysModeKeepsOneBarPerScreen() throws {
+        let screen = try XCTUnwrap(NSScreen.screens.last)
+        let fleet = NotchFleet(scope: .allDisplays, edge: .top)
+        fleet.show()
+        defer { fleet.stop() }
+        let controller = try XCTUnwrap(fleet.controllersForTesting.first)
+        controller.onMoveToScreen?(screen, 120)
+        XCTAssertEqual(fleet.scope, .allDisplays)
+        XCTAssertEqual(fleet.controllersForTesting.count, NSScreen.screens.count)
+        XCTAssertEqual(fleet.controllersForTesting.first(where: { $0.assignedScreen?.displayIdentifier == screen.displayIdentifier })?.model.alongOffset, 120)
+    }
+
     func testMainDisplayKeepsASingleNotch() {
         let fleet = NotchFleet(scope: .mainDisplay, edge: .right)
         fleet.show()
@@ -1468,5 +1566,58 @@ final class NotchSizeTests: XCTestCase {
 
         XCTAssertEqual(large.panelSize(cellCount: 3).width - medium.panelSize(cellCount: 3).width,
                        notchShare * 0.25, accuracy: 0.001)
+    }
+}
+
+@MainActor
+final class NotchPointerGestureTests: XCTestCase {
+    func testDragUsesScreenDisplacementWhenEventDeltasAreZero() throws {
+        let panel = NotchPanel(contentRect: CGRect(x: -800, y: 100, width: 300, height: 200))
+        panel.contentView = NSView(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
+        panel.canStartPlainDrag = { _ in true }
+        var starts = 0
+        var ends = 0
+        var clicks = 0
+        panel.onDragStart = { starts += 1 }
+        panel.onDragEnd = { ends += 1 }
+        panel.onClick = { _ in clicks += 1 }
+        panel.onDrag = { dx, dy in
+            panel.setFrameOrigin(CGPoint(x: panel.frame.minX + dx, y: panel.frame.minY - dy))
+        }
+        func send(_ type: NSEvent.EventType, at screen: CGPoint) throws {
+            let event = try XCTUnwrap(NSEvent.mouseEvent(with: type,
+                location: panel.convertPoint(fromScreen: screen), modifierFlags: [], timestamp: 0,
+                windowNumber: panel.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
+            XCTAssertEqual(event.deltaX, 0)
+            XCTAssertEqual(event.deltaY, 0)
+            panel.sendEvent(event)
+        }
+        try send(.leftMouseDown, at: CGPoint(x: -750, y: 150))
+        try send(.leftMouseDragged, at: CGPoint(x: -550, y: 350))
+        try send(.leftMouseDragged, at: CGPoint(x: 250, y: 400))
+        try send(.leftMouseUp, at: CGPoint(x: 250, y: 400))
+        XCTAssertEqual(starts, 1)
+        XCTAssertEqual(ends, 1)
+        XCTAssertEqual(clicks, 0)
+        XCTAssertEqual(panel.frame.origin, CGPoint(x: 200, y: 350))
+        panel.close()
+    }
+
+    func testSmallPointerMovementStillClicks() throws {
+        let panel = NotchPanel(contentRect: CGRect(x: 100, y: 100, width: 300, height: 200))
+        panel.contentView = NSView(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
+        panel.canStartPlainDrag = { _ in true }
+        var clicks = 0
+        panel.onClick = { _ in clicks += 1 }
+        panel.onDrag = { _, _ in XCTFail("Small click must not drag") }
+        for (type, point) in [(NSEvent.EventType.leftMouseDown, CGPoint(x: 50, y: 50)),
+                              (.leftMouseDragged, CGPoint(x: 52, y: 52)),
+                              (.leftMouseUp, CGPoint(x: 52, y: 52))] {
+            let event = try XCTUnwrap(NSEvent.mouseEvent(with: type, location: point, modifierFlags: [],
+                timestamp: 0, windowNumber: panel.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1))
+            panel.sendEvent(event)
+        }
+        XCTAssertEqual(clicks, 1)
+        panel.close()
     }
 }

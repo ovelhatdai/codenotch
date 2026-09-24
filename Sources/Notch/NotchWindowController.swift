@@ -30,6 +30,11 @@ final class NotchWindowController {
     /// controller only holds the live value; persisting it per edge is
     /// Preferences' job, the same division `apply(edge:)` already keeps.
     var onReposition: ((CGFloat) -> Void)?
+    var onMoveToScreen: ((NSScreen, CGFloat?) -> Void)?
+    var floatingPosition: CGPoint?
+    var onFloat: ((NSScreen, CGPoint) -> Void)?
+    var onDock: (() -> Void)?
+    var onSelectMonitor: ((NSScreen) -> Void)?
     /// A move settled on a new edge. The fleet owns writing that to
     /// preferences, for the same reason it owns `onReposition`.
     var onMoveToEdge: ((NotchEdge) -> Void)?
@@ -252,7 +257,7 @@ final class NotchWindowController {
     }
 
     private func applyPanelAppearance(_ style: NotchSurfaceStyle) {
-        panel?.appearance = style.panelAppearance(
+        panel?.appearance = model.isFloating ? NSAppearance(named: .darkAqua) : style.panelAppearance(
             reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
         )
     }
@@ -293,37 +298,53 @@ final class NotchWindowController {
     }
 
     func relocate(cellCount: Int? = nil) {
+        guard !isOptionDragging else { return }
         guard let screen = currentScreen() else { return }
+        let floating = floatingPosition != nil
+        if model.isFloating != floating {
+            model.isFloating = floating
+            applyPanelAppearance(model.surfaceStyle)
+        }
         model.adopt(screen: screen)
         let size = model.panelSize(cellCount: cellCount ?? model.snapshots.count)
-        let frame = NotchGeometry.panelFrame(
+        var frame = NotchGeometry.panelFrame(
             for: screen, panelSize: size, edge: model.edge,
             alongOffset: model.alongOffset, slack: model.slack,
             trailingExtent: model.trailingExtent,
             leadingExtent: model.leadingExtent
         )
 
+        if let floatingPosition {
+            let bar = NotchPlacement(edge: model.edge, panelSize: frame.size).rect(
+                along: model.slack, across: 0,
+                length: model.shapeLength * model.sizeScale, depth: model.notchDepth * model.sizeScale)
+            frame = NotchGeometry.floatingFrame(panelSize: frame.size, bar: bar,
+                                               position: floatingPosition, visible: screen.visibleFrame)
+        }
         if let panel {
             panel.setFrame(frame, display: true)
         } else {
             let panel = NotchPanel(contentRect: frame)
-            panel.appearance = model.surfaceStyle.panelAppearance(
-                reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
-            )
+            panel.appearance = model.isFloating ? NSAppearance(named: .darkAqua)
+                : model.surfaceStyle.panelAppearance(
+                    reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+                )
             let hosting = NotchHostingView(rootView: NotchRootView(model: model))
             panel.contextMenuProvider = { [weak self] in self?.contextMenu() }
             panel.onClick = { [weak self] point in self?.handleClick(at: point) }
             panel.canStartPlainDrag = { [weak self, weak panel] point in
                 guard let self, let panel else { return false }
                 let local = CGPoint(x: point.x, y: panel.frame.height - point.y)
-                return self.notchRect.contains(local) && !self.isOverHandle(local) && !self.isOverMoveHandle(local)
+                return self.notchRect.contains(local)
+                    && (self.model.isFloating || (!self.isOverHandle(local) && !self.isOverMoveHandle(local)))
             }
             panel.onDragStart = { [weak self] in self?.beginOptionDrag() }
             panel.onDrag = { [weak self] dx, dy in self?.dragged(dx: dx, dy: dy) }
             panel.onDragEnd = { [weak self] in
                 guard let self else { return }
-                self.onReposition?(self.model.alongOffset)
-                self.endOptionDrag()
+                self.isOptionDragging = false
+                self.finishDrag(at: NSEvent.mouseLocation)
+                self.cursorMoved()
             }
 
             // The hosting view goes *inside* a plain container rather than
@@ -369,19 +390,30 @@ final class NotchWindowController {
         updateInteractiveRects()
     }
 
-    /// Feeds a raw pointer delta from an ⌥-drag into `model.alongOffset` and
-    /// re-places the panel at once, so the pill tracks the cursor rather than
-    /// catching up once the button lifts.
-    ///
-    /// Both deltas are used as `NSEvent` reports them, unflipped: `deltaY`
-    /// positive is the pointer moving *down* the screen, `deltaX` positive is
-    /// it moving *right*. `NotchGeometry` is written to match — it subtracts
-    /// the offset from a vertical edge's y (which AppKit grows *up*, so
-    /// subtracting more moves the pill down) and adds it to a horizontal
-    /// edge's x — so no sign flip belongs here; adding one would make the
-    /// pill run away from the cursor instead of following it.
+    /// Move the existing window with the pointer; AppKit's positive deltaY
+    /// goes down while its global window coordinates grow up. Geometry and
+    /// persistence are updated once, when the bar is dropped onto a display.
     private func dragged(dx: CGFloat, dy: CGFloat) {
-        model.alongOffset += model.edge.isVertical ? dy : dx
+        guard let panel else { return }
+        // Move the existing window, without rebuilding its SwiftUI tree on
+        // every mouse event. Save its free position only on release.
+        panel.setFrameOrigin(CGPoint(x: panel.frame.minX + dx, y: panel.frame.minY - dy))
+    }
+
+    static func dragOffset(at point: CGPoint, screen: CGRect, edge: NotchEdge) -> CGFloat {
+        edge.isVertical ? screen.midY - point.y : point.x - screen.midX
+    }
+
+    private func finishDrag(at point: CGPoint) {
+        guard let target = NSScreen.screens.first(where: { $0.frame.contains(point) }) else { relocate(); return }
+        let center = panel.map { CGPoint(x: $0.frame.minX + notchRect.midX, y: $0.frame.maxY - notchRect.midY) } ?? point
+        let position = NotchGeometry.normalizedCenter(center, in: target.visibleFrame)
+        if let onFloat {
+            onFloat(target, position)
+        } else {
+            assignedScreen = target
+            floatingPosition = position
+        }
         relocate()
     }
 
@@ -397,12 +429,6 @@ final class NotchWindowController {
         model.isHoveringMove = false
         setPointing(false)
         updateInteractiveRects()
-    }
-
-    private func endOptionDrag() {
-        guard isOptionDragging else { return }
-        isOptionDragging = false
-        cursorMoved()
     }
 
     // MARK: - Hit regions
@@ -475,6 +501,7 @@ final class NotchWindowController {
     /// folding away is to stop being in the way.
     private var liveRect: CGRect {
         guard model.isExpanded else { return pillRect }
+        if model.isFloating { return notchRect }
         // The orb hangs below the shape, so the live region is both together.
         return notchRect.union(handleRect)
     }
@@ -543,7 +570,7 @@ final class NotchWindowController {
             // Runs for every mouse event on the screen. AppKit does not skip an
             // unchanged value: each assignment re-sends the window's event mask
             // and tags to WindowServer and flushes a layout pass.
-            let ignores = !rects.contains { $0.contains(localCursor(in: panel.frame)) }
+            let ignores = !isOptionDragging && !rects.contains { $0.contains(localCursor(in: panel.frame)) }
             if panel.ignoresMouseEvents != ignores {
                 panel.ignoresMouseEvents = ignores
             }
@@ -930,7 +957,8 @@ final class NotchWindowController {
     private func beginMove() {
         guard let panel, let screen = currentScreen() else { return }
 
-        let overlay = DropZoneOverlay(screen: screen)
+        var destination = screen
+        var overlay = DropZoneOverlay(screen: screen)
         dropZones = overlay
         model.isMoving = true
         // Starts on the edge it is already on, so releasing without moving is
@@ -948,19 +976,29 @@ final class NotchWindowController {
         }
 
         while let event = panel.nextEvent(matching: [.leftMouseDragged, .leftMouseUp]) {
+            var changedScreen = false
+            if let next = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }),
+               next.displayIdentifier != destination.displayIdentifier {
+                overlay.hide()
+                destination = next
+                overlay = DropZoneOverlay(screen: next)
+                dropZones = overlay
+                changedScreen = true
+            }
             let local = overlay.localPoint(from: NSEvent.mouseLocation)
             let target = EdgeDropZones.edge(at: local, in: overlay.screenSize)
 
             switch event.type {
             case .leftMouseDragged:
-                if model.moveTarget != target {
+                if model.moveTarget != target || changedScreen {
                     model.moveTarget = target
+                    overlay.show(target: target,
+                                 restingDepth: model.restingDepth * model.sizeScale,
+                                 restingLength: model.shapeLength * model.sizeScale)
                 }
-                overlay.show(target: target,
-                             restingDepth: model.restingDepth * model.sizeScale,
-                             restingLength: model.shapeLength * model.sizeScale)
             case .leftMouseUp:
                 if target != model.edge { onMoveToEdge?(target) }
+                if destination.displayIdentifier != screen.displayIdentifier { onMoveToScreen?(destination, nil) }
                 return
             default:
                 return
@@ -1229,6 +1267,24 @@ final class NotchWindowController {
         keepOpen.isEnabled = true
         menu.addItem(keepOpen)
         menu.addItem(.separator())
+        let dock = NSMenuItem(title: "Fixar na borda", action: #selector(MenuActions.dockToEdge(_:)), keyEquivalent: "")
+        dock.target = menuActions
+        dock.isEnabled = floatingPosition != nil
+        menu.addItem(dock)
+        let displays = NSMenu()
+        displays.autoenablesItems = false
+        for (index, screen) in NSScreen.screens.enumerated() {
+            guard let id = screen.displayIdentifier else { continue }
+            let item = NSMenuItem(title: "\(index + 1) · \(screen.localizedName)", action: #selector(MenuActions.selectScreen(_:)), keyEquivalent: "")
+            item.target = menuActions
+            item.representedObject = id
+            item.state = assignedScreen?.displayIdentifier == id ? .on : .off
+            item.isEnabled = onSelectMonitor != nil
+            displays.addItem(item)
+        }
+        let destination = NSMenuItem(title: "Mover para o monitor", action: nil, keyEquivalent: "")
+        destination.submenu = displays
+        menu.addItem(destination)
 
         let refresh = NSMenuItem(
             title: L10n.t("Refresh now"),
@@ -1262,7 +1318,16 @@ final class NotchWindowController {
     private lazy var menuActions = MenuActions(
         refresh: { [weak self] in self?.onRefresh?() },
         signIn: { [weak self] index in self?.signInItems[safe: index]?.action() },
-        togglePinned: { [weak self] in self?.togglePinned() }
+        togglePinned: { [weak self] in self?.togglePinned() },
+        dock: { [weak self] in
+            self?.floatingPosition = nil
+            self?.onDock?()
+            self?.relocate()
+        },
+        selectScreen: { [weak self] id in
+            guard let screen = NSScreen.screens.first(where: { $0.displayIdentifier == id }) else { return }
+            self?.onSelectMonitor?(screen)
+        }
     )
 }
 
@@ -1273,17 +1338,27 @@ final class MenuActions: NSObject {
     private let refresh: () -> Void
     private let signIn: (Int) -> Void
     private let pin: () -> Void
+    private let screen: (String) -> Void
+    private let dock: () -> Void
 
     init(
         refresh: @escaping () -> Void,
         signIn: @escaping (Int) -> Void,
-        togglePinned: @escaping () -> Void
+        togglePinned: @escaping () -> Void,
+        dock: @escaping () -> Void = {},
+        selectScreen: @escaping (String) -> Void = { _ in }
     ) {
         self.refresh = refresh
         self.signIn = signIn
         self.pin = togglePinned
+        self.screen = selectScreen
+        self.dock = dock
     }
 
+    @objc func dockToEdge(_ sender: Any?) { dock() }
+    @objc func selectScreen(_ sender: NSMenuItem) {
+        if let id = sender.representedObject as? String { screen(id) }
+    }
     @objc func refreshNow(_ sender: Any?) { refresh() }
     @objc func togglePinned(_ sender: Any?) { pin() }
 

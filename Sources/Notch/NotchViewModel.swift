@@ -182,6 +182,9 @@ final class NotchViewModel: ObservableObject {
     /// Which screen edge the notch is welded to. Everything geometric reads
     /// this through `placement` rather than assuming an axis.
     @Published var edge: NotchEdge = .right
+    /// A free-standing bar has its own chrome; bezel flares and hardware-notch
+    /// padding only make sense while the bar is attached to a screen edge.
+    @Published var isFloating = false
     /// A user-chosen nudge along that edge, in screen points from the centred
     /// default — set live while ⌥-dragging the pill, and by
     /// `NotchGeometry.panelFrame` from there. Reset to whatever was stored for
@@ -277,7 +280,7 @@ final class NotchViewModel: ObservableObject {
     /// which is the same distance a ring sits from the bezel on every other
     /// placement. Adding a gap as well pads them twice and leaves them adrift
     /// of the notch they are supposed to belong to.
-    var contentInset: CGFloat { hardwareNotch?.height ?? 0 }
+    var contentInset: CGFloat { joinedNotch?.height ?? 0 }
 
     /// How much of each end of the bar the flare actually takes.
     var flare: CGFloat {
@@ -286,11 +289,11 @@ final class NotchViewModel: ObservableObject {
 
     /// Whether the shape is drawn the way the Mac's own notch is — flush to
     /// the bezel, no flares — so the two are one object rather than two.
-    var isFlushWithHardware: Bool { hardwareNotch != nil }
+    var isFlushWithHardware: Bool { joinedNotch != nil }
 
     /// The hardware notch as the *shape* needs it, which is only where one is
     /// being drawn as.
-    var joinedNotch: HardwareNotch? { hardwareNotch }
+    var joinedNotch: HardwareNotch? { isFloating ? nil : hardwareNotch }
 
     /// The corner the shape actually draws at its far end.
     ///
@@ -300,7 +303,7 @@ final class NotchViewModel: ObservableObject {
     /// nominal figure — the orb traces the corner that is drawn, not the one
     /// that was asked for.
     var drawnCornerRadius: CGFloat {
-        guard let hardwareNotch else { return NotchLayout.cornerRadius }
+        guard let hardwareNotch = joinedNotch else { return NotchLayout.cornerRadius }
         return min(NotchLayout.cornerRadius, hardwareNotch.height / 2)
     }
 
@@ -332,7 +335,7 @@ final class NotchViewModel: ObservableObject {
     var endSpread: CGFloat { endSpread(cellCount: snapshots.count) }
 
     func endSpread(cellCount: Int) -> CGFloat {
-        guard let hardwareNotch else { return 0 }
+        guard let hardwareNotch = joinedNotch else { return 0 }
         // Expressed against the whole shape, not just its body: with no flares
         // the drawn width *is* the shape's length, and that is what has to
         // clear the hardware.
@@ -360,7 +363,8 @@ final class NotchViewModel: ObservableObject {
     /// Reserve the full hit area even while only the resting arc is visible,
     /// so revealing the settings button cannot put it beyond the screen.
     var trailingExtent: CGFloat {
-        (max(0, orbAlong - shapeLength + NotchLayout.orbHotZone / 2) * sizeScale).rounded(.up)
+        if isFloating { return 0 }
+        return (max(0, orbAlong - shapeLength + NotchLayout.orbHotZone / 2) * sizeScale).rounded(.up)
     }
 
     /// Where the move handle sits: the settings orb's position mirrored to the
@@ -380,6 +384,7 @@ final class NotchViewModel: ObservableObject {
     /// sliding to the leading end of its edge, which is a place ⌥-drag is
     /// meant to reach.
     var leadingExtent: CGFloat {
+        if isFloating { return 0 }
         guard showsMoveHandle else { return 0 }
         return (max(0, -moveAlong + NotchLayout.orbHotZone / 2) * sizeScale).rounded(.up)
     }
@@ -431,6 +436,9 @@ final class NotchViewModel: ObservableObject {
     /// reaching for, and — where it has parted company with it — the arc you
     /// can actually see.
     var orbHandlePoints: [CGPoint] {
+        if isFloating {
+            return [CGPoint(x: shapeLength - Self.floatingControlInset, y: notchDepth / 2)]
+        }
         let button = CGPoint(x: orbAlong, y: orbInset)
         guard orbHugsCorner else { return [button] }
 
@@ -454,7 +462,7 @@ final class NotchViewModel: ObservableObject {
     /// the two takes in a great deal of ground that is near neither — which is
     /// why the button used to appear well before the pointer reached the arc.
     func isOnOrbHandle(along: CGFloat, across: CGFloat) -> Bool {
-        let radius = NotchLayout.orbHotZone / 2
+        let radius = isFloating ? Self.floatingControlHitRadius : NotchLayout.orbHotZone / 2
         return orbHandlePoints.contains {
             hypot(along - $0.x, across - $0.y) <= radius
         }
@@ -463,6 +471,7 @@ final class NotchViewModel: ObservableObject {
     /// The move handle's own points, mirroring `orbHandlePoints` at the near
     /// end of the stack.
     var moveHandlePoints: [CGPoint] {
+        if isFloating { return [] }
         // No points, not merely no drawing. Every way of reaching the handle —
         // hover, a press, and the window's own click-through region — is
         // measured from these, so a hidden handle has to report none or it
@@ -488,6 +497,9 @@ final class NotchViewModel: ObservableObject {
             hypot(along - $0.x, across - $0.y) <= radius
         }
     }
+
+    static let floatingControlInset = Design.px(52)
+    private static let floatingControlHitRadius = Design.px(44)
 
 
     /// Where the tooltip's tail tip sits, measured in from the bezel: just off
@@ -667,19 +679,19 @@ final class NotchViewModel: ObservableObject {
     /// for it makes the notch itself grow.
     var notchLength: CGFloat {
         if isExpanded { return shapeLength }
-        return hardwareNotch?.width ?? NotchLayout.pillHeight
+        return joinedNotch?.width ?? NotchLayout.pillHeight
     }
 
     /// And across it.
     var notchDepth: CGFloat {
         if isExpanded { return contentInset + NotchLayout.bodyDepth(for: edge, presentation: presentation) }
-        return hardwareNotch?.height ?? NotchLayout.pillWidth
+        return joinedNotch?.height ?? NotchLayout.pillWidth
     }
 
     /// What the notch folds away to, whether or not it is open right now —
     /// the hit region has to know that while the notch is still open.
-    var restingLength: CGFloat { hardwareNotch?.width ?? NotchLayout.pillHeight }
-    var restingDepth: CGFloat { hardwareNotch?.height ?? NotchLayout.pillWidth }
+    var restingLength: CGFloat { joinedNotch?.width ?? NotchLayout.pillHeight }
+    var restingDepth: CGFloat { joinedNotch?.height ?? NotchLayout.pillWidth }
 
     /// What wakes the folded notch, in panel points: the resting shape and a
     /// band around it, or the resting shape alone.
